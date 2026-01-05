@@ -1,10 +1,9 @@
 export default function Footer() {
   return (
-    <footer className="bg-white dark:bg-[#0a0a0a] border-t-4 border-black dark:border-white mt-20 pb-12 transition-colors">
-      {/* Decorative Strip */}
-      <div className="h-2 bg-black dark:bg-white w-full mb-12 relative overflow-hidden transition-colors">
-         <div className="absolute inset-0 bg-white dark:bg-black w-full h-full" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 25% 50%, 50% 100%, 75% 50%)' }}></div>
-      </div>
+    <footer className="bg-white dark:bg-[#0a0a0a] mt-20 pb-12 transition-colors">
+      {/* Double Line Separator */}
+      <div className="w-full border-t-4 border-black dark:border-white mb-1"></div>
+      <div className="w-full border-t-2 border-black dark:border-white mb-12"></div>
 
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
