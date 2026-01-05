@@ -1,0 +1,3 @@
+﻿src/app/profile/[id]/page.tsx(172,25): error TS1127: Invalid character.
+src/app/profile/[id]/page.tsx(172,26): error TS1136: Property assignment expected.
+src/app/profile/[id]/page.tsx(373,1): error TS1160: Unterminated template literal.
