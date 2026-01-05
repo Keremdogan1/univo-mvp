@@ -33,7 +33,7 @@ export default function CommunityView() {
     <div className="container mx-auto px-4 py-8">
       {/* Newspaper Header */}
       <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors">
-        <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 !text-black !dark:text-white text-black dark:text-white">Topluluk Meydanı</h2>
+        <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Topluluk Meydanı</h2>
         <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <span>ÖĞRENCİ BÜLTENİ</span>
