@@ -248,23 +248,23 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
   const showActivities = isOwnProfile || profile.privacy_settings?.show_activities !== false;
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] py-12 px-4 transition-colors">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Identity & Social */}
         <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden relative group">
-                <div className="h-32 bg-[#C8102E]/5 w-full absolute top-0 left-0 bg-[radial-gradient(#C8102E_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden relative group transition-colors">
+                <div className="h-32 bg-[#C8102E]/5 dark:bg-[#C8102E]/10 w-full absolute top-0 left-0 bg-[radial-gradient(#C8102E_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
                 
                 <div className="pt-12 px-6 pb-6 text-center relative z-10">
-                    <div className="w-28 h-28 mx-auto bg-white rounded-full p-1 border-2 border-neutral-100 shadow-sm mb-4">
+                    <div className="w-28 h-28 mx-auto bg-white dark:bg-neutral-800 rounded-full p-1 border-2 border-neutral-100 dark:border-neutral-700 shadow-sm mb-4">
                         <div className="w-full h-full rounded-full bg-gradient-to-br from-[#C8102E] to-[#990c23] flex items-center justify-center text-white text-3xl font-bold">
                             {profile.full_name.charAt(0).toUpperCase()}
                         </div>
                     </div>
                     
-                    <h1 className="text-2xl font-bold font-serif text-neutral-900 mb-1">{profile.full_name}</h1>
-                    <p className="text-[#C8102E] font-medium text-sm mb-4">
+                    <h1 className="text-2xl font-bold font-serif text-neutral-900 dark:text-white mb-1">{profile.full_name}</h1>
+                    <p className="text-[#C8102E] dark:text-[#E81D3E] font-medium text-sm mb-4">
                         {profile.class_year || 'Öğrenci'} {profile.department ? `· ${profile.department}` : ''}
                     </p>
 
@@ -302,7 +302,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                     {isOwnProfile && (
                         <button
                             onClick={() => router.push(`/profile/${targetId}/edit`)}
-                            className="w-full py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 text-neutral-700 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                            className="w-full py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                         >
                             <Edit size={16} />
                             Profili Düzenle
@@ -313,15 +313,15 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             {/* Interests Widget */}
             {showInterests && (
-                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                    <h3 className="text-lg font-bold font-serif mb-4 flex items-center gap-2 text-neutral-800">
+                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-6 transition-colors">
+                    <h3 className="text-lg font-bold font-serif mb-4 flex items-center gap-2 text-neutral-800 dark:text-neutral-200">
                     <Heart size={20} className="text-[#C8102E]" />
                     İlgi Alanları
                     </h3>
                     {profile.interests && profile.interests.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                             {profile.interests.map(interest => (
-                                <span key={interest} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs font-medium hover:bg-[#C8102E]/10 hover:text-[#C8102E] transition-colors cursor-default">
+                                <span key={interest} className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-full text-xs font-medium hover:bg-[#C8102E]/10 hover:text-[#C8102E] transition-colors cursor-default">
                                     {interest}
                                 </span>
                             ))}
@@ -343,10 +343,10 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             {/* Bio / Headline Section */}
             {profile.bio && (
-                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 relative overflow-hidden">
-                    <Quote size={80} className="absolute top-4 right-4 text-neutral-100 -z-10 transform rotate-12" />
+                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 relative overflow-hidden transition-colors">
+                    <Quote size={80} className="absolute top-4 right-4 text-neutral-100 dark:text-neutral-800 -z-10 transform rotate-12" />
                     <h2 className="text-xl font-bold font-serif mb-4 text-[#C8102E]">Hakkımda</h2>
-                    <p className="text-lg text-neutral-700 leading-relaxed italic border-l-4 border-[#C8102E] pl-4">
+                    <p className="text-lg text-neutral-700 dark:text-neutral-300 leading-relaxed italic border-l-4 border-[#C8102E] pl-4">
                         {profile.bio}
                     </p>
                 </div>
@@ -355,8 +355,8 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             {/* Activity Timeline (New) */}
             {showActivities && activities.length > 0 && (
                  <div>
-                    <h2 className="text-2xl font-bold font-serif mb-6 flex items-center gap-3">
-                        <BookOpen size={28} className="text-neutral-900" />
+                    <h2 className="text-2xl font-bold font-serif mb-6 flex items-center gap-3 dark:text-white">
+                        <BookOpen size={28} className="text-neutral-900 dark:text-white" />
                         Aktivite Zaman Çizelgesi
                     </h2>
                     <ActivityTimeline activities={activities} />
@@ -366,14 +366,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             {/* Activities Section */}
             <div>
-                 <h2 className="text-2xl font-bold font-serif mb-6 flex items-center gap-3">
-                    <Calendar size={28} className="text-neutral-900" />
+                 <h2 className="text-2xl font-bold font-serif mb-6 flex items-center gap-3 dark:text-white">
+                    <Calendar size={28} className="text-neutral-900 dark:text-white" />
                     Yaklaşan Etkinlikler
                  </h2>
 
                  {upcomingEvents.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center mb-8">
-                         <p className="text-neutral-500">Yaklaşan etkinlik bulunamadı.</p>
+                    <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 text-center mb-8">
+                         <p className="text-neutral-500 dark:text-neutral-400">Yaklaşan etkinlik bulunamadı.</p>
                     </div>
                  ) : (
                     <div className="grid md:grid-cols-2 gap-4 mb-10">
@@ -381,15 +381,15 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             <div
                                 key={event.id}
                                 onClick={() => router.push(`/events/${event.id}`)}
-                                className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-[#C8102E] hover:shadow-md transition-all cursor-pointer group"
+                                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-[#C8102E] dark:hover:border-[#C8102E] hover:shadow-md transition-all cursor-pointer group"
                             >
-                                <span className="inline-block px-2 py-0.5 bg-neutral-100 text-neutral-600 text-xs rounded font-medium mb-3">
+                                <span className="inline-block px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs rounded font-medium mb-3">
                                     {event.category}
                                 </span>
-                                <h3 className="font-bold text-lg mb-2 text-neutral-900 group-hover:text-[#C8102E] transition-colors line-clamp-1">
+                                <h3 className="font-bold text-lg mb-2 text-neutral-900 dark:text-white group-hover:text-[#C8102E] transition-colors line-clamp-1">
                                     {event.title}
                                 </h3>
-                                <div className="space-y-1 text-sm text-neutral-600">
+                                <div className="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
                                     <div className="flex items-center gap-2">
                                         <Calendar size={14} className="text-[#C8102E]" />
                                         <span>{new Date(event.date).toLocaleDateString('tr-TR')} · {event.time}</span>

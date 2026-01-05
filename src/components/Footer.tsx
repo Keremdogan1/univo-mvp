@@ -19,7 +19,7 @@ export default function Footer() {
               Ankara'nın en güncel üniversite gazetesi.
             </p>
             <div className="pt-4">
-               <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 font-bold text-xs uppercase tracking-widest transition-colors">
+               <span className="inline-block bg-black dark:bg-neutral-800 text-white dark:text-neutral-200 px-3 py-1 font-bold text-xs uppercase tracking-widest transition-colors">
                   EST. 2025
                </span>
             </div>

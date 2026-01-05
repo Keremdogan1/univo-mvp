@@ -141,11 +141,11 @@ export default function DashboardOverview() {
       // ... returning the same No Community component ...
       return (
         <div className="flex flex-col items-center justify-center h-[50vh] text-center p-8">
-            <div className="bg-neutral-100 p-8 rounded-full mb-6">
-                <Users size={48} className="text-neutral-400" />
+            <div className="bg-neutral-100 dark:bg-neutral-800 p-8 rounded-full mb-6">
+                <Users size={48} className="text-neutral-400 dark:text-neutral-500" />
             </div>
-            <h2 className="text-2xl font-black font-serif mb-2">Henüz Bir Topluluk Yok</h2>
-            <p className="text-neutral-600 mb-8 max-w-md">
+            <h2 className="text-2xl font-black font-serif mb-2 dark:text-white">Henüz Bir Topluluk Yok</h2>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-8 max-w-md">
                 Yönetim panelini kullanmaya başlamak için önce topluluğunuzu oluşturun.
             </p>
             <Link 
@@ -255,17 +255,17 @@ export default function DashboardOverview() {
 
 function StatCard({ label, value, icon, sub, change }: any) {
     return (
-        <div className="bg-white p-6 border-2 border-neutral-200 rounded-xl shadow-sm hover:border-[#C8102E] transition-all group">
+        <div className="bg-white dark:bg-neutral-900 p-6 border-2 border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-[#C8102E] dark:hover:border-[#C8102E] transition-all group">
             <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-neutral-100 rounded-lg group-hover:bg-[#C8102E] group-hover:text-white transition-colors">
+                <div className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg group-hover:bg-[#C8102E] group-hover:text-white transition-colors dark:text-white">
                     {icon}
                 </div>
-                {change && <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{change}</span>}
+                {change && <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">{change}</span>}
             </div>
-            <h4 className="text-3xl font-black font-sans text-neutral-900 mb-1">{value}</h4>
+            <h4 className="text-3xl font-black font-sans text-neutral-900 dark:text-white mb-1">{value}</h4>
             <div className="flex items-center gap-2">
-                <span className="text-sm font-bold uppercase text-neutral-500 tracking-wide">{label}</span>
-                {sub && <span className="text-xs text-neutral-400">{sub}</span>}
+                <span className="text-sm font-bold uppercase text-neutral-500 dark:text-neutral-400 tracking-wide">{label}</span>
+                {sub && <span className="text-xs text-neutral-400 dark:text-neutral-500">{sub}</span>}
             </div>
         </div>
     );

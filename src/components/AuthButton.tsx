@@ -55,42 +55,42 @@ export default function AuthButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
         <img 
           src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=C8102E&color=fff&length=1`} 
           alt={profile?.full_name || 'User'} 
           className="w-8 h-8 rounded-full object-cover border border-neutral-200"
         />
-        <span className="text-sm font-medium text-neutral-700 hidden md:block">
+        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 hidden md:block">
           {profile?.full_name || 'User'}
         </span>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-50">
-          <div className="px-4 py-3 border-b border-neutral-200">
-            <p className="text-sm font-semibold text-neutral-900">{profile?.full_name}</p>
+        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-800 py-2 z-50">
+          <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
+            <p className="text-sm font-semibold text-neutral-900 dark:text-white">{profile?.full_name}</p>
             {profile?.department && (
-              <p className="text-xs text-neutral-500 mt-1">{profile.department}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{profile.department}</p>
             )}
           </div>
 
           <Link
             href={`/profile/${user.id}`}
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 transition-colors"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            <User size={18} className="text-neutral-600" />
-            <span className="text-sm text-neutral-700">Profilim</span>
+            <User size={18} className="text-neutral-600 dark:text-neutral-400" />
+            <span className="text-sm text-neutral-700 dark:text-neutral-200">Profilim</span>
           </Link>
 
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-left"
           >
-            <LogOut size={18} className="text-neutral-600" />
-            <span className="text-sm text-neutral-700">Çıkış Yap</span>
+            <LogOut size={18} className="text-neutral-600 dark:text-neutral-400" />
+            <span className="text-sm text-neutral-700 dark:text-neutral-200">Çıkış Yap</span>
           </button>
         </div>
       )}

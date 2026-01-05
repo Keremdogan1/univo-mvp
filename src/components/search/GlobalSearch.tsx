@@ -65,31 +65,31 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden border border-neutral-200 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 animate-in fade-in zoom-in-95 duration-200 transition-colors">
         
         {/* Header / Input */}
-        <div className="flex items-center px-4 py-4 border-b border-neutral-100 gap-3">
+        <div className="flex items-center px-4 py-4 border-b border-neutral-100 dark:border-neutral-800 gap-3">
             <Search className="text-neutral-400" size={20} />
             <input
                 ref={inputRef}
                 type="text"
                 placeholder="Kampüste ara... (Etkinlik, Duyuru, Gönderi)"
-                className="flex-1 text-lg outline-none placeholder:text-neutral-400 text-neutral-900 bg-transparent"
+                className="flex-1 text-lg outline-none placeholder:text-neutral-400 text-neutral-900 dark:text-white bg-transparent"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
             {query && (
-                <button onClick={() => setQuery('')} className="p-1 hover:bg-neutral-100 rounded-full text-neutral-400">
+                <button onClick={() => setQuery('')} className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full text-neutral-400 transition-colors">
                     <X size={18} />
                 </button>
             )}
-            <button onClick={onClose} className="px-2 py-1 text-xs font-medium text-neutral-500 border border-neutral-200 rounded hover:bg-neutral-50">
+            <button onClick={onClose} className="px-2 py-1 text-xs font-medium text-neutral-500 border border-neutral-200 dark:border-neutral-700 rounded hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                 ESC
             </button>
         </div>
 
         {/* Results Area */}
-        <div className="max-h-[60vh] overflow-y-auto p-2 bg-neutral-50/50">
+        <div className="max-h-[60vh] overflow-y-auto p-2 bg-neutral-50/50 dark:bg-neutral-900/50 transition-colors">
             
             {loading ? (
                 <div className="py-12 flex flex-col items-center justify-center text-neutral-400 gap-3">
@@ -115,13 +115,13 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                                 <button 
                                     key={event.id}
                                     onClick={() => handleSelect(`/events/${event.id}`)}
-                                    className="w-full flex items-center gap-4 p-3 bg-white rounded-lg border border-neutral-200 hover:border-[#C8102E] hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-[#C8102E] dark:hover:border-[#C8102E] hover:shadow-sm transition-all text-left group"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-[#C8102E] group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-[#C8102E] group-hover:scale-110 transition-transform">
                                         <Calendar size={20} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-neutral-900 truncate">{event.title}</h4>
+                                        <h4 className="font-bold text-neutral-900 dark:text-white truncate">{event.title}</h4>
                                         <p className="text-xs text-neutral-500 flex items-center gap-1.5 truncate">
                                             <span>{new Date(event.date).toLocaleDateString()}</span>
                                             <span>·</span>
@@ -142,13 +142,13 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                                 <button 
                                     key={voice.id}
                                     onClick={() => handleSelect(`/?view=voice`)} // Currently deep link to voice doesn't exist, going to feed
-                                    className="w-full flex items-center gap-4 p-3 bg-white rounded-lg border border-neutral-200 hover:border-blue-500 hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-sm transition-all text-left group"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                         <MessageSquare size={20} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-neutral-900 line-clamp-2 text-sm">"{voice.content}"</p>
+                                        <p className="font-medium text-neutral-900 dark:text-white line-clamp-2 text-sm">"{voice.content}"</p>
                                         <p className="text-xs text-neutral-500 mt-1">
                                             {new Date(voice.created_at).toLocaleDateString()}
                                         </p>
@@ -163,10 +163,10 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
         </div>
 
         {/* Footer */}
-        <div className="bg-neutral-50 px-4 py-2 border-t border-neutral-100 flex justify-between items-center text-xs text-neutral-500">
+        <div className="bg-neutral-50 dark:bg-neutral-900 px-4 py-2 border-t border-neutral-100 dark:border-neutral-800 flex justify-between items-center text-xs text-neutral-500 transition-colors">
             <div className="flex gap-4">
-                <span className="flex items-center gap-1"><kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-neutral-200">↑↓</kbd> Gezin</span>
-                <span className="flex items-center gap-1"><kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-neutral-200">↵</kbd> Seç</span>
+                <span className="flex items-center gap-1"><kbd className="font-mono bg-white dark:bg-neutral-800 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">↑↓</kbd> Gezin</span>
+                <span className="flex items-center gap-1"><kbd className="font-mono bg-white dark:bg-neutral-800 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">↵</kbd> Seç</span>
             </div>
             <span>Univo Global Search</span>
         </div>

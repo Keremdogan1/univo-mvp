@@ -423,11 +423,11 @@ export default function OfficialView() {
                             <div className="absolute right-4 top-4 flex items-center gap-3 z-20">
                                 {/* Action Buttons Group */}
                                 {user && activeTab !== 'history' && (
-                                    <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm p-1.5 rounded-full border border-neutral-200 shadow-sm transition-opacity">
+                                    <div className="flex items-center gap-1 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm p-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 shadow-sm transition-opacity">
                                         <button
                                             onClick={(e) => handleMarkRead(String(item.id), e)}
                                             title={isRead ? "Okundu" : "Okundu olarak işaretle"}
-                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isRead ? 'text-green-600 bg-green-50 dark:bg-green-900/30' : 'text-neutral-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
+                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isRead ? 'text-green-600 bg-green-50 dark:bg-green-900/30' : 'text-neutral-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 dark:bg-neutral-800'}`}
                                         >
                                             <CheckCircle size={20} className={isRead ? 'fill-green-100 dark:fill-green-900/50' : ''} />
                                         </button>
@@ -435,7 +435,7 @@ export default function OfficialView() {
                                         <button
                                             onClick={(e) => handleFollow(item.source, e)}
                                             title={isFollowing ? "Favorilerden Çıkar" : "Favorilere Ekle"}
-                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isFollowing ? 'text-[#C8102E] bg-red-50 dark:bg-red-900/30' : 'text-neutral-400 hover:text-[#C8102E] hover:bg-red-50 dark:hover:bg-red-900/30'}`}
+                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isFollowing ? 'text-[#C8102E] bg-red-50 dark:bg-red-900/30' : 'text-neutral-400 hover:text-[#C8102E] hover:bg-red-50 dark:hover:bg-red-900/30 dark:bg-neutral-800'}`}
                                         >
                                             <Bookmark size={20} className={isFollowing ? 'fill-[#C8102E]' : ''} />
                                         </button>
