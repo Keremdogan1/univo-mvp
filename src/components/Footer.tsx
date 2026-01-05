@@ -1,9 +1,9 @@
 export default function Footer() {
   return (
-    <footer className="bg-white border-t-4 border-black mt-20 pb-12">
+    <footer className="bg-white dark:bg-[#0a0a0a] border-t-4 border-black dark:border-white mt-20 pb-12 transition-colors">
       {/* Decorative Strip */}
-      <div className="h-2 bg-black w-full mb-12 relative overflow-hidden">
-         <div className="absolute inset-0 bg-white w-full h-full" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 25% 50%, 50% 100%, 75% 50%)' }}></div>
+      <div className="h-2 bg-black dark:bg-white w-full mb-12 relative overflow-hidden transition-colors">
+         <div className="absolute inset-0 bg-white dark:bg-black w-full h-full" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 25% 50%, 50% 100%, 75% 50%)' }}></div>
       </div>
 
       <div className="container mx-auto px-4">
@@ -11,22 +11,22 @@ export default function Footer() {
           
           {/* Brand Column */}
           <div className="md:col-span-1 space-y-4">
-            <h3 className="text-4xl font-black font-serif uppercase tracking-tighter border-b-2 border-black pb-2 inline-block">
+            <h3 className="text-4xl font-black font-serif uppercase tracking-tighter border-b-2 border-black dark:border-white pb-2 inline-block dark:text-white transition-colors">
               Univo
             </h3>
-            <p className="text-neutral-900 font-serif italic leading-relaxed text-sm">
+            <p className="text-neutral-900 dark:text-neutral-300 font-serif italic leading-relaxed text-sm">
               "Kampüsün nabzı, öğrencinin sesi." <br/>
               Ankara'nın en güncel üniversite gazetesi.
             </p>
             <div className="pt-4">
-               <span className="inline-block bg-black text-white px-3 py-1 font-bold text-xs uppercase tracking-widest">
+               <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 font-bold text-xs uppercase tracking-widest transition-colors">
                   EST. 2025
                </span>
             </div>
           </div>
 
           {/* Navigation - Vertical Rules */}
-          <div className="md:col-span-1 border-l-2 border-black pl-8 border-l-0 pl-0 md:border-l-2 md:pl-8">
+          <div className="md:col-span-1 border-l-2 border-black dark:border-white pl-8 border-l-0 pl-0 md:border-l-2 md:pl-8 dark:text-white transition-colors">
             <h4 className="font-bold font-serif uppercase mb-4 text-sm tracking-wider">Bölümler</h4>
             <ul className="space-y-2 text-sm font-medium">
               <li><a href="/" className="hover:underline decoration-2 underline-offset-2">Resmi Gündem</a></li>
@@ -35,25 +35,25 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="md:col-span-1 border-l-2 border-black pl-8 border-l-0 pl-0 md:border-l-2 md:pl-8">
+          <div className="md:col-span-1 border-l-2 border-black dark:border-white pl-8 border-l-0 pl-0 md:border-l-2 md:pl-8 dark:text-white transition-colors">
              <h4 className="font-bold font-serif uppercase mb-4 text-sm tracking-wider">Kampüs Rehberi</h4>
              <ul className="space-y-2 text-sm font-medium">
-               <li><a href="/?view=official" className="hover:bg-neutral-100 block -ml-2 px-2 py-1 transition-colors">Yemekhane Menüsü</a></li>
-               <li><a href="https://tim.metu.edu.tr/tr/ring-services" target="_blank" className="hover:bg-neutral-100 block -ml-2 px-2 py-1 transition-colors">Ring Saatleri</a></li>
-               <li><a href="https://lib.metu.edu.tr" target="_blank" className="hover:bg-neutral-100 block -ml-2 px-2 py-1 transition-colors">Kütüphane Durumu</a></li>
-               <li><a href="https://oidb.metu.edu.tr/tr/akademik-takvim" target="_blank" className="hover:bg-neutral-100 block -ml-2 px-2 py-1 transition-colors">Akademik Takvim</a></li>
+               <li><a href="/?view=official" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Yemekhane Menüsü</a></li>
+               <li><a href="https://tim.metu.edu.tr/tr/ring-services" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Ring Saatleri</a></li>
+               <li><a href="https://lib.metu.edu.tr" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Kütüphane Durumu</a></li>
+               <li><a href="https://oidb.metu.edu.tr/tr/akademik-takvim" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Akademik Takvim</a></li>
              </ul>
           </div>
 
           {/* Contact / Legal */}
-          <div className="md:col-span-1 border-l-2 border-black pl-8">
-            <h4 className="font-bold font-serif uppercase mb-4 text-sm tracking-wider">Künye</h4>
-            <address className="not-italic text-sm text-neutral-600 mb-6 font-serif">
+          <div className="md:col-span-1 border-l-2 border-black dark:border-white pl-8 transition-colors">
+            <h4 className="font-bold font-serif uppercase mb-4 text-sm tracking-wider dark:text-white">Künye</h4>
+            <address className="not-italic text-sm text-neutral-600 dark:text-neutral-400 mb-6 font-serif">
               ODTÜ Üniversiteler Mah.<br />
               Dumlupınar Blv. No:1<br />
               06800 Çankaya/Ankara
             </address>
-            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
+            <p className="text-xs text-neutral-500 dark:text-neutral-500 font-medium uppercase tracking-wider">
                &copy; 2025 UNIVO GAZETTE.<br/>Tüm Hakları Saklıdır.
             </p>
           </div>

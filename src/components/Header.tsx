@@ -74,10 +74,10 @@ function HeaderContent() {
           <Link href="/?view=voice" className="flex items-center gap-0">
             <div className="relative w-16 h-16 overflow-hidden">
                 <Image 
-                    src="/logo_black.png" 
+                    src="/univo-logo-transparent.png" 
                     alt="Univo Logo" 
                     fill 
-                    className="object-cover"
+                    className="object-cover dark:invert"
                 />
             </div>
             <h1 className="text-2xl font-bold text-foreground dark:text-white font-serif tracking-tight group-hover:text-[#C8102E] transition-colors -ml-1">
@@ -168,7 +168,7 @@ function HeaderContent() {
 
 export default function Header() {
   return (
-    <Suspense fallback={<div className="h-16 bg-white border-b border-neutral-200"></div>}>
+    <Suspense fallback={<div className="h-16 bg-white dark:bg-[#0a0a0a] border-b border-neutral-200 dark:border-neutral-800"></div>}>
       <HeaderContent />
     </Suspense>
   );

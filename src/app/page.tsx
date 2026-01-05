@@ -23,7 +23,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] transition-colors duration-300">
       {renderView()}
     </div>
   );
@@ -31,7 +31,7 @@ function HomeContent() {
 
 export default function HomePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-neutral-50 flex items-center justify-center">Yükleniyor...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center dark:text-white">Yükleniyor...</div>}>
       <HomeContent />
     </Suspense>
   );
