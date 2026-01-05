@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { ADMIN_EMAIL, ADMIN_NAME } from '@/lib/constants';
 
 export default function SettingsPage() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const router = useRouter(); 
     const [community, setCommunity] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+
+    const isAdmin = user?.email === ADMIN_EMAIL || profile?.full_name === ADMIN_NAME;
 
     // Form inputs state (optional, can use FormData, but state is easier for validation if needed)
     // We'll use FormData in handleSubmit for simplicity with defaultValues
@@ -68,12 +71,20 @@ export default function SettingsPage() {
                     {/* Manual Creation */}
                     <div className="bg-white p-8 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                         <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                             🚀 Yeni Topluluk Oluştur
+                             🚀 {isAdmin ? 'Yeni Topluluk Oluştur' : 'Erişim Kısıtlı'}
                         </h3>
-                        <p className="text-neutral-600 mb-6 text-sm">
-                            Kendi topluluğunuzu sıfırdan kurun ve yönetmeye başlayın.
-                        </p>
-                        <CreateCommunityForm userId={user?.id || ''} onComplete={(data) => setCommunity(data)} />
+                        {isAdmin ? (
+                            <>
+                                <p className="text-neutral-600 mb-6 text-sm">
+                                    Kendi topluluğunuzu sıfırdan kurun ve yönetmeye başlayın.
+                                </p>
+                                <CreateCommunityForm userId={user?.id || ''} onComplete={(data) => setCommunity(data)} />
+                            </>
+                        ) : (
+                            <p className="text-neutral-600 text-sm italic">
+                                Sadece sistem yöneticisi topluluk oluşturabilir.
+                            </p>
+                        )}
                     </div>
 
                     {/* Divider */}
@@ -84,11 +95,13 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Demo Button */}
-                    <div className="bg-neutral-50 p-6 border-2 border-dashed border-neutral-300 rounded-lg text-center opacity-75 hover:opacity-100 transition-opacity">
-                         <h4 className="font-bold text-neutral-500 mb-2">Hızlı Başlangıç (Geliştirici)</h4>
-                         <p className="text-xs text-neutral-400 mb-4">Örnek verilerle otomatik kurulum yap.</p>
-                         <InitializeDemoButton userId={user?.id || ''} onComplete={(data) => setCommunity(data)} />
-                    </div>
+                    {isAdmin && (
+                        <div className="bg-neutral-50 p-6 border-2 border-dashed border-neutral-300 rounded-lg text-center opacity-75 hover:opacity-100 transition-opacity">
+                             <h4 className="font-bold text-neutral-500 mb-2">Hızlı Başlangıç (Geliştirici)</h4>
+                             <p className="text-xs text-neutral-400 mb-4">Örnek verilerle otomatik kurulum yap.</p>
+                             <InitializeDemoButton userId={user?.id || ''} onComplete={(data) => setCommunity(data)} />
+                        </div>
+                    )}
                 </div>
             </div>
         );

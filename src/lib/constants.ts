@@ -39,3 +39,7 @@ export const METU_DEPARTMENTS = [
   "Beden Eğitimi ve Spor",
   "Diğer"
 ];
+
+export const ADMIN_EMAIL = "keremdogan.9@gmail.com";
+export const ADMIN_NAME = "Kerem Doğan";
+
