@@ -160,6 +160,8 @@ function HeaderContent() {
           </div>
         </div>
 
+      </div>
+
         {/* Mobile Navigation Overlay */}
         {isMenuOpen && (
           <>
@@ -205,7 +207,6 @@ function HeaderContent() {
               </div>
           </>
         )}
-      </div>
       
       <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
