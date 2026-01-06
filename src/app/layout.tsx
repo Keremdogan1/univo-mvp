@@ -40,12 +40,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            {/* Decorative Left Bars */}
-            <div className="fixed left-0 top-0 h-full flex gap-0.5 z-[60] pointer-events-none">
-              <div className="w-1.5 h-full bg-pink-500/80"></div>
-              <div className="w-3 h-full bg-pink-500/40"></div>
-              <div className="w-0.5 h-full bg-pink-500/20"></div>
-            </div>
+
             <Header />
             <main className="flex-1 bg-white dark:bg-[#0a0a0a] transition-colors duration-300">
               <Toaster
