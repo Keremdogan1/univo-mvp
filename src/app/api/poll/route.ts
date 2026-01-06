@@ -61,6 +61,10 @@ export async function GET() {
         .eq('week_id', currentWeekId)
         .single();
 
+    if (dbError && dbError.code !== 'PGRST116') { // PGRST116 is "Row not found", other errors are actual problems
+        console.error('Poll DB Error (Check if table weekly_polls exists):', dbError);
+    }
+
     if (existingPoll && !dbError) {
         // Return cached poll
         return NextResponse.json({

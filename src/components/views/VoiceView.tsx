@@ -733,7 +733,7 @@ export default function VoiceView() {
                                             {voice.is_anonymous ? (
                                                 <span className="font-bold text-neutral-600 dark:text-neutral-400 italic">Rumuzlu Öğrenci</span>
                                             ) : (
-                                                <Link href="#" className="font-bold text-neutral-900 dark:text-white hover:underline">
+                                                <Link href={`/profile/${voice.user_id}`} className="font-bold text-neutral-900 dark:text-white hover:underline">
                                                     {voice.user.full_name}
                                                 </Link>
                                             )}
