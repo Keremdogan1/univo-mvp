@@ -607,7 +607,7 @@ export default function VoiceView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column: Forum / Letters */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-8 order-last lg:order-first">
             <div className="flex justify-between items-end border-b-2 border-black dark:border-white pb-2 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2 font-serif dark:text-white">
                     <MessageSquare size={24} />
@@ -616,9 +616,10 @@ export default function VoiceView() {
                 {activeTagFilter && (
                     <button 
                         onClick={() => setActiveTagFilter(null)}
-                        className="text-xs bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                        className="text-xs font-black uppercase bg-neutral-900 text-white dark:bg-white dark:text-black px-3 py-1.5 rounded-full flex items-center gap-2 transition-all hover:bg-[#C8102E] hover:text-white dark:hover:bg-[#C8102E] dark:hover:text-white shadow-sm"
                     >
-                        {activeTagFilter} x
+                        <span>{activeTagFilter}</span>
+                        <X size={12} strokeWidth={3} />
                     </button>
                 )}
             </div>

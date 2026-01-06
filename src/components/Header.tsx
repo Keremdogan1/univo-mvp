@@ -173,7 +173,7 @@ function HeaderContent() {
               />
               
               {/* Menu */}
-              <div className="absolute top-16 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-neutral-200 dark:border-white shadow-lg z-50 md:hidden animate-in slide-in-from-top-2 duration-200">
+              <div className="fixed top-16 left-0 w-full h-[calc(100vh-64px)] bg-white dark:bg-[#0a0a0a] border-b border-neutral-200 dark:border-white shadow-lg z-50 md:hidden animate-in slide-in-from-top-2 duration-200 overflow-y-auto">
                 <nav className="flex flex-col gap-4 p-4">
                   {navItems.map((item) => (
                     <Link
