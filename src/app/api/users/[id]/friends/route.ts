@@ -106,8 +106,11 @@ export async function GET(
       count: friends.length
     });
 
-  } catch (error) {
-    console.error('Friends list API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Friends list API critical error:', error);
+    return NextResponse.json({ 
+        error: `Server Error: ${error?.message || 'Unknown error'}`,
+        details: JSON.stringify(error) 
+    }, { status: 500 });
   }
 }

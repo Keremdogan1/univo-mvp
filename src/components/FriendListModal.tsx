@@ -47,7 +47,7 @@ export default function FriendListModal({ userId, isOpen, onClose, isOwnProfile 
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const response = await fetch(`/api/users/${userId}/friends`, { headers });
+      const response = await fetch(`/api/users/${userId}/friends`, { headers, cache: 'no-store' });
       const data = await response.json();
 
       if (!response.ok) {
