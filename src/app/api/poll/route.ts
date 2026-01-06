@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize Gemini
 // Ensure you have GEMINI_API_KEY in your .env.local file
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// Set revalidation to 0 for debugging, or 1 hour
+// Set revalidation to 0 since we handle caching manually via DB/Logic, 
+// but technically we could cache this response for a while too.
 export const revalidate = 0;
 
 const FALLBACK_POLLS = [
@@ -21,14 +23,54 @@ const FALLBACK_POLLS = [
     { question: "A1 kapısındaki trafik yoğunluğu için çözüm öneriniz nedir?", options: ["Yeni giriş açılmalı", "Ring sayısı artmalı", "Araç girişi kısıtlanmalı"] }
 ];
 
+// Helper to get ISO Week String (YYYY-WW)
+function getWeekId() {
+    const d = new Date();
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    // Get first day of year
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    // Calculate full weeks to nearest Thursday
+    const weekNo = Math.ceil(( ( (d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+    return `${d.getUTCFullYear()}-W${weekNo}`;
+}
+
 export async function GET() {
-  // Random fallback selector
   const getRandomFallback = () => FALLBACK_POLLS[Math.floor(Math.random() * FALLBACK_POLLS.length)];
 
+  // 1. Setup Supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Use Service Role Key if available for Write permissions (creating weekly poll), otherwise Anon
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+     console.error('Missing Supabase Keys, falling back to random.');
+     return NextResponse.json(getRandomFallback());
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
   try {
+    const currentWeekId = getWeekId();
+
+    // 2. Check DB for existing poll
+    const { data: existingPoll, error: dbError } = await supabase
+        .from('weekly_polls')
+        .select('*')
+        .eq('week_id', currentWeekId)
+        .single();
+
+    if (existingPoll && !dbError) {
+        // Return cached poll
+        return NextResponse.json({
+            question: existingPoll.question,
+            options: existingPoll.options
+        });
+    }
+
+    // 3. Not Found -> Generate New with Gemini
     if (!process.env.GEMINI_API_KEY) {
-        // Fallback if no key is present (Development / No Key mode)
-        // We use a diverse bank of questions so it still feels dynamic
         return NextResponse.json(getRandomFallback());
     }
 
@@ -60,16 +102,31 @@ export async function GET() {
     const response = await result.response;
     const text = response.text();
     
-    // Clean up markdown if present (Gemini sometimes wraps in ```json ... ```)
+    // Clean up markdown
     const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    
     const pollData = JSON.parse(cleanedText);
+
+    // 4. Save to DB for this week
+    // Note: If multiple requests hit at the exact same time, we might get a race condition/unique constraint error.
+    // In that case, we can just return the generated one, or fetch again.
+    const { error: insertError } = await supabase
+        .from('weekly_polls')
+        .insert({
+            week_id: currentWeekId,
+            question: pollData.question,
+            options: pollData.options // Supabase handles JSON array automatically if column is jsonb/json
+        });
+
+    if (insertError) {
+        console.error('Failed to cache weekly poll:', insertError);
+        // It might be a duplicate key error if another request beat us to it.
+        // We can just proceed to return the data we generated.
+    }
 
     return NextResponse.json(pollData);
 
   } catch (error) {
-    console.error('Gemini API Error:', error);
-    // Fallback on error
+    console.error('Poll Logic Error:', error);
     return NextResponse.json(getRandomFallback());
   }
 }
