@@ -422,7 +422,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             {/* Community Application Section - Only for own profile and non-admins */}
             {isOwnProfile && (
-                <div className="bg-gradient-to-br from-[#C8102E]/5 to-[#C8102E]/10 dark:from-[#C8102E]/10 dark:to-[#C8102E]/20 rounded-xl shadow-sm border-2 border-[#C8102E]/20 dark:border-[#C8102E]/30 p-6 transition-colors">
+                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border-2 border-[#C8102E]/30 dark:border-[#C8102E]/50 p-6 transition-colors">
                     <h3 className="text-lg font-bold font-serif mb-2 text-neutral-800 dark:text-neutral-200">
                         Topluluk Sahibi misiniz?
                     </h3>

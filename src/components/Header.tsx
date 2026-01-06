@@ -190,7 +190,7 @@ function HeaderContent() {
                           setIsMenuOpen(false);
                           setIsSearchOpen(true);
                       }}
-                      className="flex-1 flex items-center justify-center gap-3 p-4 rounded-xl text-neutral-600 dark:text-neutral-400 font-serif font-bold text-base hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all group animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
+                      className="flex-1 flex items-center gap-3 p-4 rounded-xl text-neutral-600 dark:text-neutral-400 font-serif font-bold text-base hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all group animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
                       style={{ animationDelay: '0ms' }}
                     >
                       <SearchIcon size={20} className="group-hover:scale-110 transition-transform" />
