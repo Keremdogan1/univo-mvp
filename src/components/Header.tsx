@@ -87,7 +87,7 @@ function HeaderContent() {
           </Link>
 
           {/* Center: Desktop Navigation */}
-          <nav className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-6 py-2 rounded-full border border-neutral-200 dark:border-neutral-700">
+          <nav className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
             <ul className="flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = currentView === item.id;
@@ -95,7 +95,7 @@ function HeaderContent() {
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 relative group overflow-hidden ${
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 relative group overflow-hidden ${
                       isActive 
                         ? 'text-black dark:text-white font-bold bg-white dark:bg-black shadow-sm' 
                         : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white'
@@ -116,14 +116,14 @@ function HeaderContent() {
           {/* Right: Tools (Search, Auth, DarkMode, Menu) */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
              
-            {/* Dashboard Link (Desktop) */}
+            {/* Dashboard Link (Desktop) - Subtle */}
             {user && (
                 <Link
                     href="/dashboard"
-                    className={`hidden md:flex items-center justify-center p-2.5 rounded-full transition-colors ${
+                    className={`hidden md:flex items-center justify-center p-2.5 rounded-full transition-all ${
                         pathname?.startsWith('/dashboard') 
-                        ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
-                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                        ? 'bg-black text-white dark:bg-white dark:text-black shadow-md opacity-100' 
+                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 opacity-70 hover:opacity-100'
                     }`}
                     title="Kontrol Paneli"
                 >
@@ -131,23 +131,23 @@ function HeaderContent() {
                 </Link>
             )}
 
-            {/* Dark Mode */}
-            <div className={`border-l border-neutral-200 dark:border-neutral-800 pl-2 ml-1 transition-opacity duration-200 ${
+            {/* Dark Mode - Subtle */}
+            <div className={`border-l border-neutral-200 dark:border-neutral-800 pl-2 ml-1 transition-opacity duration-200 opacity-70 hover:opacity-100 ${
               isMenuOpen ? 'md:block' : 'hidden md:block'
             }`}>
                 <DarkModeToggle />
             </div>
 
-            {/* Search (Desktop) - Next to Notifications */}
+            {/* Search (Desktop) - Prominent */}
             <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="hidden md:block p-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+                className="hidden md:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
                 aria-label="Search"
             >
                 <SearchIcon size={20} />
             </button>
 
-            {/* Notification Center (Desktop) */}
+            {/* Notification Center (Desktop) - Prominent */}
             <div className="hidden md:block">
                 <NotificationCenter />
             </div>
