@@ -154,7 +154,7 @@ export default function FriendButton({
         switch (type) {
             case 'action': return `${base} bg-[#C8102E] text-white hover:bg-[#A00D25]`;
             case 'pending': return `${base} bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200`;
-            case 'friend': return `${base} bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-red-100 hover:text-red-700 hover:border-red-200`;
+            case 'friend': return `${base} bg-white dark:bg-neutral-900 border-2 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-[#C8102E]/5 dark:hover:bg-[#C8102E]/10`;
         }
     }
     
