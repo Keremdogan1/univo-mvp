@@ -945,7 +945,7 @@ export default function VoiceView() {
 
         {/* Sidebar: Polls & Stats */}
         <div className="space-y-8">
-            <div className="sticky top-24 space-y-8">
+            <div className="sticky top-24 space-y-8 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
                {/* Trending Topics - Moved from Community Search */}
                <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
