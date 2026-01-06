@@ -89,13 +89,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center px-4 py-12 transition-colors">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8">
+        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 transition-colors">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold font-serif mb-2">Univo'ya Katıl</h1>
-            <p className="text-neutral-600">Kampüs etkinliklerine katılmaya başlayın</p>
+            <h1 className="text-3xl font-bold font-serif mb-2 dark:text-white">Univo'ya Katıl</h1>
+            <p className="text-neutral-600 dark:text-neutral-400">Kampüs etkinliklerine katılmaya başlayın</p>
           </div>
 
           {/* Error Message */}
@@ -108,7 +108,7 @@ export default function RegisterPage() {
           {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-5">
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Ad Soyad *
               </label>
               <input
@@ -118,13 +118,13 @@ export default function RegisterPage() {
                 value={formData.fullName}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
                 placeholder="Ahmet Yılmaz"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 E-posta *
               </label>
               <input
@@ -134,13 +134,13 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
                 placeholder="ornek@universite.edu.tr"
               />
             </div>
 
             <div>
-              <label htmlFor="classYear" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="classYear" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Sınıf *
               </label>
               <select
@@ -149,7 +149,7 @@ export default function RegisterPage() {
                 value={formData.classYear}
                 onChange={(e) => setFormData({ ...formData, classYear: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white transition-colors"
               >
                 <option value="">Sınıf Seçin</option>
                 {METU_CLASSES.map((cls) => (
@@ -162,7 +162,7 @@ export default function RegisterPage() {
 
             {formData.classYear !== 'Hazırlık' && (
               <div>
-                <label htmlFor="department" className="block text-sm font-medium text-neutral-700 mb-2">
+                <label htmlFor="department" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Bölüm *
                 </label>
                 <select
@@ -171,7 +171,7 @@ export default function RegisterPage() {
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white transition-colors"
                 >
                   <option value="">Bölüm Seçin</option>
                   {METU_DEPARTMENTS.map((dept) => (
@@ -184,7 +184,7 @@ export default function RegisterPage() {
             )}
 
             <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="studentId" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Öğrenci Numarası
               </label>
               <input
@@ -193,13 +193,13 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.studentId}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
                 placeholder="2020123456"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Şifre *
               </label>
               <input
@@ -209,13 +209,13 @@ export default function RegisterPage() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
                 placeholder="En az 6 karakter"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Şifre Tekrar *
               </label>
               <input
@@ -225,7 +225,7 @@ export default function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
                 placeholder="Şifrenizi tekrar girin"
               />
             </div>
@@ -242,7 +242,7 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-neutral-600">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Zaten hesabınız var mı?{' '}
               <Link href="/login" style={{ color: '#C8102E' }} className="font-semibold hover:underline">
                 Giriş Yapın
@@ -252,7 +252,7 @@ export default function RegisterPage() {
 
           {/* Back to Home */}
           <div className="mt-4 text-center">
-            <Link href="/" className="text-neutral-500 text-sm hover:text-neutral-700">
+            <Link href="/" className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300">
               ← Ana Sayfaya Dön
             </Link>
           </div>

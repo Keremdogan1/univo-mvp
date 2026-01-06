@@ -408,14 +408,26 @@ export default function VoiceView() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return 'Şimdi';
-    } else if (diffInSeconds < 3600) {
-        return Math.floor(diffInSeconds / 60) + ' dk';
-    } else {
-      return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
-    }
+    
+    if (diffInSeconds < 60) return 'Şimdi';
+    
+    const minutes = Math.floor(diffInSeconds / 60);
+    if (minutes < 60) return `${minutes} dk önce`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} sa önce`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} gün önce`;
+    
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks} hf önce`;
+    
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} ay önce`;
+    
+    const years = Math.floor(days / 365);
+    return `${years} yıl önce`;
   };
 
   // Poll & Stats Logic
@@ -731,7 +743,7 @@ export default function VoiceView() {
                                         </div>
                                         
                                         {/* Actions */}
-                                        <div className="flex items-center gap-6 pt-2 border-t border-neutral-50 dark:border-neutral-900 border-dashed">
+                                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-50 dark:border-neutral-900 border-dashed">
                                             <div className="flex items-center gap-1 bg-neutral-50 dark:bg-neutral-800/50 rounded-full px-2 py-1">
                                                 <button 
                                                     onClick={() => handleReaction(voice.id, 'like')}

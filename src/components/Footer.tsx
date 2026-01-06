@@ -41,6 +41,7 @@ export default function Footer() {
                <li><a href="https://tim.metu.edu.tr/tr/ring-services" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Ring Saatleri</a></li>
                <li><a href="https://lib.metu.edu.tr" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Kütüphane Durumu</a></li>
                <li><a href="https://oidb.metu.edu.tr/tr/akademik-takvim" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Akademik Takvim</a></li>
+               <li><a href="https://ohpha1.netlify.app" target="_blank" className="hover:bg-neutral-100 dark:hover:bg-neutral-800 block -ml-2 px-2 py-1 transition-colors rounded-sm">Hazırlık Ort. Hesaplama</a></li>
              </ul>
           </div>
 
