@@ -80,7 +80,7 @@ function HeaderContent() {
                     className="object-cover transition-all duration-300 dark:invert mix-blend-multiply dark:mix-blend-screen"
                 />
             </div>
-            <h1 className="hidden md:block text-2xl font-bold text-foreground dark:text-white font-serif tracking-tight group-hover:text-[#C8102E] transition-colors -ml-1">
+            <h1 className="text-2xl font-bold text-foreground dark:text-white font-serif tracking-tight group-hover:text-[#C8102E] transition-colors -ml-1">
               Univo
             </h1>
           </Link>
@@ -140,7 +140,7 @@ function HeaderContent() {
             )}
 
             {/* Dark Mode */}
-            <div className="border-l border-neutral-200 dark:border-neutral-800 pl-2 ml-1">
+            <div className="hidden md:block border-l border-neutral-200 dark:border-neutral-800 pl-2 ml-1">
                 <DarkModeToggle />
             </div>
 
@@ -204,7 +204,7 @@ function HeaderContent() {
                             href={item.href}
                             className={`flex items-center gap-4 p-4 rounded-xl transition-all font-serif font-bold text-lg animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards ${
                                 isActive 
-                                ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                                ? 'bg-white text-black dark:bg-black dark:text-white shadow-md' 
                                 : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900'
                             }`}
                             style={{ animationDelay: `${(index + 1) * 75}ms` }}
@@ -221,7 +221,7 @@ function HeaderContent() {
                                 onClick={() => setIsMenuOpen(false)}
                                 className={`flex items-center gap-4 p-4 rounded-xl transition-all font-serif font-bold text-lg animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards ${
                                     pathname?.startsWith('/dashboard') 
-                                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                                    ? 'bg-white text-black dark:bg-black dark:text-white shadow-md' 
                                     : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900'
                                 }`}
                                 style={{ animationDelay: '300ms' }}
@@ -232,8 +232,18 @@ function HeaderContent() {
                         )}
                   </div>
 
+                  <div className="pt-4 space-y-4">
+                    <div 
+                      className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900 animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
+                      style={{ animationDelay: '350ms' }}
+                    >
+                      <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Tema</span>
+                      <DarkModeToggle />
+                    </div>
+                  </div>
+
                   <div 
-                    className="pt-6 border-t border-neutral-200 dark:border-neutral-800 animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
+                    className="pt-4 border-t border-neutral-200 dark:border-neutral-800 animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
                     style={{ animationDelay: '400ms' }}
                   >
                     <AuthButton />
