@@ -171,22 +171,22 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   if (loading) return <div className="p-8 text-center">Yükleniyor...</div>;
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] py-12 px-4 transition-colors">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <button 
             onClick={() => router.back()}
-            className="flex items-center text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="flex items-center text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft size={20} className="mr-1" />
             Profile Dön
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-          <div className="border-b border-neutral-200 bg-neutral-50 p-6">
-            <h1 className="text-2xl font-bold text-neutral-900">Profili Düzenle</h1>
-            <p className="text-neutral-500 text-sm mt-1">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+          <div className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 p-6">
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profili Düzenle</h1>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">
               Kampüs kimliğinizi oluşturun ve ilgi alanlarınızı belirtin.
             </p>
           </div>
@@ -201,36 +201,36 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">Ad Soyad</label>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Ad Soyad</label>
                   <input
                     type="text"
                     name="full_name"
                     value={formData.full_name}
                     onChange={handleChange}
-                    className="w-full p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                    className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">Bölüm</label>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Bölüm</label>
                   <input
                     type="text"
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
                     placeholder="Örn: Bilgisayar Mühendisliği"
-                    className="w-full p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                    className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">Sınıf / Ünvan</label>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Sınıf / Ünvan</label>
                   <select
                     name="class_year"
                     value={formData.class_year}
                     onChange={handleChange}
-                    className="w-full p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white"
+                    className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                   >
                     <option value="">Seçiniz</option>
                     {CLASS_OPTIONS.map(opt => (
@@ -249,7 +249,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
               </h2>
               
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Manşet (Hakkımda)
                 </label>
                 <div className="relative">
@@ -260,7 +260,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                     rows={3}
                     maxLength={160}
                     placeholder="Kendinizi kısaca tanıtın."
-                    className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none resize-none"
+                    className="w-full p-3 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none resize-none bg-white dark:bg-neutral-800 dark:text-white"
                   />
                   <div className="absolute bottom-2 right-2 text-xs text-neutral-400">
                     {(formData.bio?.length || 0)}/160
@@ -270,15 +270,15 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Social Links */}
-             <div className="space-y-4 pt-4 border-t border-neutral-100">
+             <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-[#C8102E]">
                     <Globe size={20} />
                     Sosyal Medya & Bağlantılar
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1 flex items-center gap-1">
-                            <Linkedin size={14} className="text-blue-700"/> LinkedIn
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 flex items-center gap-1">
+                            <Linkedin size={14} className="text-blue-700 dark:text-blue-500"/> LinkedIn
                         </label>
                         <div className="relative">
                             <span className="absolute left-3 top-2.5 text-neutral-400 text-sm">in/</span>
@@ -288,13 +288,13 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                                 value={formData.social_links?.linkedin}
                                 onChange={handleChange}
                                 placeholder="kullaniciadi"
-                                className="w-full pl-8 p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                                className="w-full pl-8 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1 flex items-center gap-1">
-                             <Github size={14} className="text-neutral-900"/> GitHub
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 flex items-center gap-1">
+                             <Github size={14} className="text-neutral-900 dark:text-white"/> GitHub
                         </label>
                          <div className="relative">
                             <span className="absolute left-3 top-2.5 text-neutral-400 text-sm">@</span>
@@ -304,13 +304,13 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                                 value={formData.social_links?.github}
                                 onChange={handleChange}
                                 placeholder="username"
-                                className="w-full pl-8 p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                                className="w-full pl-8 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1 flex items-center gap-1">
-                             <Globe size={14} className="text-neutral-600"/> Web Sitesi
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 flex items-center gap-1">
+                             <Globe size={14} className="text-neutral-600 dark:text-neutral-400"/> Web Sitesi
                         </label>
                         <input
                             type="url"
@@ -318,11 +318,11 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                             value={formData.social_links?.website}
                             onChange={handleChange}
                             placeholder="https://..."
-                            className="w-full p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                            className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                         />
                     </div>
                      <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1 flex items-center gap-1">
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 flex items-center gap-1">
                              <Instagram size={14} className="text-pink-600"/> Instagram
                         </label>
                          <div className="relative">
@@ -333,7 +333,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                                 value={formData.social_links?.instagram}
                                 onChange={handleChange}
                                 placeholder="username"
-                                className="w-full pl-8 p-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none"
+                                className="w-full pl-8 p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
                             />
                         </div>
                     </div>
@@ -341,18 +341,18 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Privacy Settings */}
-            <div className="space-y-4 pt-4 border-t border-neutral-100">
+            <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-[#C8102E]">
                     <Lock size={20} />
                     Gizlilik Ayarları
                 </h2>
                 <div className="space-y-3">
-                     <label className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50">
+                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
                         <div className="flex items-center gap-3">
                             {formData.privacy_settings?.show_interests ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
                             <div>
-                                <span className="font-medium text-neutral-900 block">İlgi Alanlarımı Göster</span>
-                                <span className="text-xs text-neutral-500">Profilinizde seçtiğiniz ilgi alanları herkese açık olur.</span>
+                                <span className="font-medium text-neutral-900 dark:text-white block">İlgi Alanlarımı Göster</span>
+                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Profilinizde seçtiğiniz ilgi alanları herkese açık olur.</span>
                             </div>
                         </div>
                         <input 
@@ -363,12 +363,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                         />
                     </label>
 
-                    <label className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50">
+                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
                         <div className="flex items-center gap-3">
                             {formData.privacy_settings?.show_activities ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
                             <div>
-                                <span className="font-medium text-neutral-900 block">Aktivitelerimi Göster</span>
-                                <span className="text-xs text-neutral-500">Katıldığınız etkinlikler ve paylaşımlarınız profilde görünür.</span>
+                                <span className="font-medium text-neutral-900 dark:text-white block">Aktivitelerimi Göster</span>
+                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Katıldığınız etkinlikler ve paylaşımlarınız profilde görünür.</span>
                             </div>
                         </div>
                         <input 
@@ -382,7 +382,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Interests */}
-            <div className="space-y-4 pt-4 border-t border-neutral-100">
+            <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">
               <h2 className="text-lg font-semibold flex items-center gap-2 text-[#C8102E]">
                 <Heart size={20} />
                 İlgi Alanları
@@ -398,8 +398,8 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                     className={`
                       flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all
                       ${(formData.interests || []).includes(interest) 
-                        ? 'bg-red-50 border-[#C8102E] text-[#C8102E]' 
-                        : 'bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300'}
+                        ? 'bg-red-50 dark:bg-red-900/20 border-[#C8102E] text-[#C8102E]' 
+                        : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-600'}
                     `}
                   >
                     <input
@@ -423,7 +423,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 border-t border-neutral-200 flex justify-end">
+            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}
