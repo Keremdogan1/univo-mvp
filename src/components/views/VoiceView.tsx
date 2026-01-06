@@ -608,34 +608,63 @@ export default function VoiceView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column: Forum / Letters */}
         <div className="lg:col-span-2 space-y-8 order-last lg:order-first">
-            {/* Trending Topics - Moved above feed */}
+            {/* Weekly Poll - Moved above feed */}
             <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
-                <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
-                    <TrendingUp size={24} className="text-[#C8102E]" />
-                    Kampüste Gündem
+                <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
+                    Haftanın Anketi
                 </h3>
-                <div className="space-y-3">
-                    {allTags.length > 0 ? (
-                        allTags.slice(0, 5).map((topic, index) => (
-                            <div key={topic.tag} onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
-                                    <div className="flex flex-col">
-                                        <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-[#C8102E]' : 'text-neutral-900 dark:text-white group-hover:text-[#C8102E]'}`}>
-                                            {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
-                                        </span>
-                                        <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
-                                    </div>
-                                </div>
-                                <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-[#C8102E]' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-6 text-neutral-400 text-sm italic">
-                            Henüz gündem oluşmadı.
+                
+                 <div className="mb-4 bg-black dark:bg-black p-2 border border-black dark:border-white rounded-sm text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white flex items-center justify-center gap-1">
+                         <span className="w-2 h-2 rounded-full bg-[#C8102E] animate-pulse"></span>
+                         Yapay Zeka Seçimi
+                    </span>
+                 </div>
+
+                {pollLoading ? (
+                    <div className="text-center py-8 text-neutral-400 animate-pulse">Yapay zeka anket hazırlıyor...</div>
+                ) : (
+                    <>
+                        <h4 className="font-bold text-lg mb-6 font-serif text-center leading-tight dark:text-white">
+                            "{activePoll?.question}"
+                        </h4>
+                        
+                        <div className="space-y-3">
+                            {activePoll?.options.map((option, idx) => {
+                                const percentage = totalVotes === 0 ? 0 : Math.round((pollResults[idx] / totalVotes) * 100);
+                                const isSelected = userVote === idx;
+                                const showResults = userVote !== null;
+
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handlePollVote(idx)}
+                                        className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden ${
+                                            isSelected 
+                                                ? 'border-black dark:border-white bg-neutral-50 dark:bg-neutral-800' 
+                                                : 'border-neutral-200 dark:border-neutral-800 hover:border-black dark:hover:border-white'
+                                        }`}
+                                    >
+                                        {showResults && (
+                                            <div 
+                                                className="absolute top-0 left-0 h-full bg-neutral-100 dark:bg-neutral-800 transition-all duration-500 ease-out"
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        )}
+                                        
+                                        <div className="relative p-3 flex justify-between items-center z-10 font-bold">
+                                            <span className={isSelected ? 'text-black dark:text-white' : 'text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors'}>
+                                                {option}
+                                            </span>
+                                            {showResults && <span className="text-sm font-black dark:text-white">{percentage}%</span>}
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
+                        {userVote !== null && <div className="text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium">{totalVotes} oy kullanıldı</div>}
+                    </>
+                )}
             </div>
             
             <div className="flex justify-between items-end border-b-2 border-black dark:border-white pb-2 mb-6">
@@ -976,6 +1005,35 @@ export default function VoiceView() {
         {/* Sidebar: Polls & Stats */}
         <div className="space-y-8">
             <div className="sticky top-24 space-y-8 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
+               {/* Trending Topics */}
+               <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
+                    <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
+                        <TrendingUp size={24} className="text-[#C8102E]" />
+                        Kampüste Gündem
+                    </h3>
+                    <div className="space-y-3">
+                        {allTags.length > 0 ? (
+                            allTags.slice(0, 5).map((topic, index) => (
+                                <div key={topic.tag} onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
+                                        <div className="flex flex-col">
+                                            <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-[#C8102E]' : 'text-neutral-900 dark:text-white group-hover:text-[#C8102E]'}`}>
+                                                {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
+                                            </span>
+                                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                        </div>
+                                    </div>
+                                    <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-[#C8102E]' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-6 text-neutral-400 text-sm italic">
+                                Henüz gündem oluşmadı.
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
