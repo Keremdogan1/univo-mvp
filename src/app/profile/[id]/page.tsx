@@ -379,6 +379,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                         isOwnProfile={isOwnProfile}
                     />
 
+                    {/* Friend Button - Only for other users' profiles */}
+                    {!isOwnProfile && (
+                        <FriendButton 
+                            targetUserId={targetId}
+                            variant="profile"
+                            onFriendshipChange={(status) => {
+                                if (status === 'accepted' || status === 'none') {
+                                    fetchProfileData();
+                                }
+                            }}
+                        />
+                    )}
+
                     {/* Social Links */}
                     {profile.social_links && Object.values(profile.social_links).some(v => v) && (
                         <div className="flex justify-center gap-3 mb-4">
@@ -410,19 +423,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                         </div>
                     )}
 
-                    {/* Friend Button - Only for other users' profiles */}
-                    {!isOwnProfile && (
-                        <FriendButton 
-                            targetUserId={targetId}
-                            onFriendshipChange={(status) => {
-                                // Refresh stats if accepted/unfriended
-                                // Ideally fetch fresh count
-                                if (status === 'accepted' || status === 'none') {
-                                    fetchProfileData();
-                                }
-                            }}
-                        />
-                    )}
+
 
                     {isOwnProfile && (
                         <button

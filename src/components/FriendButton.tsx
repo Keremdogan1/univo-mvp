@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 interface FriendButtonProps {
   targetUserId: string;
   onFriendshipChange?: (status: 'none' | 'pending' | 'accepted') => void;
-  variant?: 'default' | 'menu-item';
+  variant?: 'default' | 'menu-item' | 'profile';
 }
 
 export default function FriendButton({ 
@@ -147,6 +147,15 @@ export default function FriendButton({
   const getButtonStyles = (type: 'action' | 'pending' | 'friend') => {
     if (variant === 'menu-item') {
       return "w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors";
+    }
+    
+    if (variant === 'profile') {
+        const base = "w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm mb-4";
+        switch (type) {
+            case 'action': return `${base} bg-[#C8102E] text-white hover:bg-[#A00D25]`;
+            case 'pending': return `${base} bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200`;
+            case 'friend': return `${base} bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-red-100 hover:text-red-700 hover:border-red-200`;
+        }
     }
     
     // Default styles
