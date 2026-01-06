@@ -111,28 +111,30 @@ export default function VoiceView() {
       if (data.voices) {
         setVoices(data.voices);
         
-        // Dynamic Tag Learning & Counting
-        const tagCounts = new Map<string, number>();
-        
-        // Initialize with default tags (count 0 or low value so they appear but at bottom if not used)
-        INITIAL_TAGS.forEach(t => tagCounts.set(t, 0));
+        // Simply don't update tags if we are filtering, to preserve the "global view"
+        if (!activeTagFilter) {
+            // Dynamic Tag Learning & Counting
+            const tagCounts = new Map<string, number>();
+            
+            // Initialize with default tags
+            INITIAL_TAGS.forEach(t => tagCounts.set(t, 0));
 
-        data.voices.forEach((v: Voice) => {
-            if (v.tags) {
-                // Ensure all learned tags are lowercase and counted
-                v.tags.forEach(t => {
-                    const lower = t.toLowerCase();
-                    tagCounts.set(lower, (tagCounts.get(lower) || 0) + 1);
-                });
-            }
-        });
+            data.voices.forEach((v: Voice) => {
+                if (v.tags) {
+                    v.tags.forEach(t => {
+                        const lower = t.toLowerCase();
+                        tagCounts.set(lower, (tagCounts.get(lower) || 0) + 1);
+                    });
+                }
+            });
 
-        // Convert to array and sort by count descending
-        const sortedTags = Array.from(tagCounts.entries())
-            .map(([tag, count]) => ({ tag, count }))
-            .sort((a, b) => b.count - a.count);
+            // Convert to array and sort by count descending
+            const sortedTags = Array.from(tagCounts.entries())
+                .map(([tag, count]) => ({ tag, count }))
+                .sort((a, b) => b.count - a.count);
 
-        setAllTags(sortedTags);
+            setAllTags(sortedTags);
+        }
       }
     } catch (e) {
       console.error('Failed to fetch voices', e);

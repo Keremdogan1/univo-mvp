@@ -48,6 +48,8 @@ function formatRelativeTime(dateString: string) {
 export default function ActivityTimeline({ activities }: ActivityTimelineProps) {
   const router = useRouter();
 
+  const [displayCount, setDisplayCount] = React.useState(5);
+
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8 text-neutral-500 text-sm">
@@ -56,9 +58,12 @@ export default function ActivityTimeline({ activities }: ActivityTimelineProps) 
     );
   }
 
+  const visibleActivities = activities.slice(0, displayCount);
+  const hasMore = activities.length > displayCount;
+
   return (
     <div className="space-y-4">
-      {activities.map((activity, index) => (
+      {visibleActivities.map((activity, index) => (
         <div key={activity.id} className="relative pl-6 pb-6 border-l-2 border-neutral-200 dark:border-neutral-800 last:border-0 last:pb-0">
           
           {/* Timeline Dot */}
@@ -114,6 +119,15 @@ export default function ActivityTimeline({ activities }: ActivityTimelineProps) 
           </div>
         </div>
       ))}
+
+      {hasMore && (
+        <button 
+            onClick={() => setDisplayCount(prev => prev + 5)}
+            className="w-full py-2 text-sm font-bold text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors border-t border-neutral-200 dark:border-neutral-800 mt-4"
+        >
+            Daha Fazla Göster ({activities.length - displayCount})
+        </button>
+      )}
     </div>
   );
 }
