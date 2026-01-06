@@ -608,6 +608,36 @@ export default function VoiceView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column: Forum / Letters */}
         <div className="lg:col-span-2 space-y-8 order-last lg:order-first">
+            {/* Trending Topics - Moved above feed */}
+            <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
+                <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
+                    <TrendingUp size={24} className="text-[#C8102E]" />
+                    Kampüste Gündem
+                </h3>
+                <div className="space-y-3">
+                    {allTags.length > 0 ? (
+                        allTags.slice(0, 5).map((topic, index) => (
+                            <div key={topic.tag} onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
+                                    <div className="flex flex-col">
+                                        <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-[#C8102E]' : 'text-neutral-900 dark:text-white group-hover:text-[#C8102E]'}`}>
+                                            {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
+                                        </span>
+                                        <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                    </div>
+                                </div>
+                                <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-[#C8102E]' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-6 text-neutral-400 text-sm italic">
+                            Henüz gündem oluşmadı.
+                        </div>
+                    )}
+                </div>
+            </div>
+            
             <div className="flex justify-between items-end border-b-2 border-black dark:border-white pb-2 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2 font-serif dark:text-white">
                     <MessageSquare size={24} />
@@ -946,35 +976,6 @@ export default function VoiceView() {
         {/* Sidebar: Polls & Stats */}
         <div className="space-y-8">
             <div className="sticky top-24 space-y-8 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
-               {/* Trending Topics - Moved from Community Search */}
-               <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
-                    <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
-                        <TrendingUp size={24} className="text-[#C8102E]" />
-                        Kampüste Gündem
-                    </h3>
-                    <div className="space-y-3">
-                        {allTags.length > 0 ? (
-                            allTags.slice(0, 5).map((topic, index) => (
-                                <div key={topic.tag} onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
-                                        <div className="flex flex-col">
-                                            <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-[#C8102E]' : 'text-neutral-900 dark:text-white group-hover:text-[#C8102E]'}`}>
-                                                {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
-                                            </span>
-                                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
-                                        </div>
-                                    </div>
-                                    <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-[#C8102E]' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-6 text-neutral-400 text-sm italic">
-                                Henüz gündem oluşmadı.
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
