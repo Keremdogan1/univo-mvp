@@ -19,6 +19,12 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
+    if (!email.endsWith('@metu.edu.tr') && !email.endsWith('@student.metu.edu.tr')) {
+      setError('Sadece @metu.edu.tr veya @student.metu.edu.tr uzantılı e-posta adresleri ile giriş yapılabilir.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -66,7 +72,7 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                E-posta
+                E-posta <span className="text-xs font-normal text-neutral-500">(Sadece @metu.edu.tr)</span>
               </label>
               <input
                 id="email"
@@ -75,7 +81,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white transition-colors"
-                placeholder="ornek@universite.edu.tr"
+                placeholder="ornek@metu.edu.tr"
               />
             </div>
 

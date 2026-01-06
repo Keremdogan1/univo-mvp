@@ -42,6 +42,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!formData.email.endsWith('@metu.edu.tr') && !formData.email.endsWith('@student.metu.edu.tr')) {
+      setError('Sadece @metu.edu.tr veya @student.metu.edu.tr uzantılı e-posta adresleri kabul edilmektedir.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -125,7 +130,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                E-posta *
+                E-posta * <span className="text-xs font-normal text-neutral-500">(Sadece @metu.edu.tr)</span>
               </label>
               <input
                 id="email"
@@ -135,7 +140,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 transition-colors"
-                placeholder="ornek@universite.edu.tr"
+                placeholder="ornek@metu.edu.tr"
               />
             </div>
 
