@@ -42,18 +42,29 @@ export async function GET(
       }, { status: 403 });
     }
 
-    // Fetch confirmed friendships
-    const { data: friendships, error } = await supabase
+    // Fetch confirmed friendships where user is requester
+    const { data: sentFriendships, error: sentError } = await supabase
       .from('friendships')
       .select('id, requester_id, receiver_id, created_at')
       .eq('status', 'accepted')
-      .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`)
-      .order('created_at', { ascending: false });
+      .eq('requester_id', userId);
 
-    if (error) {
-      console.error('Friends fetch error:', error);
-      return NextResponse.json({ error: 'Failed to fetch friends' }, { status: 500 });
+    if (sentError) {
+      console.error('Sent friends fetch error:', sentError);
     }
+
+    // Fetch confirmed friendships where user is receiver
+    const { data: receivedFriendships, error: receivedError } = await supabase
+      .from('friendships')
+      .select('id, requester_id, receiver_id, created_at')
+      .eq('status', 'accepted')
+      .eq('receiver_id', userId);
+
+    if (receivedError) {
+      console.error('Received friends fetch error:', receivedError);
+    }
+
+    const friendships = [...(sentFriendships || []), ...(receivedFriendships || [])];
 
     if (!friendships || friendships.length === 0) {
       return NextResponse.json({ friends: [], count: 0 });
