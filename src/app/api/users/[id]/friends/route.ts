@@ -87,7 +87,7 @@ export async function GET(
     // Fetch friend profiles
     const { data: profiles, error: profilesError } = await profileClient
       .from('profiles')
-      .select('id, full_name, avatar_url, department, university')
+      .select('id, full_name, avatar_url, department')
       .in('id', friendIds);
     
     if (profilesError) {
