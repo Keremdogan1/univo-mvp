@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Calendar, MapPin, Quote, Heart, BookOpen, Edit, Globe, Lock, Linkedin, Github, Twitter, Instagram } from 'lucide-react';
+import { User, Calendar, MapPin, Quote, Heart, BookOpen, Edit, Globe, Lock, Linkedin, Github, Twitter, Instagram, Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import EventFeedbackButton from '@/components/EventFeedbackButton';
@@ -51,6 +51,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
   const [badges, setBadges] = useState<any[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Determine if viewing own profile
   const [targetId, setTargetId] = useState<string>(id);
@@ -165,6 +168,21 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         `)
         .eq('user_id', resolvedId);
 
+      // Fetch Follow Counts
+      // Notes: supabase-js doesn't support 'count' in single select easily without return type issues in strict mode sometimes, but let's try standard way
+      const { count: followers } = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', resolvedId);
+      
+      const { count: following } = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', resolvedId);
+
+      setFollowersCount(followers || 0);
+      setFollowingCount(following || 0);
+
       if (attendanceData) {
         // Process Events for Display
         const eventsList: EventAttendance[] = attendanceData
@@ -229,6 +247,58 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
     }
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+      
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user!.id}/${fileName}`;
+
+      setIsUploading(true);
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update Profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user!.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update Local State
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+      
+      // Toast notification would be good here but not imported
+      alert('Profil fotoğrafı güncellendi');
+
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('Fotoğraf yüklenirken bir hata oluştu');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
@@ -257,16 +327,55 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 <div className="h-32 bg-[#C8102E]/5 dark:bg-[#C8102E]/10 w-full absolute top-0 left-0 bg-[radial-gradient(#C8102E_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
                 
                 <div className="pt-12 px-6 pb-6 text-center relative z-10">
-                    <div className="w-28 h-28 mx-auto bg-white dark:bg-neutral-800 rounded-full p-1 border-2 border-neutral-100 dark:border-neutral-700 shadow-sm mb-4">
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-[#C8102E] to-[#990c23] flex items-center justify-center text-white text-3xl font-bold">
-                            {profile.full_name.charAt(0).toUpperCase()}
+                    <div className="w-28 h-28 mx-auto relative group/avatar">
+                        <div className="w-full h-full rounded-full p-1 border-2 border-neutral-100 dark:border-neutral-700 shadow-sm bg-white dark:bg-neutral-800 overflow-hidden">
+                            {profile.avatar_url ? (
+                                <img 
+                                    src={profile.avatar_url} 
+                                    alt={profile.full_name} 
+                                    className="w-full h-full rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#C8102E] to-[#990c23] flex items-center justify-center text-white text-3xl font-bold">
+                                    {profile.full_name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                         </div>
+
+                        {/* Camera Overlay for Owner */}
+                        {isOwnProfile && (
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover/avatar:opacity-100 cursor-pointer transition-opacity z-20">
+                                {isUploading ? (
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                ) : (
+                                    <Camera size={24} />
+                                )}
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={handleAvatarUpload} 
+                                    className="hidden" 
+                                    disabled={isUploading}
+                                />
+                            </label>
+                        )}
                     </div>
                     
                     <h1 className="text-2xl font-bold font-serif text-neutral-900 dark:text-white mb-1">{profile.full_name}</h1>
                     <p className="text-[#C8102E] dark:text-[#E81D3E] font-medium text-sm mb-4">
                         {profile.class_year || 'Öğrenci'} {profile.department ? `· ${profile.department}` : ''}
                     </p>
+
+                    <div className="flex justify-center gap-6 mb-6 border-t border-b border-neutral-100 dark:border-neutral-800 py-3">
+                        <div className="text-center">
+                            <div className="text-lg font-bold text-neutral-900 dark:text-white">{followersCount}</div>
+                            <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Takipçi</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-lg font-bold text-neutral-900 dark:text-white">{followingCount}</div>
+                            <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Takip</div>
+                        </div>
+                    </div>
 
                     {/* Social Links */}
                     {profile.social_links && Object.values(profile.social_links).some(v => v) && (
