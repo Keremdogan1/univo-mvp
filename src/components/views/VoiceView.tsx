@@ -620,7 +620,7 @@ export default function VoiceView() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Column: Forum / Letters */}
+                {/* Main Column: Forum / Letters - Shows last on mobile, first on desktop */}
                 <div className="lg:col-span-2 space-y-8 order-last lg:order-first">
                     {/* Weekly Poll - Moved above feed */}
 
@@ -959,8 +959,8 @@ export default function VoiceView() {
                     </div>
                 </div>
 
-                {/* Sidebar: Polls & Stats */}
-                <div className="space-y-8">
+                {/* Sidebar: Polls & Stats - Shows first on mobile, last on desktop */}
+                <div className="space-y-8 order-first lg:order-last">
                     <div className="sticky top-24 space-y-8 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
                         {/* Weekly Poll */}
                         <div className="border-4 border-black dark:border-white p-4 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors">

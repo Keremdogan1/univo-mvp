@@ -329,25 +329,22 @@ export default function OfficialView() {
   return (
     <div className="container mx-auto px-4 py-8 relative">
       {/* Newspaper Header */}
-      <div className="border-b-4 border-black dark:border-white pb-4 mb-4 text-center transition-colors">
+      <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors">
         <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Resmi Gündem</h2>
         <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
-          <span>RESMİ BÜLTEN</span>
+          <Link 
+            href="/official/archive" 
+            className="flex items-center gap-1 hover:underline decoration-2 underline-offset-4 cursor-pointer font-bold uppercase dark:text-neutral-300"
+            style={{ color: 'var(--primary-color, #C8102E)' }}
+          >
+            <Briefcase size={14} />
+            Belge Arşivi
+          </Link>
           <span>{formattedDate.toUpperCase()}</span>
         </div>
       </div>
-      
-      {/* Belge Arşivi Link */}
-      <div className="flex justify-center mb-8">
-        <Link 
-          href="/official/archive" 
-          className="flex items-center gap-2 px-4 py-2 border-2 border-black dark:border-white text-black dark:text-white font-bold uppercase text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-        >
-          <Briefcase size={16} />
-          Belge Arşivi
-        </Link>
-      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column */}
