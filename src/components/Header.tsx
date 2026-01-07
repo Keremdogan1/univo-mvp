@@ -24,6 +24,7 @@ function HeaderContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCommunityAdmin, setIsCommunityAdmin] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { user, profile, signOut } = useAuth();
@@ -32,6 +33,17 @@ function HeaderContent() {
 
   // ... (existing code)
 
+  // Scroll detection for mobile header hide
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsAtTop(window.scrollY < 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial position
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
 
   useEffect(() => {
@@ -76,7 +88,7 @@ function HeaderContent() {
   };
 
   return (
-    <header className="sticky top-0 z-[9999] bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 transition-colors duration-300">
+    <header className={`sticky top-0 z-[9999] bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 transition-all duration-300 ${!isAtTop ? 'md:translate-y-0 -translate-y-full' : ''}`}>
       <div className="w-full px-4 md:container md:mx-auto">
         <div className="flex items-center justify-between h-16 max-w-full relative">
 

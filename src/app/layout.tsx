@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -71,6 +72,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <ScrollToTopButton />
           </ThemeProvider>
         </AuthProvider>
       </body>
