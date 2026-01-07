@@ -627,14 +627,15 @@ export default function OfficialView() {
                                                         ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-600 text-violet-800 dark:text-violet-400' 
                                                         : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 text-emerald-800 dark:text-emerald-400';
                                             
-                                            const hoverClass = item.type === 'email' ? 'hover:bg-amber-100' : item.type === 'event' ? 'hover:bg-blue-100' : 'hover:bg-emerald-100';
+                                            // Use hoverClass for better interactivity
+                                            const hoverClass = item.type === 'email' ? 'hover:bg-amber-100 dark:hover:bg-amber-900/40' : item.type === 'event' ? 'hover:bg-blue-100 dark:hover:bg-blue-900/40' : (item.type === 'grade' || item.type === 'assignment') ? 'hover:bg-violet-100 dark:hover:bg-violet-900/40' : 'hover:bg-emerald-100 dark:hover:bg-emerald-900/40';
                                             const shadowClass = 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.3)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]';
 
                                             return (
                                             <>
                                                 <button
                                                     onClick={(e) => handleMarkRead(String(item.id), e)}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${activeColorClass}`}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${activeColorClass} ${hoverClass}`}
                                                 >
                                                     {isRead ? <CheckCircle size={12} /> : <div className="w-3 h-3 rounded-full border-2 border-current" />}
                                                     {isRead ? 'Okundu' : 'Okundu İşaretle'}
@@ -642,7 +643,7 @@ export default function OfficialView() {
 
                                                 <button
                                                     onClick={(e) => handleStar(String(item.id), e)}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${starredIds.includes(String(item.id)) ? activeColorClass : activeColorClass /* Keep colorful even if not starred, just differentiate maybe? No user said "sadece kaynağa git renkli bunu düzelt" implying all should be colorful */}`}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${starredIds.includes(String(item.id)) ? activeColorClass : activeColorClass} ${hoverClass}`}
                                                 >
                                                     <Star size={12} className={starredIds.includes(String(item.id)) ? 'fill-current' : ''} />
                                                     {starredIds.includes(String(item.id)) ? 'Yıldızlı' : 'Yıldızla'}
@@ -653,7 +654,7 @@ export default function OfficialView() {
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all group/btn active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${activeColorClass}`}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all group/btn active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${activeColorClass} ${hoverClass} !text-current`}
                                                 >
                                                     <ArrowRight size={12} className="group-hover/btn:translate-x-0.5 transition-transform" />
                                                     Kaynağa Git

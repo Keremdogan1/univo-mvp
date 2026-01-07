@@ -81,8 +81,8 @@ export default function MetuLoginModal({ isOpen, onClose, onSuccess }: MetuLogin
                         <X size={24} />
                     </button>
                     <div className="relative z-10 text-center">
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg p-2">
-                            <img src="/logo_black.png" alt="Univo" className="w-full h-full object-contain" />
+                        <div className="w-20 h-20 mx-auto mb-2 flex items-center justify-center">
+                            <GraduationCap size={72} className="text-white drop-shadow-md" />
                         </div>
                         <h2 className="text-2xl font-black font-serif uppercase tracking-tight">ODTÜ İle Bağlan</h2>
                         <p className="text-white/90 text-sm mt-2 font-medium">
