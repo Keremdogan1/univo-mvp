@@ -4,9 +4,10 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram } from 'lucide-react';
+import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram, Camera, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { METU_DEPARTMENTS } from '@/lib/constants';
+import Image from 'next/image';
 
 interface SocialLinks {
   linkedin?: string;
@@ -26,6 +27,7 @@ interface PrivacySettings {
 interface Profile {
   id: string;
   full_name: string;
+  avatar_url?: string;
   department?: string;
   class_year?: string;
   bio?: string;
@@ -56,6 +58,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   const [formData, setFormData] = useState<Profile>({
     id: '',
     full_name: '',
+    avatar_url: '',
     department: '',
     class_year: '',
     bio: '',
@@ -63,6 +66,9 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
     social_links: { linkedin: '', github: '', website: '', twitter: '', instagram: '' },
     privacy_settings: { show_email: false, show_interests: true, show_activities: true, show_friends: true }
   });
+  
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   useEffect(() => {
     // Security check: Only allow editing own profile
@@ -87,6 +93,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
         setFormData({
           id: data.id,
           full_name: data.full_name || '',
+          avatar_url: data.avatar_url || '',
           department: data.department || '',
           class_year: data.class_year || '',
           bio: data.bio || '',
@@ -139,16 +146,71 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
     });
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Limit file size to 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+        return;
+      }
+
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (): Promise<string | null> => {
+      if (!avatarFile || !user) return null;
+
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, avatarFile, { upsert: true });
+
+      if (uploadError) {
+          throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+      return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
+      let avatarUrl = formData.avatar_url;
+      
+      if (avatarFile) {
+          try {
+              const uploadedUrl = await uploadAvatar();
+              if (uploadedUrl) {
+                  avatarUrl = uploadedUrl;
+              }
+          } catch (uploadError) {
+              console.error('Avatar upload failed:', uploadError);
+              toast.error('Profil fotoğrafı yüklenemedi, diğer bilgiler kaydediliyor...');
+          }
+      }
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: id,
           full_name: formData.full_name,
+          avatar_url: avatarUrl,
           department: formData.department,
           class_year: formData.class_year,
           bio: formData.bio,
@@ -205,6 +267,41 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                 Kişisel Bilgiler
               </h2>
               
+              {/* Avatar Upload */}
+              <div className="flex justify-center mb-6">
+                <div className="relative group cursor-pointer">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-md relative bg-neutral-100 dark:bg-neutral-800">
+                    {(avatarPreview || formData.avatar_url) ? (
+                        <Image
+                            src={avatarPreview || formData.avatar_url || ''}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                            <User size={48} />
+                        </div>
+                    )}
+                    
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                        <Camera size={24} />
+                    </div>
+                  </div>
+                  
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className="absolute bottom-0 right-0 bg-[#C8102E] text-white p-2 rounded-full shadow-sm">
+                    <Upload size={16} />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Ad Soyad</label>
