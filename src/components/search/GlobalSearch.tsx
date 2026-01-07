@@ -93,7 +93,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
             
             {loading ? (
                 <div className="py-12 flex flex-col items-center justify-center text-neutral-400 gap-3">
-                    <Loader2 size={32} className="animate-spin text-[#C8102E]" />
+                    <Loader2 size={32} className="animate-spin text-primary" />
                     <span className="text-sm font-medium">Aranıyor...</span>
                 </div>
             ) : !query ? (
@@ -115,9 +115,9 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                                 <button 
                                     key={event.id}
                                     onClick={() => handleSelect(`/events/${event.id}`)}
-                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-[#C8102E] dark:hover:border-[#C8102E] hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-primary dark:hover:border-primary hover:shadow-sm transition-all text-left group"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-[#C8102E] group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Calendar size={20} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                                             <span>{event.location}</span>
                                         </p>
                                     </div>
-                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-[#C8102E]" />
+                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary" />
                                 </button>
                             ))}
                         </div>

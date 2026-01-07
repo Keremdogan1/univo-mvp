@@ -136,7 +136,7 @@ export default function OfficialArchivePage() {
                                   {filteredDocs.length > 0 ? filteredDocs.map((doc, i) => (
                                       <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
                                           <td className="p-4 font-bold text-neutral-900 dark:text-white flex items-center gap-3">
-                                              <div className="bg-red-50 dark:bg-red-900/20 text-[#C8102E] p-2 rounded">
+                                              <div className="bg-primary/10 dark:bg-primary/20 text-primary p-2 rounded">
                                                   <FileText size={20} />
                                               </div>
                                               {doc.title}
@@ -151,7 +151,7 @@ export default function OfficialArchivePage() {
                                                 href={doc.file_url} 
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 text-[#C8102E] font-bold text-sm hover:underline"
+                                                className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline"
                                               >
                                                   <Download size={16} />
                                                   <span className="hidden sm:inline">İndir/Görüntüle</span>

@@ -158,7 +158,7 @@ export default function VoiceView() {
                             e.stopPropagation();
                             setActiveTagFilter(part);
                         }}
-                            className="text-[#C8102E] dark:text-red-500 font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:text-black dark:hover:text-white transition-colors"
+                            className="text-primary dark:text-primary-light font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:text-black dark:hover:text-white transition-colors"
                         >
                             {part}
                         </button>
@@ -632,7 +632,7 @@ export default function VoiceView() {
                         {activeTagFilter && (
                             <button
                                 onClick={() => setActiveTagFilter(null)}
-                                className="text-xs font-black uppercase bg-neutral-900 text-white dark:bg-white dark:text-black px-3 py-1.5 rounded-full flex items-center gap-2 transition-all hover:bg-[#C8102E] hover:text-white dark:hover:bg-[#C8102E] dark:hover:text-white shadow-sm"
+                                className="text-xs font-black uppercase bg-neutral-900 text-white dark:bg-white dark:text-black px-3 py-1.5 rounded-full flex items-center gap-2 transition-all hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white shadow-sm"
                             >
                                 <span>{activeTagFilter}</span>
                                 <X size={12} strokeWidth={3} />
@@ -656,7 +656,7 @@ export default function VoiceView() {
                                     ref={textareaRef}
                                     rows={3}
                                     maxLength={280}
-                                    className="w-full p-3 border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:border-black dark:focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white mb-3 font-serif resize-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
+                                    className="w-full p-3 border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:border-black dark:focus:border-primary bg-white dark:bg-neutral-800 dark:text-white mb-3 font-serif resize-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
                                     placeholder="Kampüs gündemi hakkında ne düşünüyorsun? (#etiket kullanabilirsin)"
                                     value={newStatus}
                                     onChange={handleTextChange}
@@ -964,7 +964,7 @@ export default function VoiceView() {
                                     Haftanın Anketi
                                 </h3>
                                 <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                                     Yapay Zeka
                                 </span>
                             </div>
@@ -1017,7 +1017,7 @@ export default function VoiceView() {
                         {/* Trending Topics */}
                         <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
                             <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
-                                <TrendingUp size={24} className="text-[#C8102E]" />
+                                <TrendingUp size={24} className="text-primary" />
                                 Kampüste Gündem
                             </h3>
                             <div className="space-y-3">
@@ -1027,13 +1027,13 @@ export default function VoiceView() {
                                             <div className="flex items-center gap-3">
                                                 <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
                                                 <div className="flex flex-col">
-                                                    <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-[#C8102E]' : 'text-neutral-900 dark:text-white group-hover:text-[#C8102E]'}`}>
+                                                    <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
                                                         {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
                                                     </span>
                                                     <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
                                                 </div>
                                             </div>
-                                            <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-[#C8102E]' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+                                            <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
                                         </div>
                                     ))
                                 ) : (
@@ -1051,7 +1051,7 @@ export default function VoiceView() {
                             </h3>
                             <div className="grid grid-cols-2 gap-4 text-center">
                                 <div className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700">
-                                    <span className="block text-3xl font-black font-serif text-[#C8102E] animate-pulse">
+                                    <span className="block text-3xl font-black font-serif text-primary animate-pulse">
                                         {activeUsers}
                                     </span>
                                     <span className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">

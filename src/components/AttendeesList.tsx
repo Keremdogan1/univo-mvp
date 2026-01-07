@@ -111,8 +111,7 @@ export default function AttendeesList({ eventId }: AttendeesListProps) {
             className="flex flex-col items-center p-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors"
           >
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2"
-              style={{ backgroundColor: '#C8102E' }}
+              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2 bg-primary"
             >
               {attendee.profiles?.full_name?.charAt(0).toUpperCase() || 'U'}
             </div>
@@ -131,8 +130,7 @@ export default function AttendeesList({ eventId }: AttendeesListProps) {
       {attendees.length > 8 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          style={{ color: '#C8102E' }}
-          className="mt-4 w-full py-2 text-sm font-semibold hover:underline"
+          className="mt-4 w-full py-2 text-sm font-semibold hover:underline text-primary"
         >
           Tümünü Göster (+{attendees.length - 8})
         </button>
@@ -141,8 +139,7 @@ export default function AttendeesList({ eventId }: AttendeesListProps) {
       {showAll && (
         <button
           onClick={() => setShowAll(false)}
-          style={{ color: '#C8102E' }}
-          className="mt-4 w-full py-2 text-sm font-semibold hover:underline"
+          className="mt-4 w-full py-2 text-sm font-semibold hover:underline text-primary"
         >
           Daha Az Göster
         </button>

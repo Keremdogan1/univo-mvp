@@ -343,7 +343,7 @@ export default function OfficialView() {
         <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Resmi Gündem</h2>
         <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
-          <a href="/official/archive" className="flex items-center gap-1 hover:text-[#C8102E] transition-colors font-bold uppercase hover:underline decoration-2 underline-offset-4 cursor-pointer dark:text-neutral-300 dark:hover:text-[#C8102E]">
+          <a href="/official/archive" className="flex items-center gap-1 hover:text-primary transition-colors font-bold uppercase hover:underline decoration-2 underline-offset-4 cursor-pointer dark:text-neutral-300 dark:hover:text-primary-light">
               <Briefcase size={16} />
               Belge Arşivi
           </a>
@@ -386,7 +386,7 @@ export default function OfficialView() {
             {/* Featured Post (Only show on Agenda for impact, or always? Let's hide on Archive) */}
             {activeTab !== 'history' && news.length > 0 && (
                 <article className="bg-neutral-50 dark:bg-neutral-900 p-6 border border-neutral-200 dark:border-neutral-800 rounded-sm mb-6 transition-colors">
-                    <span className="inline-block bg-[#C8102E] text-white text-xs px-2 py-1 font-bold mb-3">ÖNEMLİ DUYURU</span>
+                    <span className="inline-block bg-primary text-white text-xs px-2 py-1 font-bold mb-3">ÖNEMLİ DUYURU</span>
                     <h4 className="text-2xl font-bold font-serif mb-3 leading-tight hover:underline cursor-pointer dark:text-white">
                         {news[0].title}
                     </h4>
@@ -418,7 +418,7 @@ export default function OfficialView() {
                             key={index} 
                             onClick={() => setExpandedId(isExpanded ? null : item.id)}
                             className={`flex gap-4 items-start p-4 transition-all duration-300 border-l-4 cursor-pointer relative bg-white dark:bg-neutral-900 shadow-sm group
-                                ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white/5' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800 border-[#C8102E]'}
+                                ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white/5' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800 border-primary'}
                                 ${isRead && activeTab !== 'history' ? 'hidden' : ''} 
                                 ${isRead ? 'opacity-75 grayscale border-neutral-300 dark:border-neutral-700' : ''}
                             `}
@@ -439,9 +439,9 @@ export default function OfficialView() {
                                         <button
                                             onClick={(e) => handleFollow(item.source, e)}
                                             title={isFollowing ? "Favorilerden Çıkar" : "Favorilere Ekle"}
-                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isFollowing ? 'text-[#C8102E] bg-red-50 dark:bg-red-900/30' : 'text-neutral-400 hover:text-[#C8102E] hover:bg-red-50 dark:hover:bg-red-900/30 dark:bg-neutral-800'}`}
+                                            className={`p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isFollowing ? 'text-primary bg-red-50 dark:bg-red-900/30' : 'text-neutral-400 hover:text-primary hover:bg-red-50 dark:hover:bg-red-900/30 dark:bg-neutral-800'}`}
                                         >
-                                            <Bookmark size={20} className={isFollowing ? 'fill-[#C8102E]' : ''} />
+                                            <Bookmark size={20} className={isFollowing ? 'fill-primary' : ''} />
                                         </button>
                                     </div>
                                 )}
@@ -457,7 +457,7 @@ export default function OfficialView() {
                                     </button>
                                 )}
                                 
-                                <div className="text-neutral-300 group-hover:text-[#C8102E] transition-colors font-bold ml-1 text-2xl leading-none select-none">
+                                <div className="text-neutral-300 group-hover:text-primary transition-colors font-bold ml-1 text-2xl leading-none select-none">
                                     {isExpanded ? '−' : '+'}
                                 </div>
                             </div>
@@ -465,18 +465,18 @@ export default function OfficialView() {
                             <div className="flex-1 pr-32">
                                 <div className="flex items-center gap-2 mb-1">
                                     {item.type === 'event' ? (
-                                        <Calendar size={16} className="text-[#C8102E]"/>
+                                        <Calendar size={16} className="text-primary"/>
                                     ) : item.type === 'email' ? (
                                         <Mail size={16} className="text-yellow-600"/>
                                     ) : (
-                                        <Megaphone size={16} className="text-[#C8102E]"/>
+                                        <Megaphone size={16} className="text-primary"/>
                                     )}
-                                    <span className={`text-xs font-bold uppercase ${item.type === 'email' ? 'text-yellow-600' : 'text-[#C8102E]'}`}>
+                                    <span className={`text-xs font-bold uppercase ${item.type === 'email' ? 'text-yellow-600' : 'text-primary'}`}>
                                         {item.type === 'event' ? 'Etkinlik' : item.type === 'email' ? 'E-POSTA' : 'Duyuru'}
                                     </span>
                                 </div>
                                 
-                                <h4 className={`text-lg font-bold font-serif mb-2 transition-colors ${isExpanded ? (item.type === 'email' ? 'text-yellow-700 dark:text-yellow-500' : 'text-[#C8102E]') : 'text-black dark:text-white'}`}>
+                                <h4 className={`text-lg font-bold font-serif mb-2 transition-colors ${isExpanded ? (item.type === 'email' ? 'text-yellow-700 dark:text-yellow-500' : 'text-primary') : 'text-black dark:text-white'}`}>
                                     {item.title}
                                 </h4>
                                 
@@ -563,17 +563,17 @@ export default function OfficialView() {
                 )}
             </div>
 
-            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm p-6 relative overflow-hidden group hover:border-[#C8102E]/30 transition-all">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#C8102E]/5 to-[#C8102E]/10 dark:from-[#C8102E]/10 dark:to-[#C8102E]/20 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm p-6 relative overflow-hidden group hover:border-primary/30 transition-all">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
                 
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 pb-2 relative z-10 text-neutral-900 dark:text-white">
-                    <Briefcase size={20} className="text-[#C8102E]" />
+                    <Briefcase size={20} className="text-primary" />
                     Teknokent Fırsatları
                 </h3>
                 {/* Static sidebar jobs */}
                 <div className="space-y-4 relative z-10">
                     <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg hover:bg-white dark:hover:bg-neutral-800 hover:shadow-md transition-all cursor-pointer border border-neutral-100 dark:border-neutral-800 group/item">
-                        <h5 className="font-bold text-neutral-900 dark:text-neutral-100 mb-1 group-hover/item:text-[#C8102E] transition-colors">{news[1].title}</h5>
+                        <h5 className="font-bold text-neutral-900 dark:text-neutral-100 mb-1 group-hover/item:text-primary transition-colors">{news[1].title}</h5>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 line-clamp-2">{news[1].summary}</p>
                         <div className="flex justify-between text-xs text-neutral-400 dark:text-neutral-500 font-medium">
                             <span>{news[1].source}</span>
@@ -582,7 +582,7 @@ export default function OfficialView() {
                     </div>
                     
                     <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg hover:bg-white dark:hover:bg-neutral-800 hover:shadow-md transition-all cursor-pointer border border-neutral-100 dark:border-neutral-800 group/item">
-                        <h5 className="font-bold text-neutral-900 dark:text-neutral-100 mb-1 group-hover/item:text-[#C8102E] transition-colors">Stajyer (Marketing)</h5>
+                        <h5 className="font-bold text-neutral-900 dark:text-neutral-100 mb-1 group-hover/item:text-primary transition-colors">Stajyer (Marketing)</h5>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">GameDev Stüdyomuz için sosyal medya yönetebilecek stajyerler...</p>
                         <div className="flex justify-between text-xs text-neutral-400 dark:text-neutral-500 font-medium">
                             <span>Pixel Games</span>
@@ -590,7 +590,7 @@ export default function OfficialView() {
                         </div>
                     </div>
                 </div>
-                <button className="w-full mt-4 py-2.5 bg-[#C8102E] text-white font-bold text-sm uppercase rounded hover:bg-[#a60d26] transition-colors relative z-10 shadow-sm">
+                <button className="w-full mt-4 py-2.5 bg-primary text-white font-bold text-sm uppercase rounded hover:bg-primary-hover transition-colors relative z-10 shadow-sm">
                     Tüm İlanları Gör
                 </button>
             </div>
@@ -616,8 +616,8 @@ export default function OfficialView() {
 
                         {(menu.lunch?.length > 0) && (
                             <div>
-                                <h5 className="font-bold text-[#C8102E] text-sm uppercase mb-3 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]"></span>
+                                <h5 className="font-bold text-primary text-sm uppercase mb-3 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                                     Öğle Yemeği
                                 </h5>
                                 <div className="grid grid-cols-2 gap-3">
@@ -639,8 +639,8 @@ export default function OfficialView() {
 
                         {menu.dinner?.length > 0 && (
                             <div>
-                                <h5 className="font-bold text-[#C8102E] text-sm uppercase mb-3 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]"></span>
+                                <h5 className="font-bold text-primary text-sm uppercase mb-3 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                                     Akşam Yemeği
                                 </h5>
                                 <div className="grid grid-cols-2 gap-3">
@@ -734,7 +734,7 @@ export default function OfficialView() {
                       <button 
                           type="submit"
                           disabled={loadingEmails}
-                          className="w-full py-4 bg-[#C8102E] text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-4 bg-primary text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                           {loadingEmails ? (
                               <>

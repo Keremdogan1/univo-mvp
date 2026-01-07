@@ -59,7 +59,7 @@ export default function EventCard({ event, isAttending = false }: EventCardProps
       <div className={`h-full flex flex-col bg-white dark:bg-neutral-900 border-2 border-black dark:border-white transition-all duration-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] ${isPastEvent ? 'opacity-80 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}>
         {/* Header / Category */}
         <div className="border-b-2 border-black dark:border-white p-3 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800 transition-colors">
-           <span className="font-bold font-serif uppercase text-sm tracking-wide text-[#C8102E]">
+           <span className="font-bold font-serif uppercase text-sm tracking-wide text-primary">
              {event.community.category || event.category}
            </span>
            {isPastEvent ? (
@@ -104,7 +104,7 @@ export default function EventCard({ event, isAttending = false }: EventCardProps
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
-                className="hover:underline hover:text-[#C8102E] transition-colors"
+                className="hover:underline hover:text-primary transition-colors"
                >
                 {event.location}
                </a>
@@ -128,7 +128,7 @@ export default function EventCard({ event, isAttending = false }: EventCardProps
                                 {attendee.avatar_url ? (
                                     <img src={attendee.avatar_url} alt="user" className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-[#C8102E] text-white font-bold select-none">
+                                    <div className="w-full h-full flex items-center justify-center bg-primary text-white font-bold select-none">
                                         {attendee.full_name ? attendee.full_name.charAt(0).toUpperCase() : '?'}
                                     </div>
                                 )}

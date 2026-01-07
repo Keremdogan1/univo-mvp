@@ -67,7 +67,7 @@ export default async function EventDetailPage({
                 href="https://www.google.com/maps/search/?api=1&query=ODTÜ+Devrim+Stadyumu" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="hover:underline decoration-2 underline-offset-4 cursor-pointer hover:text-[#C8102E] transition-colors"
+                className="hover:underline decoration-2 underline-offset-4 cursor-pointer hover:text-primary transition-colors"
               >
                 {event.location.toUpperCase()}
               </a>

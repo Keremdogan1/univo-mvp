@@ -213,7 +213,7 @@ export default function RSVPButton({
                   <button
                     onClick={() => handleRSVP('not_going')}
                     disabled={loading}
-                    className="px-4 py-2 text-sm font-bold text-red-600 underline decoration-2 hover:text-red-800"
+                    className="px-4 py-2 text-sm font-bold text-primary underline decoration-2 hover:text-primary-hover dark:hover:text-white"
                   >
                     İptal Et
                   </button>

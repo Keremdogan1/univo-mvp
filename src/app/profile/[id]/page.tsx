@@ -299,7 +299,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
-           <div className="w-16 h-16 border-4 border-[#C8102E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
            <p className="text-neutral-600">Yükleniyor...</p>
         </div>
       </div>
@@ -320,7 +320,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         {/* Left Column: Identity & Social */}
         <div className="lg:col-span-1 space-y-6">
             <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden relative group transition-colors">
-                <div className="h-32 bg-[#C8102E]/5 dark:bg-[#C8102E]/10 w-full absolute top-0 left-0 bg-[radial-gradient(#C8102E_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                <div className="h-32 bg-primary/5 dark:bg-primary/10 w-full absolute top-0 left-0 bg-[radial-gradient(var(--primary-color)_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
                 
                 <div className="pt-12 px-6 pb-6 text-center relative z-10">
                     <div className="w-28 h-28 mx-auto relative group/avatar">
@@ -332,7 +332,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                                     className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#C8102E] to-[#990c23] flex items-center justify-center text-white text-3xl font-bold">
+                                <div className="w-full h-full rounded-full bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-white text-3xl font-bold">
                                     {profile.full_name.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -358,7 +358,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                     </div>
                     
                     <h1 className="text-2xl font-bold font-serif text-neutral-900 dark:text-white mb-1">{profile.full_name}</h1>
-                    <p className="text-[#C8102E] dark:text-[#E81D3E] font-medium text-sm mb-4">
+                    <p className="text-primary dark:text-primary-light font-medium text-sm mb-4">
                         {profile.class_year || 'Öğrenci'} {profile.department ? `· ${profile.department}` : ''}
                     </p>
 
@@ -416,7 +416,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                                 </a>
                             )}
                             {profile.social_links.website && (
-                                <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-[#C8102E] transition-colors">
+                                <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-primary transition-colors">
                                     <Globe size={20} />
                                 </a>
                             )}
@@ -439,7 +439,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             {/* Community Application Section - Only for own profile and non-admins */}
             {isOwnProfile && (
-                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border-2 border-[#C8102E]/30 dark:border-[#C8102E]/50 p-6 transition-colors">
+                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border-2 border-primary/30 dark:border-primary/50 p-6 transition-colors">
                     <h3 className="text-lg font-bold font-serif mb-2 text-neutral-800 dark:text-neutral-200">
                         Topluluk Sahibi misiniz?
                     </h3>
@@ -451,7 +451,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             // For now, just mailto. Can be replaced with a modal/form later
                             window.location.href = 'mailto:admin@univo.app?subject=Topluluk Yönetim Paneli Başvurusu&body=Merhaba,%0D%0A%0D%0ATopluluk adı:%0D%0ATopluluk açıklaması:%0D%0AÜniversite:%0D%0AIletişim bilgileri:%0D%0A';
                         }}
-                        className="w-full py-2.5 bg-[#C8102E] hover:bg-[#A00D25] text-white rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                        className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                     >
                         <Building2 size={16} />
                         Başvuru Yap
@@ -463,13 +463,13 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             {showInterests && (
                 <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-6 transition-colors">
                     <h3 className="text-lg font-bold font-serif mb-4 flex items-center gap-2 text-neutral-800 dark:text-neutral-200">
-                    <Heart size={20} className="text-[#C8102E]" />
+                    <Heart size={20} className="text-primary" />
                     İlgi Alanları
                     </h3>
                     {profile.interests && profile.interests.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                             {profile.interests.map(interest => (
-                                <span key={interest} className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-full text-xs font-medium hover:bg-[#C8102E]/10 hover:text-[#C8102E] transition-colors cursor-default">
+                                <span key={interest} className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-full text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors cursor-default">
                                     {interest}
                                 </span>
                             ))}
@@ -493,8 +493,8 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             {profile.bio && (
                 <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 relative overflow-hidden transition-colors">
                     <Quote size={80} className="absolute top-4 right-4 text-neutral-100 dark:text-neutral-800 -z-10 transform rotate-12" />
-                    <h2 className="text-xl font-bold font-serif mb-4 text-[#C8102E]">Hakkımda</h2>
-                    <p className="text-lg text-neutral-700 dark:text-neutral-300 leading-relaxed italic border-l-4 border-[#C8102E] pl-4">
+                    <h2 className="text-xl font-bold font-serif mb-4 text-primary">Hakkımda</h2>
+                    <p className="text-lg text-neutral-700 dark:text-neutral-300 leading-relaxed italic border-l-4 border-primary pl-4">
                         {profile.bio}
                     </p>
                 </div>
@@ -529,21 +529,21 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             <div
                                 key={event.id}
                                 onClick={() => router.push(`/events/${event.id}`)}
-                                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-[#C8102E] dark:hover:border-[#C8102E] hover:shadow-md transition-all cursor-pointer group"
+                                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-primary dark:hover:border-primary hover:shadow-md transition-all cursor-pointer group"
                             >
                                 <span className="inline-block px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs rounded font-medium mb-3">
                                     {event.category}
                                 </span>
-                                <h3 className="font-bold text-lg mb-2 text-neutral-900 dark:text-white group-hover:text-[#C8102E] transition-colors line-clamp-1">
+                                <h3 className="font-bold text-lg mb-2 text-neutral-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
                                     {event.title}
                                 </h3>
                                 <div className="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
                                     <div className="flex items-center gap-2">
-                                        <Calendar size={14} className="text-[#C8102E]" />
+                                        <Calendar size={14} className="text-primary" />
                                         <span>{new Date(event.date).toLocaleDateString('tr-TR')} · {event.time}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <MapPin size={14} className="text-[#C8102E]" />
+                                        <MapPin size={14} className="text-primary" />
                                         <span>{event.location}</span>
                                     </div>
                                 </div>

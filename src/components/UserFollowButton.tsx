@@ -90,7 +90,7 @@ export default function UserFollowButton({
       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all disabled:opacity-50 ${
         isFollowing
           ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-700'
-          : 'bg-[#C8102E] text-white hover:bg-[#A00D25]'
+          : 'bg-primary text-white hover:bg-primary-hover'
       }`}
     >
       {isFollowing ? (
