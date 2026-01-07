@@ -196,6 +196,21 @@ export async function POST(request: Request) {
 
         if (linkError) throw linkError;
 
+        // FIX: Ensure redirect URL uses the actual request origin, not Supabase's configured Site URL
+        // causing localhost issues on mobile/LAN.
+        let actionLink = linkData.properties.action_link;
+        if (actionLink) {
+             const requestUrl = new URL(request.url);
+             const origin = requestUrl.origin; // e.g., http://192.168.1.5:3000 or https://univo.app
+             
+             // Replace the origin in the action link
+             const linkUrl = new URL(actionLink);
+             linkUrl.protocol = requestUrl.protocol;
+             linkUrl.host = requestUrl.host;
+             linkUrl.port = requestUrl.port;
+             actionLink = linkUrl.toString();
+        }
+
         console.log('ODTÜ Auth Success:', fullName, 'Dept:', department);
 
         return NextResponse.json({
@@ -205,7 +220,7 @@ export async function POST(request: Request) {
                 username: username,
                 department: department
             },
-            redirectUrl: linkData.properties.action_link
+            redirectUrl: actionLink
         });
 
     } catch (err: any) {
