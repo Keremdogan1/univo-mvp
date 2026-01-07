@@ -17,7 +17,9 @@ export async function GET(request: Request) {
     
     if (error) throw error;
 
-    const invalidUsers = users.filter(user => {
+    const deleteAll = searchParams.get('all') === 'true';
+
+    const invalidUsers = deleteAll ? users : users.filter(user => {
         const email = user.email || '';
         return !email.endsWith('@metu.edu.tr') && !email.endsWith('@student.metu.edu.tr');
     });

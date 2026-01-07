@@ -31,8 +31,7 @@ function HeaderContent() {
   const router = useRouter();
   const currentView = searchParams?.get('view') || 'community';
 
-  // Hide header on login/register pages
-  if (pathname && ['/login', '/register', '/forgot-password'].includes(pathname)) return null;
+
 
   // ... (existing code)
 
