@@ -63,6 +63,12 @@ p {
   --primary-hover-rgb: 160 13 37; /* #A00D25 */
   --primary-light-rgb: 232 29 62; /* #E81D3E */
   --primary-dark-rgb: 138 11 32;  /* #8a0b20 */
+
+  /* Derived variables for compatibility */
+  --primary-color: rgb(var(--primary-rgb));
+  --primary-color-hover: rgb(var(--primary-hover-rgb));
+  --primary-color-light: rgb(var(--primary-light-rgb));
+  --primary-color-dark: rgb(var(--primary-dark-rgb));
 }
 
 :root[data-theme-color="blue"] {
