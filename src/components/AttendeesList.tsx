@@ -112,6 +112,7 @@ export default function AttendeesList({ eventId }: AttendeesListProps) {
           >
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2 bg-primary"
+              style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
             >
               {attendee.profiles?.full_name?.charAt(0).toUpperCase() || 'U'}
             </div>

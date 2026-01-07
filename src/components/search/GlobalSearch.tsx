@@ -169,7 +169,10 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                                     onClick={() => handleSelect(`/profile/${user.id}`)}
                                     className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-500 dark:hover:border-purple-500 hover:shadow-sm transition-all text-left group"
                                 >
-                                    <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border border-neutral-200 dark:border-neutral-700 ${user.avatar_url ? 'bg-neutral-100' : 'bg-primary text-white'}`}>
+                                    <div 
+                                        className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border border-neutral-200 dark:border-neutral-700 ${user.avatar_url ? 'bg-neutral-100' : 'bg-primary text-white'}`}
+                                        style={!user.avatar_url ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
+                                    >
                                         {user.avatar_url ? (
                                             <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
                                         ) : (

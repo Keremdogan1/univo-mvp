@@ -32,6 +32,19 @@ export default function RootLayout({
                 } else {
                   document.documentElement.classList.remove('dark')
                 }
+                
+                // Defensive cleanup for rogue extension/overlay
+                const observer = new MutationObserver(() => {
+                    const rogue = document.getElementById('preact-border-shadow-host');
+                    if (rogue) rogue.remove();
+                });
+                observer.observe(document.documentElement, { childList: true, subtree: true });
+                
+                // Immediate check
+                window.addEventListener('load', () => {
+                    const rogue = document.getElementById('preact-border-shadow-host');
+                    if (rogue) rogue.remove();
+                });
               } catch (_) {}
             `,
           }}

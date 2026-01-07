@@ -70,7 +70,10 @@ export default function AnnouncementComments({ announcementId }: { announcementI
                                     className="w-8 h-8 rounded-full border border-neutral-200 mt-1 object-cover"
                                 />
                             ) : (
-                                <div className="w-8 h-8 rounded-full border border-neutral-200 mt-1 bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                <div 
+                                    className="w-8 h-8 rounded-full border border-neutral-200 mt-1 bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0"
+                                    style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                >
                                     {(comment.profiles?.full_name || 'U').charAt(0)}
                                 </div>
                             )}
