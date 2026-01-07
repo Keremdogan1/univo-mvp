@@ -1,342 +1,189 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import { METU_DEPARTMENTS, METU_CLASSES } from '@/lib/constants';
-import MetuLoginModal from '@/components/auth/MetuLoginModal';
-import { GraduationCap, ArrowRight, User, Mail, School, BookOpen } from 'lucide-react';
+import { Eye, EyeOff, GraduationCap, AlertCircle, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [showMetuModal, setShowMetuModal] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: '',
-    department: '',
-    studentId: '',
-    classYear: '',
-  });
-  
-  // State to track if ODTÜ Verified
-  const [isMetuVerified, setIsMetuVerified] = useState(false);
-  
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showManualForm, setShowManualForm] = useState(false);
+    const router = useRouter();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-     if (typeof window !== 'undefined') {
-        const temp = sessionStorage.getItem('odtu_temp_auth');
-        if (temp) {
-            try {
-                const data = JSON.parse(temp);
-                handleMetuSuccess(data);
-                sessionStorage.removeItem('odtu_temp_auth');
-            } catch(e) { console.error(e) }
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+
+        if (!acceptedTerms) {
+            setError('Devam etmek için aydınlatma metnini onaylamalısınız.');
+            return;
         }
-    }
-  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+        setIsLoading(true);
 
-  const handleMetuSuccess = (studentInfo: any) => {
-    // Auto-fill form with scraped data
-    setFormData(prev => ({
-        ...prev,
-        fullName: studentInfo.fullName,
-        email: `${studentInfo.username}@metu.edu.tr`,
-        studentId: studentInfo.username.replace('e', ''), // Attempt to parse ID
-        // Try to infer class year from ID if possible (e.g. 23xxxxx -> 3. Sınıf approx)
-        classYear: '', 
-        department: '', // Scraping dept is hard, left empty for now or user fills
-    }));
-    setIsMetuVerified(true);
-    setShowManualForm(true); // Reveal form to set password
-  };
+        try {
+            // Re-use the SAME auth endpoint. It handles both Login and Registration (Auto-create).
+            const res = await fetch('/api/auth/metu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+            const data = await res.json();
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Şifreler eşleşmiyor');
-      return;
-    }
+            if (!res.ok) {
+                throw new Error(data.error || 'Kayıt işlemi başarısız.');
+            }
 
-    if (formData.password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır');
-      return;
-    }
+            toast.success(`Aramıza hoş geldin, ${data.studentInfo.fullName}!`);
 
-    if (!formData.email.endsWith('@metu.edu.tr') && !formData.email.endsWith('@student.metu.edu.tr')) {
-      setError('Sadece @metu.edu.tr veya @student.metu.edu.tr uzantılı e-posta adresleri kabul edilmektedir.');
-      return;
-    }
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            } else {
+                 router.push('/dashboard');
+            }
 
-    setLoading(true);
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
+            setIsLoading(false);
+        }
+    };
 
-    try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          },
-        },
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Update profile with additional info
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            full_name: formData.fullName,
-            department: formData.department || null,
-            student_id: formData.studentId || null,
-            class_year: formData.classYear || null,
-            is_metu_verified: isMetuVerified // Assuming we add this field later
-          })
-          .eq('id', authData.user.id);
-
-        if (profileError) throw profileError;
-      }
-
-      // Redirect based on whether verification is required
-      if (authData.session) {
-        // Confirmation is disabled, user is automatically logged in
-        router.push('/');
-      } else {
-        // Confirmation is enabled, user needs to verify email
-        router.push('/verify');
-      }
-    } catch (error: any) {
-      setError(error.message || 'Kayıt sırasında bir hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center px-4 py-12 transition-colors">
-      <div className="max-w-md w-full">
-        
-        {/* Metu Modal */}
-        <MetuLoginModal 
-            isOpen={showMetuModal} 
-            onClose={() => setShowMetuModal(false)}
-            onSuccess={handleMetuSuccess}
-        />
-
-        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 transition-colors relative overflow-hidden">
-          
-          {/* Header */}
-          <div className="text-center mb-8 relative z-10">
-            <h1 className="text-3xl font-black font-serif mb-2 dark:text-white uppercase tracking-tight">Univo'ya Katıl</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">ODTÜ kimliğinle saniyeler içinde başla.</p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 text-sm font-bold">{error}</p>
-            </div>
-          )}
-
-          {/* ODTÜ Connect Button (Primary) */}
-          {!isMetuVerified && !showManualForm && (
-              <div className="space-y-6">
-                 <button 
-                    onClick={() => setShowMetuModal(true)}
-                    className="w-full relative group overflow-hidden bg-[var(--primary-color)] text-white p-6 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all border-2 border-black dark:border-white"
-                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-20 transform group-hover:scale-110 transition-transform">
-                        <GraduationCap size={80} />
-                    </div>
-                    <div className="relative z-10 text-left">
-                        <span className="block text-xs font-black uppercase tracking-wider opacity-90 mb-1">ÖNERİLEN</span>
-                        <h3 className="text-2xl font-black font-serif uppercase leading-none mb-2">ODTÜ İle Bağlan</h3>
-                        <p className="text-sm font-medium opacity-90 leading-tight">
-                            Profilin otomatik oluşturulsun, rozetini kap, form doldurma derdinden kurtul.
+    return (
+        <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-neutral-900 w-full max-w-md border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] animate-in fade-in zoom-in duration-300">
+                
+                {/* Header - Different Color for Register? Maybe Green or Blue? Or stick to Primary (Red)? */}
+                {/* Sticking to Primary for brand consistency, but changing Title */}
+                <div className="bg-[var(--primary-color)] text-white p-6 relative overflow-hidden">
+                    <div className="relative z-10 text-center">
+                        <div className="w-20 h-20 mx-auto mb-2 flex items-center justify-center">
+                            <GraduationCap size={72} className="text-white drop-shadow-md" />
+                        </div>
+                        <h2 className="text-2xl font-bold uppercase tracking-tight text-white">Univo'ya Katıl</h2>
+                        <p className="text-white/90 text-sm mt-2 font-medium">
+                            ODTÜ kimliğinle tek tıkla hesabını oluştur.
                         </p>
                     </div>
-                    <div className="absolute bottom-4 right-4 bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                        <ArrowRight size={20} />
-                    </div>
-                 </button>
+                </div>
 
-                 <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-neutral-300 dark:border-neutral-700"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white dark:bg-neutral-900 text-neutral-500">veya</span>
-                    </div>
-                 </div>
+                {/* Body */}
+                <div className="p-8">
+                    <form onSubmit={handleRegister} className="space-y-5">
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 text-sm font-bold flex items-center gap-2 border border-red-200 dark:border-red-800 rounded">
+                                <AlertCircle size={16} className="shrink-0" />
+                                {error}
+                            </div>
+                        )}
 
-                 <button 
-                    onClick={() => setShowManualForm(true)}
-                    className="w-full py-3 text-neutral-500 font-bold hover:text-neutral-800 dark:hover:text-neutral-300 transition-colors text-sm"
-                 >
-                    Manuel Olarak Kayıt Ol
-                 </button>
-
-                 <div className="text-center text-xs text-neutral-400 mt-4">
-                    Zaten hesabın var mı? <Link href="/login" className="font-bold text-primary hover:underline">Giriş Yap</Link>
-                 </div>
-              </div>
-          )}
-
-          {/* Registration Form (Hidden initially or shown after verify) */}
-          {(showManualForm || isMetuVerified) && (
-            <form onSubmit={handleRegister} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                
-               {isMetuVerified && (
-                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg mb-6 flex items-center gap-3">
-                       <div className="bg-green-100 dark:bg-green-800 p-2 rounded-full shrink-0">
-                           <GraduationCap size={20} className="text-green-700 dark:text-green-300" />
-                       </div>
-                       <div>
-                           <h4 className="font-bold text-green-800 dark:text-green-300 text-sm">ODTÜ Hesabı Doğrulandı</h4>
-                           <p className="text-xs text-green-600 dark:text-green-400">Bilgilerin otomatik dolduruldu. Sadece şifre belirle.</p>
-                       </div>
-                   </div>
-               )}
-
-              <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="text-xs font-bold uppercase text-neutral-500 mb-1 block">Ad Soyad</label>
-                    <div className="relative">
-                        <input
-                            name="fullName"
-                            type="text"
-                            value={formData.fullName}
-                            onChange={handleChange}
-                            required
-                            disabled={isMetuVerified}
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors font-bold disabled:opacity-70"
-                            placeholder="Ad Soyad"
-                        />
-                        <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    </div>
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="text-xs font-bold uppercase text-neutral-500 mb-1 block">E-Posta</label>
-                    <div className="relative">
-                        <input
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            disabled={isMetuVerified}
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors font-bold disabled:opacity-70"
-                            placeholder="e123456@metu.edu.tr"
-                        />
-                        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    </div>
-                  </div>
-
-                  {!isMetuVerified && (
-                      <>
                         <div>
-                            <label className="text-xs font-bold uppercase text-neutral-500 mb-1 block">Sınıf</label>
+                            <label className="block text-xs font-black uppercase text-neutral-500 mb-1.5 ml-1">Kullanıcı Adı (NetID)</label>
                             <div className="relative">
-                                <select
-                                    name="classYear"
-                                    value={formData.classYear}
-                                    onChange={handleChange}
+                                <input 
+                                    type="text"
                                     required
-                                    className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors font-bold appearance-none"
-                                >
-                                    <option value="">Seçiniz</option>
-                                    {METU_CLASSES.map(cls => <option key={cls} value={cls}>{cls}</option>)}
-                                </select>
-                                <School size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                    placeholder="e123456"
+                                    className="w-full p-3 pl-4 pr-32 border-2 border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 font-mono text-lg focus:border-primary focus:outline-none dark:text-white transition-colors rounded-lg"
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold pointer-events-none text-sm select-none">@metu.edu.tr</span>
                             </div>
                         </div>
+
                         <div>
-                             <label className="text-xs font-bold uppercase text-neutral-500 mb-1 block">Bölüm</label>
-                             <div className="relative">
-                                <select
-                                    name="department"
-                                    value={formData.department}
-                                    onChange={handleChange}
+                            <label className="block text-xs font-black uppercase text-neutral-500 mb-1.5 ml-1">Şifre</label>
+                            <div className="relative">
+                                <input 
+                                    type={showPassword ? "text" : "password"}
                                     required
-                                    className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors font-bold appearance-none"
+                                    placeholder="ODTÜ Şifreniz"
+                                    className="w-full p-3 pl-10 pr-12 border-2 border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 font-mono text-lg focus:border-primary focus:outline-none dark:text-white transition-colors rounded-lg"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                />
+                                <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
                                 >
-                                    <option value="">Seçiniz</option>
-                                    {METU_DEPARTMENTS.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                                </select>
-                                <BookOpen size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                         </div>
-                      </>
-                  )}
-              </div>
 
-              <div className="pt-2">
-                <label className="text-xs font-bold uppercase text-neutral-500 mb-1 block">{isMetuVerified ? 'Univo Şifreni Belirle' : 'Şifre'}</label>
-                <input
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border-2 border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors mb-3"
-                    placeholder="En az 6 karakter"
-                />
-                <input
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-white dark:bg-neutral-900 border-2 border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors"
-                    placeholder="Şifreyi Tekrarla"
-                />
-              </div>
+                        {/* Terms */}
+                        <label className="flex items-start gap-3 p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors select-none group">
+                            <div 
+                                className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${acceptedTerms ? 'text-white' : 'border-neutral-300 dark:border-neutral-600 group-hover:border-neutral-400'}`}
+                                style={acceptedTerms ? { backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)' } : {}}
+                            >
+                                {acceptedTerms && <CheckCircle size={14} className="text-white" />}
+                            </div>
+                            <input 
+                                type="checkbox" 
+                                className="sr-only" 
+                                checked={acceptedTerms} 
+                                onChange={e => setAcceptedTerms(e.target.checked)} 
+                            />
+                            <span className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                                Kişisel verilerimin işlenmesini ve ODTÜ kimlik doğrulama sisteminin kullanılmasını kabul ediyorum.
+                            </span>
+                        </label>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-black dark:bg-white text-white dark:text-black font-black uppercase tracking-wide py-4 rounded-lg hover:opacity-90 transition-opacity mt-6 shadow-md"
-              >
-                {loading ? 'Kayıt Yapılıyor...' : 'Kaydı Tamamla'}
-              </button>
-                
-              {!isMetuVerified && (
-                  <button 
-                    type="button"
-                    onClick={() => setShowManualForm(false)}
-                    className="w-full text-center text-xs text-neutral-400 font-bold hover:text-neutral-600 mt-4"
-                  >
-                      ← Geri Dön
-                  </button>
-              )}
+                        <button 
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-4 bg-[var(--primary-color)] text-white font-black text-lg uppercase tracking-wide rounded-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-md flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Hesap Oluşturuluyor...
+                                </>
+                            ) : (
+                                <>
+                                    Kayıt Ol ve Bağlan
+                                </>
+                            )}
+                        </button>
 
-            </form>
-          )}
+                         {/* Login Link */}
+                         <div className="text-center text-sm font-medium text-neutral-500 mt-4">
+                            Zaten hesabın var mı? <Link href="/login" className="text-black dark:text-white font-bold hover:underline underline-offset-2">Giriş Yap</Link>
+                        </div>
 
-          {/* Decorative Elements */}
-          <div className="absolute top-0 left-0 w-full h-2 bg-[var(--primary-color)]"></div>
-
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
+}
+
+function LockIcon({ className, size }: { className?: string, size?: number }) {
+    return (
+        <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width={size} 
+            height={size} 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className={className}
+        >
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+    )
 }
