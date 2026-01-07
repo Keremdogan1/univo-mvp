@@ -520,7 +520,26 @@ export default function OfficialView() {
             <div className="grid gap-6">
                 {displayedItems.length === 0 ? (
                     <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-900 border-2 border-dashed border-neutral-200 dark:border-neutral-800 transition-colors">
-                        <p className="text-neutral-400 dark:text-neutral-500 font-bold uppercase">Bu listede içerik bulunmuyor.</p>
+                        {/* Login prompt for protected tabs */}
+                        {!user && (activeTab === 'emails' || activeTab === 'odtuclass') ? (
+                            <div className="space-y-3">
+                                <Lock size={32} className="mx-auto text-neutral-300 dark:text-neutral-600" />
+                                <p className="text-neutral-600 dark:text-neutral-400 font-medium max-w-xs mx-auto">
+                                    {activeTab === 'emails' 
+                                        ? 'ODTÜ e-posta hesabınızı bağlayarak kütüphane, öğrenci işleri ve bölüm duyurularını buradan takip edin.'
+                                        : 'ODTÜClass derslerinizi ve ödevlerinizi takip etmek için giriş yapın.'
+                                    }
+                                </p>
+                                <a 
+                                    href="/login"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary-color,#C8102E)] text-white font-bold text-sm uppercase rounded hover:opacity-90 transition-opacity"
+                                >
+                                    Giriş Yap
+                                </a>
+                            </div>
+                        ) : (
+                            <p className="text-neutral-400 dark:text-neutral-500 font-bold uppercase">Bu listede içerik bulunmuyor.</p>
+                        )}
                     </div>
                 ) : (
                     displayedItems.map((item: any, index: number) => {
