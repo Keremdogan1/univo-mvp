@@ -12,8 +12,8 @@ export default {
       colors: {
         primary: 'var(--primary-color)',
         'primary-hover': 'var(--primary-color-hover)',
-        'primary-dark': 'rgb(160, 13, 37)', // Keep as fallback or update if needed
-        'primary-light': 'rgb(230, 57, 70)',
+        'primary-dark': 'var(--primary-color-dark)',
+        'primary-light': 'var(--primary-color-light)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

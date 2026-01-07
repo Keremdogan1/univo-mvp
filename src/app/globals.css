@@ -60,26 +60,36 @@ p {
 :root {
   --primary-color: #C8102E;
   --primary-color-hover: #A00D25;
+  --primary-color-light: #E81D3E;
+  --primary-color-dark: #8a0b20;
 }
 
 :root[data-theme-color="blue"] {
   --primary-color: #3b82f6;
   --primary-color-hover: #2563eb;
+  --primary-color-light: #60a5fa;
+  --primary-color-dark: #1e40af;
 }
 
 :root[data-theme-color="green"] {
   --primary-color: #22c55e;
   --primary-color-hover: #16a34a;
+  --primary-color-light: #4ade80;
+  --primary-color-dark: #15803d;
 }
 
 :root[data-theme-color="purple"] {
   --primary-color: #a855f7;
   --primary-color-hover: #9333ea;
+  --primary-color-light: #c084fc;
+  --primary-color-dark: #7e22ce;
 }
 
 :root[data-theme-color="orange"] {
   --primary-color: #f97316;
   --primary-color-hover: #ea580c;
+  --primary-color-light: #fb923c;
+  --primary-color-dark: #c2410c;
 }
 
 a {
