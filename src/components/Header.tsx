@@ -199,38 +199,43 @@ function HeaderContent() {
       </header>
 
       {/* Mobile Bottom Navigation - Moved outside header to prevent transform issues */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 z-[9999] px-6 pr-8 py-3 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <ul className="flex justify-between items-center">
-          {navItems.map((item) => {
-            const isActive = currentView === item.id;
-            return (
-              <li key={item.id}>
+      {/* Mobile Bottom Navigation - Universal Design */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center h-16 w-full max-w-md mx-auto px-2">
+          <ul className="grid grid-cols-4 w-full h-full">
+            {navItems.map((item) => {
+              const isActive = currentView === item.id;
+              return (
+                <li key={item.id} className="flex justify-center items-center h-full">
+                  <Link
+                    href={item.href}
+                    className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 active:scale-95 ${isActive ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
+                      }`}
+                  >
+                    <item.icon size={22} className={`${isActive ? 'fill-current' : ''} transition-transform duration-300 ${isActive ? '-translate-y-0.5' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+                    <span className={`text-[10px] font-bold uppercase tracking-tight text-center leading-none max-w-[80px] transition-all duration-300 ${isActive ? 'scale-105' : ''}`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+
+            {/* Dashboard Link */}
+            {user && canAccessDashboard && (
+              <li className="flex justify-center items-center h-full">
                 <Link
-                  href={item.href}
-                  className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
+                  href="/dashboard"
+                  className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 active:scale-95 ${pathname?.startsWith('/dashboard') ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
                     }`}
                 >
-                  <item.icon size={24} className={isActive ? 'fill-current' : ''} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-center leading-none max-w-[80px]">{item.label}</span>
+                  <LayoutDashboard size={22} strokeWidth={pathname?.startsWith('/dashboard') ? 2.5 : 2} />
+                  <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-none">Panel</span>
                 </Link>
               </li>
-            );
-          })}
-
-          {/* Dashboard Link for Mobile Bottom Nav */}
-          {user && canAccessDashboard && (
-            <li>
-              <Link
-                href="/dashboard"
-                className={`flex flex-col items-center gap-1 transition-all duration-300 ${pathname?.startsWith('/dashboard') ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
-                  }`}
-              >
-                <LayoutDashboard size={24} strokeWidth={pathname?.startsWith('/dashboard') ? 2.5 : 2} />
-                <span className="text-[10px] font-bold uppercase tracking-wide">Panel</span>
-              </Link>
-            </li>
-          )}
-        </ul>
+            )}
+          </ul>
+        </div>
       </nav>
     </>
   );

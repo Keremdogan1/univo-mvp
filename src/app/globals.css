@@ -17,6 +17,10 @@ html {
   overscroll-behavior-y: none;
 }
 
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 html.dark body {
   background: #0a0a0a;
   color: #ededed;
