@@ -346,9 +346,9 @@ export default function OfficialView() {
       return scoreB - scoreA;
   });
 
-  // ODTUClass Data (Real or Mock)
+  // ODTUClass Data (Real or Mock) - Only show if user is logged in
   const realCourses = user?.user_metadata?.odtu_courses;
-  const odtuClassData = (realCourses && realCourses.length > 0) ? realCourses.map((c: any) => ({
+  const odtuClassData = !user ? [] : ((realCourses && realCourses.length > 0) ? realCourses.map((c: any) => ({
       id: `oc-${c.url}`,
       title: c.name,
       source: 'ODTÜClass',
@@ -388,7 +388,7 @@ export default function OfficialView() {
         summary: 'Bu haftaki laboratuvar dersi online yapılacaktır. Zoom linki ders sayfasında paylaşılmıştır.',
         link: 'https://odtuclass2025f.metu.edu.tr/my/'
     }
-  ];
+  ]);
 
   // Filtered Lists
   // GÜNDEM: Unread Items AND NOT Emails (Announcements Only) AND Last 7 Days
@@ -397,7 +397,8 @@ export default function OfficialView() {
     if (blockedSources.includes(item.source)) return false;
 
     if (activeTab === 'agenda') return (item.type === 'announcement' || item.type === 'event');
-    if (activeTab === 'emails') return item.type === 'email';
+    // Emails tab: only show emails if user is logged in
+    if (activeTab === 'emails') return user && item.type === 'email';
     if (activeTab === 'odtuclass') return false; // Handled separately
     if (activeTab === 'starred') return starredIds.includes(String(item.id));
     if (activeTab === 'history') return readIds.includes(String(item.id));
@@ -461,7 +462,7 @@ export default function OfficialView() {
             <div className="flex border-b-2 border-neutral-200 dark:border-neutral-800 mb-6 gap-4 md:gap-8 relative overflow-x-auto no-scrollbar scroll-smooth">
                 {[
                     { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="mb-0.5"/> },
-                    { id: 'emails', label: 'E-POSTALAR', count: emails.filter(n => !readIds.includes(String(n.id))).length, icon: <Mail size={14} className="mb-0.5"/> },
+                    { id: 'emails', label: 'E-POSTALAR', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="mb-0.5"/> },
                     { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="mb-0.5"/> },
                     { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="mb-0.5"/> },
                     { id: 'history', label: '', icon: <Trash2 size={16} />, count: readIds.length }
@@ -520,7 +521,8 @@ export default function OfficialView() {
                                 </p>
                                 <a 
                                     href="/login"
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary-color,#C8102E)] text-white font-bold text-sm uppercase rounded hover:opacity-90 transition-opacity"
+                                    className="inline-flex items-center gap-2 px-4 py-2 font-bold text-sm uppercase rounded hover:opacity-90 transition-opacity"
+                                    style={{ backgroundColor: 'var(--primary-color, #C8102E)', color: 'white' }}
                                 >
                                     Giriş Yap
                                 </a>

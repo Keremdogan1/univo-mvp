@@ -188,10 +188,14 @@ export default function LoginPage() {
                     
                     <div className="flex items-center gap-4">
                         <div 
-                            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0"
+                            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 overflow-hidden"
                             style={{ backgroundColor: selectedUni?.color || 'var(--primary-color)' }}
                         >
-                            {selectedUni?.name.charAt(0) || 'U'}
+                            {selectedUni?.logo ? (
+                                <img src={selectedUni.logo} alt={selectedUni.name} className="w-full h-full object-cover" />
+                            ) : (
+                                selectedUni?.name.charAt(0) || 'U'
+                            )}
                         </div>
                         <div>
                             <h2 className="text-xl font-bold font-serif text-neutral-900 dark:text-white">{selectedUni?.name} ile Giriş</h2>
