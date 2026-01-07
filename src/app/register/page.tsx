@@ -333,7 +333,7 @@ export default function RegisterPage() {
           )}
 
           {/* Decorative Elements */}
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--primary-color)] via-orange-500 to-yellow-500"></div>
+          <div className="absolute top-0 left-0 w-full h-2 bg-[var(--primary-color)]"></div>
 
         </div>
       </div>

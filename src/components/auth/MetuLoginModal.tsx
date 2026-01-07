@@ -82,7 +82,7 @@ export default function MetuLoginModal({ isOpen, onClose, onSuccess }: MetuLogin
                         <div className="w-20 h-20 mx-auto mb-2 flex items-center justify-center">
                             <GraduationCap size={72} className="text-white drop-shadow-md" />
                         </div>
-                        <h2 className="text-2xl font-black font-serif uppercase tracking-tight">ODTÜ İle Bağlan</h2>
+                        <h2 className="text-2xl font-bold uppercase tracking-tight text-white">ODTÜ İle Bağlan</h2>
                         <p className="text-white/90 text-sm mt-2 font-medium">
                             Tek tıkla profilini oluştur ve doğrulanmış hesap rozetini kap.
                         </p>
