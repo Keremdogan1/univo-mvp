@@ -3,7 +3,7 @@ import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
   try {
@@ -106,6 +106,7 @@ export async function POST(request: Request) {
         // --- 3. UNIVO AUTHENTICATION (Proxy Strategy) ---
         
         const eduEmail = `${username}@metu.edu.tr`;
+        const supabaseAdmin = getSupabaseAdmin();
         
         // A. Check if user already exists
         const { data: { users }, error: fetchError } = await supabaseAdmin.auth.admin.listUsers();
