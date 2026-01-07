@@ -346,8 +346,18 @@ export default function OfficialView() {
       return scoreB - scoreA;
   });
 
-  // Mock ODTUClass Data
-  const odtuClassData = [
+  // ODTUClass Data (Real or Mock)
+  const realCourses = user?.user_metadata?.odtu_courses;
+  const odtuClassData = (realCourses && realCourses.length > 0) ? realCourses.map((c: any) => ({
+      id: `oc-${c.url}`,
+      title: c.name,
+      source: 'ODTÜClass',
+      type: 'grade', // Use 'grade' type styling (Violet) for courses
+      course: c.name.split(' ')[0], // Heuristic for short code
+      date: 'Güz 2025',
+      summary: 'Ders sayfasına gitmek için tıklayınız.',
+      link: c.url
+  })) : [
     {
         id: 'oc1',
         title: 'PHYS105 - Midterm 2 Sonuçları',

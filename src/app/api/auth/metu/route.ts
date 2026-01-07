@@ -78,8 +78,9 @@ export async function POST(request: Request) {
         let fullName = $dash('.usertext').text() || $dash('.user-name').text() || $dash('#action-menu-toggle-1 span.userbutton span.usertext').text();
         if (fullName) fullName = fullName.replace('You are logged in as', '').trim();
         
-        // --- ENHANCED SCRAPING: Get Department ---
+        // --- ENHANCED SCRAPING: Get Department & Courses ---
         let department = '';
+        let courses: { name: string, url: string }[] = [];
         try {
             // 1. Find Profile URL from Dashboard
             // Look for any link containing 'user/profile.php'
@@ -109,9 +110,21 @@ export async function POST(request: Request) {
                 }
                 
                 console.log('Scraped Department:', department);
+
+                // 3. Scrape Enrolled Courses
+                // Look for links to courses: /course/view.php?id=XYZ
+                $prof('a[href*="/course/view.php?id="]').each((_, el) => {
+                    const url = $prof(el).attr('href') || '';
+                    const name = $prof(el).text().trim();
+                    // Basic filtering to avoid duplicates or generic links
+                    if (name && url && !courses.some(c => c.url === url)) {
+                        courses.push({ name, url });
+                    }
+                });
+                console.log('Scraped Courses:', courses.length);
             }
         } catch (scrapeErr) {
-            console.warn('Could not scrape department:', scrapeErr);
+            console.warn('Could not scrape department or courses:', scrapeErr);
         }
 
         // --- 3. UNIVO AUTHENTICATION (Proxy Strategy) ---
@@ -136,7 +149,8 @@ export async function POST(request: Request) {
                     full_name: fullName || username,
                     is_metu_verified: true,
                     student_username: username,
-                    department: department
+                    department: department,
+                    odtu_courses: courses
                 }
             });
 
@@ -161,6 +175,7 @@ export async function POST(request: Request) {
              const updates: any = {};
              if (!user.user_metadata.is_metu_verified) updates.is_metu_verified = true;
              if (department && !user.user_metadata.department) updates.department = department;
+             if (courses.length > 0) updates.odtu_courses = courses;
              
              if (Object.keys(updates).length > 0) {
                  await supabaseAdmin.auth.admin.updateUserById(user.id, {
