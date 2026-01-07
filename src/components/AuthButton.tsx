@@ -60,11 +60,17 @@ export default function AuthButton({ onNavigate }: { onNavigate?: () => void }) 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
-        <img
-          src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=C8102E&color=fff&length=1`}
-          alt={profile?.full_name || 'User'}
-          className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
-        />
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt={profile.full_name || 'User'}
+            className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 font-bold text-xs border border-transparent">
+            {(profile?.full_name || 'U').charAt(0).toUpperCase()}
+          </div>
+        )}
         <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 hidden md:block">
           {profile?.full_name || 'User'}
         </span>

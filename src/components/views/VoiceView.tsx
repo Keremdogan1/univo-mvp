@@ -158,10 +158,10 @@ export default function VoiceView() {
                             e.stopPropagation();
                             setActiveTagFilter(part);
                         }}
-                        className="text-[#C8102E] font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline"
-                    >
-                        {part}
-                    </button>
+                            className="text-[#C8102E] dark:text-red-500 font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:text-black dark:hover:text-white transition-colors"
+                        >
+                            {part}
+                        </button>
                 );
             }
             return <span key={index}>{part}</span>;
@@ -734,8 +734,8 @@ export default function VoiceView() {
                                 return (
                                     <article key={voice.id} className={`bg-white dark:bg-[#0a0a0a] border-b border-neutral-200 dark:border-neutral-800 pb-6 last:border-0 px-2 relative transition-colors ${voice.is_editors_choice ? 'bg-yellow-50/50 dark:bg-yellow-900/10 -mx-2 px-4 py-4 rounded-lg border-none ring-1 ring-yellow-200 dark:ring-yellow-700/50' : ''}`}>
                                         {voice.is_editors_choice && (
-                                            <div className="absolute -top-3 right-4 bg-yellow-400 dark:bg-yellow-500 text-yellow-900 text-xs font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1 uppercase tracking-wider">
-                                                <Award size={12} />
+                                            <div className="absolute -top-3 right-4 bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 text-xs font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1 uppercase tracking-wider">
+                                                <Award size={12} className="text-yellow-900 dark:text-yellow-100" />
                                                 Editörün Seçimi
                                             </div>
                                         )}

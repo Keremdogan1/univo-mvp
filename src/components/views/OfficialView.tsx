@@ -339,9 +339,9 @@ export default function OfficialView() {
             </div>
          </div>
       </div>
-      <div className="border-b-4 border-black dark:border-neutral-700 pb-4 mb-8 text-center transition-colors">
+      <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors">
         <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Resmi Gündem</h2>
-        <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-neutral-700 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <a href="/official/archive" className="flex items-center gap-1 hover:text-[#C8102E] transition-colors font-bold uppercase hover:underline decoration-2 underline-offset-4 cursor-pointer dark:text-neutral-300 dark:hover:text-[#C8102E]">
               <Briefcase size={16} />
@@ -670,9 +670,9 @@ export default function OfficialView() {
       </div>
 
       {/* LOGIN MODAL */}
-       {showLoginModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-white/10 backdrop-blur-sm p-4">
-              <div className="bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.3)] w-full max-w-md p-8 relative animate-in fade-in zoom-in duration-200">
+        {showLoginModal && (
+           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-white/10 backdrop-blur-sm p-4">
+               <div className="bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] w-full max-w-md p-8 relative animate-in fade-in zoom-in duration-200">
                   <button 
                     onClick={() => setShowLoginModal(false)}
                     className="absolute right-4 top-4 text-black dark:text-white hover:rotate-90 transition-transform"
@@ -734,7 +734,7 @@ export default function OfficialView() {
                       <button 
                           type="submit"
                           disabled={loadingEmails}
-                          className="w-full py-4 bg-[#C8102E] text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-4 bg-[#C8102E] text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                           {loadingEmails ? (
                               <>
