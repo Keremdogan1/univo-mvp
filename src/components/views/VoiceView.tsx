@@ -256,9 +256,8 @@ export default function VoiceView() {
                 },
                 body: JSON.stringify({ type: newType })
             });
-            // We can optionally not fetchVoices() here if we trust our math, 
-            // but keeping it ensures consistency.
-            fetchVoices();
+            // We rely on optimistic update
+            // fetchVoices();
         } catch (e) {
             setVoices(oldVoices); // Revert
             console.error(e);

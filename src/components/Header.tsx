@@ -13,6 +13,13 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
 import NotificationCenter from './NotificationCenter';
 
+
+const ALLOWED_DASHBOARD_USERS = [
+  'Kerem Doğan',
+  'Berke Şen',
+  'Salih KIZILER'
+];
+
 function HeaderContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -38,6 +45,8 @@ function HeaderContent() {
     }
     checkAdmin();
   }, [user]);
+
+  const canAccessDashboard = isCommunityAdmin || (profile?.full_name && ALLOWED_DASHBOARD_USERS.includes(profile.full_name));
 
   const navItems = [
     {
@@ -116,7 +125,7 @@ function HeaderContent() {
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
 
             {/* Dashboard Link (Desktop) - Subtle */}
-            {user && (
+            {user && canAccessDashboard && (
               <Link
                 href="/dashboard"
                 className={`hidden md:flex items-center justify-center p-2.5 rounded-full transition-all ${pathname?.startsWith('/dashboard')
@@ -226,7 +235,7 @@ function HeaderContent() {
                   );
                 })}
 
-                {user && (
+                {user && canAccessDashboard && (
                   <Link
                     href="/dashboard"
                     onClick={() => setIsMenuOpen(false)}
