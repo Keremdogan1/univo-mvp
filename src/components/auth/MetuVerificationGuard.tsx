@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import MetuLoginModal from './MetuLoginModal';
 import { GraduationCap } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function MetuVerificationGuard({ children }: { children: React.ReactNode }) {
     const [isVerified, setIsVerified] = useState(true); // Default true to prevent flash
