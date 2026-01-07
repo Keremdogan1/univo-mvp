@@ -158,7 +158,8 @@ export default function VoiceView() {
                             e.stopPropagation();
                             setActiveTagFilter(part);
                         }}
-                            className="text-primary dark:text-primary-light font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:text-black dark:hover:text-white transition-colors"
+                            className="font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:opacity-80 transition-colors"
+                            style={{ color: 'var(--primary-color, #C8102E)' }}
                         >
                             {part}
                         </button>
@@ -967,7 +968,10 @@ export default function VoiceView() {
                                     Haftanın Anketi
                                 </h3>
                                 <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                    <span 
+                                        className="w-2 h-2 rounded-full animate-pulse"
+                                        style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                    ></span>
                                     Yapay Zeka
                                 </span>
                             </div>
@@ -1020,7 +1024,7 @@ export default function VoiceView() {
                         {/* Trending Topics */}
                         <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors">
                             <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
-                                <TrendingUp size={24} className="text-primary" />
+                                <TrendingUp size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
                                 Kampüste Gündem
                             </h3>
                             <div className="space-y-3">
@@ -1053,8 +1057,17 @@ export default function VoiceView() {
                                 Kampüs Nabzı
                             </h3>
                             <div className="grid grid-cols-2 gap-4 text-center">
-                                <div className="p-3 bg-primary/5 dark:bg-neutral-800 rounded border border-primary dark:border-primary/50">
-                                    <span className="block text-3xl font-black font-serif text-primary animate-pulse">
+                                <div 
+                                    className="p-3 dark:bg-neutral-800 rounded"
+                                    style={{ 
+                                        backgroundColor: 'rgba(var(--primary-rgb), 0.05)', 
+                                        border: '1px solid var(--primary-color, #C8102E)' 
+                                    }}
+                                >
+                                    <span 
+                                        className="block text-3xl font-black font-serif animate-pulse"
+                                        style={{ color: 'var(--primary-color, #C8102E)' }}
+                                    >
                                         {activeUsers}
                                     </span>
                                     <span className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
