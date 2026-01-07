@@ -200,7 +200,7 @@ function HeaderContent() {
                   className="animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards"
                   style={{ animationDelay: '50ms' }}
                 >
-                  {!user && <AuthButton onNavigate={() => setIsMenuOpen(false)} />}
+                  <AuthButton onNavigate={() => setIsMenuOpen(false)} />
                 </div>
               </div>
 
@@ -240,54 +240,7 @@ function HeaderContent() {
                   </Link>
                 )}
               </div>
-                {user && (
-                  <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-2">
-                     <div className="flex items-center gap-3 px-4 py-2">
-                        <img 
-                          src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'User')}&background=C8102E&color=fff&length=1`} 
-                          alt={profile?.full_name || 'User'} 
-                          className="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
-                        />
-                        <div>
-                           <p className="font-semibold text-neutral-900 dark:text-white">{profile?.full_name}</p>
-                           {profile?.department && (
-                             <p className="text-xs text-neutral-500 dark:text-neutral-400">{profile.department}</p>
-                           )}
-                        </div>
-                     </div>
 
-                    <Link
-                      href={`/profile/${user.id}`}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-4 p-4 rounded-xl text-neutral-600 dark:text-neutral-400 font-serif font-bold text-lg hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all"
-                    >
-                      <User size={24} />
-                      <span>Profilim</span>
-                    </Link>
-
-                    <Link
-                      href="/settings"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-4 p-4 rounded-xl text-neutral-600 dark:text-neutral-400 font-serif font-bold text-lg hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all"
-                    >
-                      <Settings size={24} />
-                      <span>Ayarlar</span>
-                    </Link>
-
-                    <button
-                      onClick={async () => {
-                        await signOut();
-                        setIsMenuOpen(false);
-                        router.push('/');
-                        router.refresh();
-                      }}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl text-neutral-600 dark:text-neutral-400 font-serif font-bold text-lg hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all text-left"
-                    >
-                      <LogOut size={24} />
-                      <span>Çıkış Yap</span>
-                    </button>
-                  </div>
-                )}
             </nav>
           </div>
         </>

@@ -71,11 +71,11 @@ export default function AuthButton({ onNavigate }: { onNavigate?: () => void }) 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-800 py-2 z-50">
+        <div className="absolute right-0 mt-2 w-56 max-w-[90vw] bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-800 py-2 z-50">
           <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
-            <p className="text-sm font-semibold text-neutral-900 dark:text-white">{profile?.full_name}</p>
+            <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">{profile?.full_name}</p>
             {profile?.department && (
-              <p className="text-xs text-neutral-500 dark:text-neutral-300 mt-1">{profile.department}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-300 mt-1 truncate">{profile.department}</p>
             )}
           </div>
 
