@@ -211,7 +211,7 @@ function HeaderContent() {
                     }`}
                 >
                   <item.icon size={24} className={isActive ? 'fill-current' : ''} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="text-[10px] font-bold uppercase tracking-wide">{item.label.split(' ')[0]}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-center leading-none max-w-[80px]">{item.label}</span>
                 </Link>
               </li>
             );
