@@ -132,7 +132,7 @@ export default function FriendListModal({ userId, isOpen, onClose, isOwnProfile 
         <div className="flex-1 overflow-y-auto p-2">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-4 border-neutral-200 border-t-[#C8102E] rounded-full animate-spin mx-auto mb-2"></div>
+              <div className="w-8 h-8 border-4 border-neutral-200 rounded-full animate-spin mx-auto mb-2" style={{ borderTopColor: 'var(--primary-color, #C8102E)' }}></div>
               <p className="text-sm text-neutral-500">Yükleniyor...</p>
             </div>
           ) : error ? (
