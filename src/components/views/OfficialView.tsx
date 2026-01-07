@@ -620,12 +620,12 @@ export default function OfficialView() {
                                             // Always use colorful active classes, regardless of isRead
                                             // Violet for ODTUClass, Blue for Events, Amber for Email, Emerald for Announcement
                                             const activeColorClass = item.type === 'email' 
-                                                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-600 text-amber-800 dark:text-amber-400' 
+                                                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-600 !text-amber-800 dark:!text-amber-400' 
                                                 : item.type === 'event'
-                                                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-800 dark:text-blue-400'
+                                                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-600 !text-blue-800 dark:!text-blue-400'
                                                     : (item.type === 'grade' || item.type === 'assignment')
-                                                        ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-600 text-violet-800 dark:text-violet-400' 
-                                                        : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 text-emerald-800 dark:text-emerald-400';
+                                                        ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-600 !text-violet-800 dark:!text-violet-400' 
+                                                        : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 !text-emerald-800 dark:!text-emerald-400';
                                             
                                             // Use hoverClass for better interactivity
                                             const hoverClass = item.type === 'email' ? 'hover:bg-amber-100 dark:hover:bg-amber-900/40' : item.type === 'event' ? 'hover:bg-blue-100 dark:hover:bg-blue-900/40' : (item.type === 'grade' || item.type === 'assignment') ? 'hover:bg-violet-100 dark:hover:bg-violet-900/40' : 'hover:bg-emerald-100 dark:hover:bg-emerald-900/40';
