@@ -97,7 +97,7 @@ export default function LoginPage() {
             const result = await signInWithMetu(username, password);
 
             if (result.success) {
-                toast.success(`Hoş geldin, ${result.studentInfo?.fullName || 'Öğrenci'}!`);
+                toast.success(`Hoş geldin, ${result.studentInfo?.fullName || 'Öğrenci'}!`, { duration: 2000 });
                 router.push('/');
                 router.refresh();
             } else {

@@ -468,7 +468,19 @@ export default function OfficialView() {
                 ].map(tab => (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
+                        onClick={() => {
+                            // Protected tabs require login
+                            if ((tab.id === 'emails' || tab.id === 'odtuclass') && !user) {
+                                toast.error('Bu bölümü görüntülemek için giriş yapmalısınız.', {
+                                    action: {
+                                        label: 'Giriş Yap',
+                                        onClick: () => window.location.href = '/login'
+                                    }
+                                });
+                                return;
+                            }
+                            setActiveTab(tab.id as any);
+                        }}
                         className={`pb-3 font-black text-sm tracking-wider uppercase transition-colors relative flex items-center gap-2 shrink-0 ${
                             activeTab === tab.id 
                             ? 'text-black dark:text-white' 
@@ -687,57 +699,6 @@ export default function OfficialView() {
 
         {/* Sidebar / Teknokent */}
         <div className="space-y-6">
-            {/* Email Integration Card - Hide if already verified via ODTÜ Proxy */}
-            {!user?.user_metadata?.is_metu_verified && (
-            <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors relative overflow-hidden">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b-2 border-black dark:border-white pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
-                    <Mail size={20} className="text-neutral-900 dark:text-white" />
-                    E-Posta Entegrasyonu
-                </h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
-                    ODTÜ e-posta hesabınızı bağlayarak kütüphane, öğrenci işleri ve bölüm duyurularını buradan takip edin.
-                </p>
-                {isEmailConnected ? (
-                    <div className="bg-neutral-50 dark:bg-neutral-800 border-2 border-black dark:border-white p-4 relative transition-colors">
-                        <div className="flex items-center gap-2 font-black uppercase text-sm mb-1 dark:text-white">
-                            <CheckCircle size={18} className="text-black dark:text-white fill-white dark:fill-black" />
-                            BAĞLANTI AKTİF
-                        </div>
-                        <div className="text-xs font-mono text-neutral-600 dark:text-neutral-400 mb-3 pl-6">
-                             {loginForm.username}@metu.edu.tr
-                        </div>
-                        <div className="pl-6 flex gap-2">
-                             <button 
-                                onClick={() => setShowLoginModal(true)}
-                                className="text-[10px] font-bold uppercase underline decoration-2 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black px-1 transition-colors dark:text-white"
-                             >
-                                YENİLE / GÜNCELLE
-                             </button>
-                             <button 
-                                onClick={() => {
-                                    setIsEmailConnected(false);
-                                    setEmails([]);
-                                    localStorage.removeItem('univo_cached_emails');
-                                    localStorage.removeItem('univo_email_user');
-                                }}
-                                className="text-[10px] font-bold uppercase text-red-600 hover:bg-red-600 hover:text-white px-1 transition-all"
-                             >
-                                BAĞLANTIYI KES
-                             </button>
-                        </div>
-                        {/* Status bar */}
-                        {loadingEmails && <span className="text-xs ml-6 text-neutral-500 dark:text-neutral-400 animate-pulse block mt-1">E-postalar güncelleniyor...</span>}
-                    </div>
-                ) : (
-                    <button 
-                        onClick={() => setShowLoginModal(true)}
-                        className="w-full py-2.5 bg-neutral-900 dark:bg-neutral-800 text-white dark:text-neutral-200 font-bold text-sm uppercase rounded hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors shadow-sm"
-                    >
-                         ODTÜ Hesabını Bağla
-                    </button>
-                )}
-            </div>
-            )}
 
              {/* Teknokent Job */}
             {news[1] && (
