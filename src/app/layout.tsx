@@ -58,7 +58,7 @@ export default function RootLayout({
           <ThemeProvider>
             <MetuVerificationGuard>
               <Header />
-              <main className="flex-1 transition-colors duration-300">
+              <main className="flex-1 bg-white dark:bg-[#0a0a0a] transition-colors duration-300 pb-20 md:pb-0">
                 <Toaster
                   position="top-center"
                   richColors

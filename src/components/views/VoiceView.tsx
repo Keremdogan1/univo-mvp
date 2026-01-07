@@ -158,11 +158,11 @@ export default function VoiceView() {
                             e.stopPropagation();
                             setActiveTagFilter(part);
                         }}
-                            className="font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:opacity-80 transition-colors"
-                            style={{ color: 'var(--primary-color, #C8102E)' }}
-                        >
-                            {part}
-                        </button>
+                        className="font-bold hover:underline cursor-pointer bg-transparent border-0 p-0 inline align-baseline hover:opacity-80 transition-colors"
+                        style={{ color: 'var(--primary-color, #C8102E)' }}
+                    >
+                        {part}
+                    </button>
                 );
             }
             return <span key={index}>{part}</span>;
@@ -613,7 +613,7 @@ export default function VoiceView() {
         <div className="container mx-auto px-4 py-8">
             {/* Newspaper Header - Sticky on mobile */}
             <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
-                <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Kampüsün Sesi</h2>
+                <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Kampüsün Sesi</h2>
                 <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
                     <span>SAYI: {issueNumber}</span>
                     <span>SERBEST KÜRSÜ</span>
@@ -746,7 +746,7 @@ export default function VoiceView() {
 
                                         <div className="flex gap-4 items-start">
                                             {/* Avatar */}
-                                            <div 
+                                            <div
                                                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold font-serif shrink-0 border border-neutral-200 dark:border-neutral-800 ${voice.is_anonymous ? 'bg-neutral-800 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300' : 'text-white bg-primary'}`}
                                                 style={!voice.is_anonymous ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
                                             >
@@ -971,7 +971,7 @@ export default function VoiceView() {
                                     Haftanın Anketi
                                 </h3>
                                 <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
-                                    <span 
+                                    <span
                                         className="w-2 h-2 rounded-full animate-pulse"
                                         style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                                     ></span>
@@ -1060,14 +1060,14 @@ export default function VoiceView() {
                                 Kampüs Nabzı
                             </h3>
                             <div className="grid grid-cols-2 gap-4 text-center">
-                                <div 
+                                <div
                                     className="p-3 dark:bg-neutral-800 rounded"
-                                    style={{ 
-                                        backgroundColor: 'rgba(var(--primary-rgb), 0.05)', 
-                                        border: '1px solid var(--primary-color, #C8102E)' 
+                                    style={{
+                                        backgroundColor: 'rgba(var(--primary-rgb), 0.05)',
+                                        border: '1px solid var(--primary-color, #C8102E)'
                                     }}
                                 >
-                                    <span 
+                                    <span
                                         className="block text-3xl font-black font-serif animate-pulse"
                                         style={{ color: 'var(--primary-color, #C8102E)' }}
                                     >
