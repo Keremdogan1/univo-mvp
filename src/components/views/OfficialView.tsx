@@ -574,8 +574,8 @@ export default function OfficialView() {
                         <article 
                             key={index} 
                             onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                            className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-3 sm:p-4 transition-all duration-300 border-2 border-black dark:border-white border-l-4 cursor-pointer relative bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] group min-w-0 overflow-hidden rounded-none
-                                ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-0' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}
+                            className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-3 sm:p-4 transition-all duration-300 border-l-4 cursor-pointer relative bg-white dark:bg-neutral-900 shadow-sm group min-w-0 overflow-hidden rounded-xl
+                                ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}
                                 ${isRead && (activeTab !== 'history' && activeTab !== 'starred') ? 'hidden' : ''} 
                                 ${isRead ? 'opacity-75 grayscale' : ''}
                             `}
@@ -747,7 +747,7 @@ export default function OfficialView() {
         {/* Sidebar */}
         <div className="space-y-6">
             {news[1] && (
-                <article className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] relative transition-colors group cursor-pointer hover:shadow-md rounded-xl">
+                <article className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative transition-colors group cursor-pointer hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] rounded-none">
                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
                         <Briefcase size={20} className="text-neutral-900 dark:text-white" />
                         Kariyer & Staj
@@ -765,7 +765,7 @@ export default function OfficialView() {
                 </article>
             )}
 
-            <div className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
+            <div className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
                 <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-2">
                     Günün Menüsü
                 </h4>
