@@ -92,7 +92,8 @@ export async function PATCH(request: Request) {
       .from('notifications')
       .update({ read: true })
       .eq('user_id', user.id)
-      .eq('read', false);
+      .eq('read', false)
+      .neq('type', 'friend_request'); // Exclude friend requests
 
     if (error) {
       console.error('Mark all read error:', error);
@@ -103,6 +104,45 @@ export async function PATCH(request: Request) {
 
   } catch (error) {
     console.error('Mark all read API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Delete all regular notifications, but KEEP friend requests
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', user.id)
+      .neq('type', 'friend_request');
+
+    if (error) {
+      console.error('Clear all error:', error);
+      return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: 'Notifications cleared' });
+
+  } catch (error) {
+    console.error('Clear all API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
