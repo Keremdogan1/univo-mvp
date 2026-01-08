@@ -118,8 +118,8 @@ export default function LoginPage() {
                     
                     {/* Header */}
                     <div className="p-8 text-center border-b border-neutral-100 dark:border-neutral-800">
-                        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                            <img src="/univo-logo-transparent.png" alt="Univo" className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 p-2">
+                            <img src="/univo-logo-transparent.png" alt="Univo" className="w-full h-full object-contain" />
                         </div>
                         <h2 className="text-2xl font-bold font-serif text-neutral-900 dark:text-white">Univo'ya Giriş</h2>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">
@@ -164,7 +164,7 @@ export default function LoginPage() {
                     </div>
                 </div>
                 
-                <p className="fixed bottom-4 text-xs text-neutral-400 dark:text-neutral-600 text-center w-full">
+                <p className="fixed bottom-4 left-0 right-0 text-xs text-neutral-400 dark:text-neutral-600 text-center z-50">
                 &copy; 2026 Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
                 </p>
             </div>
@@ -297,7 +297,7 @@ export default function LoginPage() {
                 </div>
             </div>
             
-            <p className="fixed bottom-4 text-xs text-neutral-400 dark:text-neutral-600 text-center w-full">
+            <p className="fixed bottom-4 left-0 right-0 text-xs text-neutral-400 dark:text-neutral-600 text-center z-50">
                 &copy; 2026 Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
             </p>
         </div>
