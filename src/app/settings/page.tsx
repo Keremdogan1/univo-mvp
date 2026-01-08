@@ -126,14 +126,18 @@ export default function SettingsPage() {
                         {/* Theme Mode */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                                    {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                                <div className="p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                                    {theme === 'dark' ? 
+                                        <Moon size={20} style={{ color: 'var(--primary-color)' }} /> : 
+                                        <Sun size={20} className="text-neutral-600 dark:text-neutral-400" />
+                                    }
                                 </div>
                                 <div className="font-medium text-neutral-900 dark:text-white">Karanlık Mod</div>
                             </div>
                             <button
                                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${theme === 'dark' ? 'bg-purple-600' : 'bg-neutral-200'}`}
+                                className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200 dark:bg-neutral-700"
+                                style={{ backgroundColor: theme === 'dark' ? 'var(--primary-color)' : undefined }}
                             >
                                 <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
@@ -185,7 +189,8 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 onClick={() => updatePrivacy('show_email', !privacySettings.show_email)}
-                                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${privacySettings.show_email ? 'bg-blue-600' : 'bg-neutral-200'}`}
+                                className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200"
+                                style={{ backgroundColor: privacySettings.show_email ? 'var(--primary-color)' : undefined }}
                             >
                                 <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${privacySettings.show_email ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
@@ -203,7 +208,8 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 onClick={() => updatePrivacy('show_friends', !privacySettings.show_friends)}
-                                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${privacySettings.show_friends ? 'bg-blue-600' : 'bg-neutral-200'}`}
+                                className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200"
+                                style={{ backgroundColor: privacySettings.show_friends ? 'var(--primary-color)' : undefined }}
                             >
                                 <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${privacySettings.show_friends ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
@@ -221,7 +227,8 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 onClick={() => updatePrivacy('show_activities', !privacySettings.show_activities)}
-                                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${privacySettings.show_activities ? 'bg-blue-600' : 'bg-neutral-200'}`}
+                                className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200"
+                                style={{ backgroundColor: privacySettings.show_activities ? 'var(--primary-color)' : undefined }}
                             >
                                 <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${privacySettings.show_activities ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
