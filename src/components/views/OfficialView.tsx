@@ -428,7 +428,10 @@ export default function OfficialView() {
             {/* Pinned Announcement */}
             {news[0] && (
                 <div className="border-4 border-black dark:border-white p-4 sm:p-6 bg-neutral-50 dark:bg-white/5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10">
-                     <div className="absolute -top-3 left-6 bg-primary text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20">
+                     <div 
+                        className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20"
+                        style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                      >
                         Önemli Duyuru
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2 break-words">

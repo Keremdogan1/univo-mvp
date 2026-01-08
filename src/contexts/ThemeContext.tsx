@@ -23,24 +23,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
   const [colorTheme, setColorTheme] = useState<ColorTheme>('default');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const lastSyncedRef = React.useRef<string>('');
 
-  // Initial load from localStorage and then profile
+  // Initial load from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const savedColorTheme = localStorage.getItem('colorTheme') as ColorTheme | null;
-    
-    if (savedTheme) setTheme(savedTheme);
-    if (savedColorTheme) setColorTheme(savedColorTheme);
-    
+    try {
+      const savedTheme = localStorage.getItem('theme') as Theme | null;
+      const savedColorTheme = localStorage.getItem('colorTheme') as ColorTheme | null;
+      
+      if (savedTheme) setTheme(savedTheme);
+      if (savedColorTheme) setColorTheme(savedColorTheme);
+    } catch (e) {
+      console.warn('LocalStorage not available');
+    }
     setIsInitialLoad(false);
   }, []);
 
-  // Update from profile when it loads
+  // Update from profile when it loads (only if different)
   useEffect(() => {
     if (profile && (profile as any).theme_preference) {
       const { theme: dbTheme, colorTheme: dbColorTheme } = (profile as any).theme_preference;
-      if (dbTheme) setTheme(dbTheme);
-      if (dbColorTheme) setColorTheme(dbColorTheme);
+      
+      if (dbTheme && dbTheme !== theme) {
+        setTheme(dbTheme);
+      }
+      if (dbColorTheme && dbColorTheme !== colorTheme) {
+        setColorTheme(dbColorTheme);
+      }
+      // Initialize synced ref to avoid immediate re-sync
+      lastSyncedRef.current = JSON.stringify({ theme: dbTheme, colorTheme: dbColorTheme });
     }
   }, [profile]);
 
@@ -61,13 +72,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('light', 'dark');
       root.classList.add(activeTheme);
 
-      if (theme !== 'system') {
-        localStorage.setItem('theme', theme);
-      } else {
-        localStorage.removeItem('theme');
-      }
+      try {
+        if (theme !== 'system') {
+          localStorage.setItem('theme', theme);
+        } else {
+          localStorage.removeItem('theme');
+        }
+      } catch (e) {}
 
-      // Sync to DB
+      // Sync to DB (debounced/checked)
       if (!isInitialLoad && user) {
         syncThemeToDb(theme, colorTheme);
       }
@@ -90,7 +103,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = window.document.documentElement;
     root.setAttribute('data-theme-color', colorTheme);
-    localStorage.setItem('colorTheme', colorTheme);
+    try {
+      localStorage.setItem('colorTheme', colorTheme);
+    } catch (e) {}
 
     // Sync to DB
     if (!isInitialLoad && user) {
@@ -100,6 +115,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const syncThemeToDb = async (t: Theme, ct: ColorTheme) => {
     if (!user) return;
+    
+    // Check if truly different from last sync
+    const syncKey = JSON.stringify({ theme: t, colorTheme: ct });
+    if (lastSyncedRef.current === syncKey) return;
+    
+    lastSyncedRef.current = syncKey;
+
     try {
       await supabase
         .from('profiles')
