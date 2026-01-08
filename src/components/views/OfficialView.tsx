@@ -458,11 +458,57 @@ export default function OfficialView() {
                 </div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex border-b-2 border-neutral-200 dark:border-neutral-800 mb-6 gap-4 md:gap-8 relative overflow-x-auto no-scrollbar scroll-smooth">
+            {/* Tab Navigation - Collapsible on very small screens */}
+            <div className="relative mb-6">
+                {/* Mobile Dropdown Trigger (below 525px) */}
+                <div className="sm:hidden">
+                    <button
+                        onClick={() => {
+                            const dropdown = document.getElementById('tab-dropdown');
+                            dropdown?.classList.toggle('hidden');
+                        }}
+                        className="w-full flex items-center justify-between p-3 border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-sm uppercase"
+                    >
+                        <span className="flex items-center gap-2">
+                            {activeTab === 'agenda' && <Megaphone size={14} />}
+                            {activeTab === 'emails' && <Mail size={14} />}
+                            {activeTab === 'odtuclass' && <GraduationCap size={14} />}
+                            {activeTab === 'starred' && <Star size={14} />}
+                            {activeTab === 'history' && <Trash2 size={14} />}
+                            <span className="dark:text-white">
+                                {activeTab === 'agenda' ? 'Gündem' : activeTab === 'emails' ? 'E-Postalar' : activeTab === 'odtuclass' ? 'ODTÜClass' : activeTab === 'starred' ? 'Yıldızlı' : 'Geçmiş'}
+                            </span>
+                        </span>
+                        <ChevronRight size={16} className="rotate-90 dark:text-white" />
+                    </button>
+                    <div id="tab-dropdown" className="hidden absolute top-full left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-2 border-t-0 border-neutral-200 dark:border-neutral-700 shadow-lg">
+                        {[
+                            { id: 'agenda', label: 'Gündem', icon: <Megaphone size={14} /> },
+                            { id: 'emails', label: 'E-Postalar', icon: <Mail size={14} /> },
+                            { id: 'odtuclass', label: 'ODTÜClass', icon: <GraduationCap size={14} /> },
+                            { id: 'starred', label: 'Yıldızlı', icon: <Star size={14} /> },
+                            { id: 'history', label: 'Geçmiş', icon: <Trash2 size={14} /> }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => {
+                                    setActiveTab(tab.id as any);
+                                    document.getElementById('tab-dropdown')?.classList.add('hidden');
+                                }}
+                                className={`w-full flex items-center gap-2 p-3 text-left text-sm font-bold uppercase transition-colors ${activeTab === tab.id ? 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Desktop/Tablet Tabs (525px and above) */}
+                <div className="hidden sm:flex border-b-2 border-neutral-200 dark:border-neutral-800 gap-2 md:gap-4 overflow-x-auto no-scrollbar scroll-smooth">
                 {[
                     { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="mb-0.5"/> },
-                    { id: 'emails', label: 'E-POSTALAR', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="mb-0.5"/> },
+                    { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="mb-0.5"/> },
                     { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="mb-0.5"/> },
                     { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="mb-0.5"/> },
                     { id: 'history', label: '', icon: <Trash2 size={16} />, count: readIds.length }
@@ -470,7 +516,7 @@ export default function OfficialView() {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`pb-3 font-black text-sm tracking-wider uppercase transition-colors relative flex items-center gap-2 shrink-0 ${
+                        className={`pb-3 font-black text-xs md:text-sm tracking-wider uppercase transition-colors relative flex items-center gap-1 md:gap-2 shrink-0 ${
                             activeTab === tab.id 
                             ? 'text-black dark:text-white' 
                             : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
@@ -478,7 +524,7 @@ export default function OfficialView() {
                         title={tab.id === 'history' ? 'Çöp Kutusu' : tab.label}
                     >
                         {tab.icon && tab.icon}
-                        {tab.label}
+                        <span className="hidden md:inline">{tab.label}</span>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
                             activeTab === tab.id 
                             ? 'bg-black text-white dark:bg-white dark:text-black' 
@@ -500,6 +546,7 @@ export default function OfficialView() {
                         <X size={12}/> Tümünü Sil
                     </button>
                 )}
+                </div>
             </div>
 
             {/* Featured Post (Only show on Agenda for impact, or always? Let's hide on Archive) */}

@@ -37,9 +37,10 @@ export default function AuthButton({ onNavigate }: { onNavigate?: () => void }) 
       <Link
         href="/login"
         onClick={onNavigate}
-        className="px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity !text-white bg-[var(--primary-color,#C8102E)] flex items-center gap-2"
+        className="px-3 md:px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity !text-white bg-[var(--primary-color,#C8102E)] flex items-center gap-2 text-sm md:text-base"
       >
-        <span>Üniversitenle Giriş Yap</span>
+        <span className="hidden md:inline">Üniversitenle Giriş Yap</span>
+        <span className="md:hidden">Giriş Yap</span>
       </Link>
     );
   }
