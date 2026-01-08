@@ -65,6 +65,14 @@ export async function PATCH(
         return NextResponse.json({ error: 'Failed to reject request' }, { status: 500 });
       }
 
+      // Cleanup notification for the receiver (me)
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', currentUserId)
+        .eq('actor_id', friendship.requester_id)
+        .eq('type', 'friend_request');
+
       return NextResponse.json({ message: 'Friend request rejected' });
     }
 
@@ -78,6 +86,14 @@ export async function PATCH(
       console.error('Accept error:', updateError);
       return NextResponse.json({ error: 'Failed to accept request' }, { status: 500 });
     }
+
+    // Cleanup friend_request notification for the receiver (me)
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', currentUserId)
+      .eq('actor_id', friendship.requester_id)
+      .eq('type', 'friend_request');
 
     // Get current user profile for notification
     const { data: receiverProfile } = await supabase

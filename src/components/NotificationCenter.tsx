@@ -37,17 +37,19 @@ export default function NotificationCenter() {
         .on(
           'postgres_changes',
           {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'notifications',
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            console.log('New notification received:', payload);
-            fetchNotifications(); // Refresh both list and count
+            console.log('Notification change detected:', payload.eventType);
+            fetchNotifications(); // Refresh both list and count for any change
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log(`Notification subscription status for ${user.id}:`, status);
+        });
 
       return () => {
         supabase.removeChannel(channel);
@@ -256,7 +258,7 @@ export default function NotificationCenter() {
                   <div className="flex gap-3">
                     {notification.actor && (
                       <Link href={`/profile/${notification.actor.id}`}>
-                        <div className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+                        <div className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm shrink-0 bg-[#C8102E]">
                           {notification.actor.full_name?.charAt(0) || '?'}
                         </div>
                       </Link>
