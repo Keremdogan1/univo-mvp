@@ -56,7 +56,7 @@ export default function BadgeDisplay({ badges, showTitle = true }: BadgeDisplayP
           return (
             <div 
               key={badge.id} 
-              className="group relative flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-help border border-transparent hover:border-neutral-100 dark:hover:border-neutral-700"
+              className="group relative flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-default border border-transparent hover:border-neutral-100 dark:hover:border-neutral-700"
             >
               <div 
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow-sm"

@@ -32,9 +32,9 @@ export default function CommunityView() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Newspaper Header - Sticky on mobile */}
-      <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
+      <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
         <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Topluluk Meydanı</h2>
-        <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t border-neutral-200 dark:border-neutral-800 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <span>ÖĞRENCİ BÜLTENİ</span>
           <span>{formattedDate.toUpperCase()}</span>
@@ -45,7 +45,7 @@ export default function CommunityView() {
         {/* Left Sidebar / Navigation (Category Filter) */}
         <div className="lg:col-span-1">
           <div className="">
-            <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif dark:text-white transition-colors">Kategoriler</h3>
+            <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif dark:text-white transition-colors">Kategoriler</h3>
             <CategoryFilter
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
@@ -53,8 +53,8 @@ export default function CommunityView() {
 
             <div className="mt-8">
               {/* Popular Events - Replaced TrendingWidget */}
-              <div className="border-4 border-primary dark:border-primary p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] transition-colors">
-                <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white transition-colors">
+              <div className="border border-primary dark:border-primary p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
+                <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white transition-colors">
                   <Calendar size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
                   Popüler
                 </h3>
@@ -79,7 +79,7 @@ export default function CommunityView() {
 
         {/* Main Column */}
         <div className="lg:col-span-3">
-          <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-6 flex items-center gap-2 font-serif dark:text-white transition-colors">
+          <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-6 flex items-center gap-2 font-serif dark:text-white transition-colors">
             <span className="bg-black dark:bg-white text-white dark:text-black px-2 py-1 text-sm uppercase">Güncel</span>
             Etkinlikler & Kulüpler
           </h3>

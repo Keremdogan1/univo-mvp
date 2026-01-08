@@ -265,7 +265,7 @@ function HeaderContent() {
 
 export default function Header() {
   return (
-    <Suspense fallback={<div className="h-16 bg-white dark:bg-[#0a0a0a] border-b-2 border-black dark:border-white"></div>}>
+    <Suspense fallback={<div className="h-16 bg-white dark:bg-[#0a0a0a] border-b border-neutral-200 dark:border-neutral-800"></div>}>
       <HeaderContent />
     </Suspense>
   );

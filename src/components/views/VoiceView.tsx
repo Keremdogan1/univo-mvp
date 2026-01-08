@@ -642,9 +642,9 @@ export default function VoiceView() {
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Newspaper Header - Sticky on mobile */}
-            <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
+            <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
                 <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Kampüsün Sesi</h2>
-                <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+                <div className="flex justify-between items-center text-sm font-medium border-t border-neutral-200 dark:border-neutral-800 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
                     <span>SAYI: {issueNumber}</span>
                     <span>SERBEST KÜRSÜ</span>
                     <span>{formattedDate.toUpperCase()}</span>
@@ -657,7 +657,7 @@ export default function VoiceView() {
                     {/* Weekly Poll - Moved above feed */}
 
 
-                    <div className="flex justify-between items-end border-b-2 border-black dark:border-white pb-2 mb-6">
+                    <div className="flex justify-between items-end border-b border-neutral-200 dark:border-neutral-800 pb-2 mb-6">
                         <h3 className="text-xl font-bold flex items-center gap-2 font-serif dark:text-white">
                             <MessageSquare size={24} />
                             Öğrenci Kürsüsü
@@ -701,7 +701,7 @@ export default function VoiceView() {
 
                                 {/* Autocomplete Suggestions */}
                                 {showSuggestions && (
-                                    <div className="absolute left-0 bottom-full mb-1 w-64 bg-white dark:bg-neutral-900 border-2 border-black dark:border-white shadow-lg z-[1000] max-h-48 overflow-y-auto">
+                                    <div className="absolute left-0 bottom-full mb-1 w-64 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg z-[1000] max-h-48 overflow-y-auto">
                                         <ul className="py-1">
                                             {suggestionList.map(tag => (
                                                 <li
@@ -721,7 +721,7 @@ export default function VoiceView() {
 
                                 <div className="flex justify-between items-center border-t border-neutral-200 dark:border-neutral-800 pt-3">
                                     <label className="flex items-center gap-2 cursor-pointer group">
-                                        <div className={`w-4 h-4 border transition-colors flex items-center justify-center ${isAnonymous ? 'bg-black dark:bg-white border-black dark:border-white' : 'border-neutral-400 group-hover:border-black dark:group-hover:border-white'}`}>
+                                        <div className={`w-4 h-4 border transition-colors flex items-center justify-center ${isAnonymous ? 'bg-neutral-900 dark:bg-white border-neutral-900 dark:border-white' : 'border-neutral-300 dark:border-neutral-700 group-hover:border-neutral-900 dark:group-hover:border-white'}`}>
                                             {isAnonymous && <span className="text-white dark:text-black text-[10px]">✓</span>}
                                         </div>
                                         <input
@@ -863,7 +863,7 @@ export default function VoiceView() {
                                                 {editingId === voice.id ? (
                                                     <form onSubmit={handleUpdate} className="mb-4">
                                                         <textarea
-                                                            className="w-full p-2 border border-black dark:border-white bg-white dark:bg-neutral-800 dark:text-white font-serif rounded-sm"
+                                                            className="w-full p-2 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white font-serif rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500 transition-colors"
                                                             rows={3}
                                                             value={editContent}
                                                             onChange={e => setEditContent(e.target.value)}
@@ -1019,8 +1019,8 @@ export default function VoiceView() {
                         <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:pr-2">
                             <div className="flex flex-row flex-nowrap items-start gap-0 overflow-x-auto pb-4 lg:pb-0 lg:flex-col lg:overflow-x-visible lg:gap-8 lg:pr-2 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
                                 {/* Weekly Poll */}
-                                <div className="border-4 border-black dark:border-white p-4 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center">
-                                    <div className="flex items-center justify-between border-b-2 border-black dark:border-white pb-2 mb-3">
+                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center rounded-xl">
+                                    <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-3">
                                         <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white">
                                             Haftanın Anketi
                                         </h3>
@@ -1096,8 +1096,8 @@ export default function VoiceView() {
                                 </div>
 
                                 {/* Trending Topics */}
-                                <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center">
-                                    <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
+                                <div className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center rounded-xl">
+                                    <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
                                         <TrendingUp size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
                                         Kampüste Gündem
                                     </h3>
@@ -1137,8 +1137,8 @@ export default function VoiceView() {
                                 </div>
 
 
-                                <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center">
-                                    <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
+                                <div className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors shrink-0 w-[calc(100vw-32px)] mx-4 lg:mx-0 lg:w-full snap-center rounded-xl">
+                                    <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
                                         Kampüs Nabzı
                                     </h3>
                                     <div className="grid grid-cols-2 gap-4 text-center">
@@ -1179,9 +1179,9 @@ export default function VoiceView() {
             {showVotersModal && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowVotersModal(false)} />
-                    <div className="relative w-full max-w-lg bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] overflow-hidden animate-in zoom-in duration-200">
+                    <div className="relative w-full max-w-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl dark:shadow-[0_0_30px_rgba(255,255,255,0.05)] overflow-hidden animate-in zoom-in duration-200 rounded-xl">
                         {/* Header */}
-                        <div className="flex justify-between items-center p-6 border-b-4 border-black dark:border-white bg-neutral-50 dark:bg-neutral-800">
+                        <div className="flex justify-between items-center p-6 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
                             <h3 className="text-xl font-bold font-serif uppercase tracking-tight dark:text-white flex items-center gap-2">
                                 <Users size={24} className="text-primary" />
                                 Oy Kullananlar
@@ -1239,9 +1239,10 @@ export default function VoiceView() {
                                             {voters
                                                 .filter(v => v.option_index === selectedVoterOption)
                                                 .map(voter => (
-                                                    <div 
+                                                    <Link 
                                                         key={voter.user_id}
-                                                        className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm"
+                                                        href={`/profile/${voter.user_id}`}
+                                                        className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-700 hover:border-primary transition-all cursor-pointer"
                                                     >
                                                         <div 
                                                             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black shadow-sm"
@@ -1249,10 +1250,10 @@ export default function VoiceView() {
                                                         >
                                                             {voter.display_name.charAt(0)}
                                                         </div>
-                                                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200 truncate">
+                                                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200 truncate hover:underline">
                                                             {voter.display_name.split(' ').map((word: string) => word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR')).join(' ')}
                                                         </span>
-                                                    </div>
+                                                    </Link>
                                                 ))
                                             }
                                         </div>

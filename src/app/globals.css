@@ -24,6 +24,10 @@ html {
 html.dark body {
   background: #0a0a0a;
   color: #ededed;
+  --border-soft: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-soft-dark: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 h1,

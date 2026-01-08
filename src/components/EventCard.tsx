@@ -56,9 +56,9 @@ export default function EventCard({ event, isAttending = false }: EventCardProps
       onClick={() => router.push(`/events/${event.id}`)}
       className="block h-full group relative cursor-pointer"
     >
-      <div className={`h-full flex flex-col bg-white dark:bg-neutral-900 border-2 border-black dark:border-white transition-all duration-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:border-primary dark:hover:border-primary ${isPastEvent ? 'opacity-80 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}>
+      <div className={`h-full flex flex-col bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 transition-all duration-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:border-primary dark:hover:border-primary ${isPastEvent ? 'opacity-80 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}>
         {/* Header / Category */}
-        <div className="border-b-2 border-black dark:border-white p-3 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800 transition-colors">
+        <div className="border-b-2 border-black dark:border-neutral-700 p-3 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800 transition-colors">
            <span className="font-bold font-serif uppercase text-sm tracking-wide" style={{ color: 'var(--primary-color, #C8102E)' }}>
              {event.community.category || event.category}
            </span>

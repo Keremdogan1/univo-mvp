@@ -101,15 +101,28 @@ export default function OfficialView() {
                 const data = await res.json();
                 
                 // Map raw IMAP data
-                const mappedEmails = (data.emails || []).map((msg: any) => ({
-                    id: `email-${msg.id}`,
-                    type: 'email',
-                    title: msg.subject,
-                    source: 'ODTÜ E-Posta', 
-                    date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
-                    summary: `Gönderen: ${msg.from}`,
-                    link: `https://metumail.metu.edu.tr/`
-                }));
+                const mappedEmails = (data.emails || []).map((msg: any) => {
+                    // Extract sender name from 'From' header (format: "Name <email@domain.com>")
+                    let senderName = msg.from || 'Bilinmeyen Gönderen';
+                    // Try to extract the name part before <email>
+                    const nameMatch = senderName.match(/^"?([^"<]+)"?\s*</);
+                    if (nameMatch && nameMatch[1]) {
+                        senderName = nameMatch[1].trim();
+                    } else if (senderName.includes('@')) {
+                        // If only email, use part before @
+                        senderName = senderName.split('@')[0].replace(/[<>"]/g, '');
+                    }
+                    
+                    return {
+                        id: `email-${msg.id}`,
+                        type: 'email',
+                        title: msg.subject,
+                        source: senderName, // Use sender name instead of 'ODTÜ E-Posta'
+                        date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
+                        summary: `E-posta içeriği için tıklayınız.`,
+                        link: `https://metumail.metu.edu.tr/`
+                    };
+                });
 
                 setEmails(mappedEmails);
                 setIsEmailConnected(true);
@@ -412,9 +425,9 @@ export default function OfficialView() {
   return (
     <div className="container mx-auto px-4 py-8 relative">
       {/* Newspaper Header - Sticky on mobile */}
-      <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
+      <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
         <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Resmi Gündem</h2>
-        <div className="flex justify-between items-center text-sm font-medium border-t border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t border-neutral-200 dark:border-neutral-800 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <Link 
             href="/official/archive" 
@@ -434,7 +447,7 @@ export default function OfficialView() {
             
             {/* Pinned Announcement */}
             {news[0] && (
-                <div className="border-4 border-black dark:border-white p-4 sm:p-6 bg-neutral-50 dark:bg-white/5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10">
+                <div className="border border-neutral-200 dark:border-neutral-800 p-4 sm:p-6 bg-neutral-50 dark:bg-white/5 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] relative mt-4 z-10 rounded-xl">
                      <div 
                         className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20"
                         style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
@@ -617,16 +630,23 @@ export default function OfficialView() {
 
                             <div className="flex-1 pr-32">
                                 <div className="flex items-center gap-2 mb-1">
-                                    {item.type === 'event' ? (
-                                        <Calendar size={16} className="text-blue-600"/>
-                                    ) : item.type === 'email' ? (
-                                        <Mail size={16} className="text-amber-600"/>
-                                    ) : (item.type === 'grade' || item.type === 'assignment') ? (
-                                        <GraduationCap size={16} className="text-violet-600"/>
-                                    ) : (
-                                        <Megaphone size={16} className="text-emerald-600"/>
-                                    )}
-                                    <span className={`text-xs font-bold uppercase ${item.type === 'event' ? 'text-blue-600' : item.type === 'email' ? 'text-amber-600' : (item.type === 'grade' || item.type === 'assignment') ? 'text-violet-600' : 'text-emerald-600'}`}>
+                                    <div className={`transition-colors duration-300 flex items-center justify-center ${
+                                        item.type === 'event' ? 'text-blue-600' : 
+                                        item.type === 'email' ? 'text-amber-600' : 
+                                        (item.type === 'grade' || item.type === 'assignment') ? 'text-violet-600' : 
+                                        'text-emerald-600'
+                                    }`}>
+                                        {item.type === 'event' ? (
+                                            <Calendar size={16} />
+                                        ) : item.type === 'email' ? (
+                                            <Mail size={16} />
+                                        ) : (item.type === 'grade' || item.type === 'assignment') ? (
+                                            <GraduationCap size={16} />
+                                        ) : (
+                                            <Megaphone size={16} />
+                                        )}
+                                    </div>
+                                    <span className={`text-xs font-bold uppercase transition-colors duration-300 ${item.type === 'event' ? 'text-blue-600' : item.type === 'email' ? 'text-amber-600' : (item.type === 'grade' || item.type === 'assignment') ? 'text-violet-600' : 'text-emerald-600'}`}>
                                         {item.type === 'event' ? 'Etkinlik' : item.type === 'email' ? 'E-POSTA' : (item.type === 'grade' || item.type === 'assignment') ? item.course : 'Duyuru'}
                                     </span>
                                     <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{item.source}</span>
@@ -727,8 +747,8 @@ export default function OfficialView() {
         {/* Sidebar */}
         <div className="space-y-6">
             {news[1] && (
-                <article className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative transition-colors group cursor-pointer hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b-2 border-black dark:border-white pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
+                <article className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] relative transition-colors group cursor-pointer hover:shadow-md rounded-xl">
+                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
                         <Briefcase size={20} className="text-neutral-900 dark:text-white" />
                         Kariyer & Staj
                     </h3>
@@ -745,8 +765,8 @@ export default function OfficialView() {
                 </article>
             )}
 
-            <div className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-sm">
-                <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b-2 border-black dark:border-white pb-2">
+            <div className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
+                <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-2">
                     Günün Menüsü
                 </h4>
                 {loadingMenu ? (
@@ -811,7 +831,7 @@ export default function OfficialView() {
 
       {showLoginModal && (
            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-white/10 backdrop-blur-sm p-4">
-               <div className="bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] w-full max-w-md p-8 relative animate-in fade-in zoom-in duration-200">
+               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl dark:shadow-[0_0_30px_rgba(255,255,255,0.05)] w-full max-w-md p-8 relative animate-in fade-in zoom-in duration-200 rounded-xl">
                   <button onClick={() => setShowLoginModal(false)} className="absolute right-4 top-4 text-black dark:text-white hover:rotate-90 transition-transform"><X size={24} strokeWidth={3}/></button>
                   <div className="text-center mb-8">
                       <div className="w-16 h-16 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center mx-auto mb-4 border-2 border-transparent"><Lock size={32} /></div>
@@ -822,16 +842,16 @@ export default function OfficialView() {
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Kullanıcı Kodu</label>
                           <div className="relative group">
-                              <input type="text" required placeholder="e123456 (Sadece kod)" className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} />
+                              <input type="text" required placeholder="e123456 (Sadece kod)" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} />
                               <span className="absolute right-3 top-3.5 text-neutral-500 font-bold pointer-events-none bg-white dark:bg-neutral-900 px-1 text-xs">@metu.edu.tr</span>
                           </div>
                       </div>
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Şifre</label>
-                          <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} />
+                          <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} />
                       </div>
                       {loginError && (<div className="p-3 bg-red-50 text-red-600 text-sm font-bold border-2 border-red-100 flex items-center gap-2"><span className="uppercase">Hata:</span> {loginError}</div>)}
-                      <div className="bg-neutral-100 dark:bg-neutral-800 p-4 border-2 border-black dark:border-white text-xs text-black dark:text-neutral-300 relative">
+                      <div className="bg-neutral-100 dark:bg-neutral-800 p-4 border border-neutral-200 dark:border-neutral-700 text-xs text-black dark:text-neutral-300 relative rounded">
                           <p className="font-black mb-1 uppercase flex items-center gap-1 dark:text-white"><Lock size={12}/> Güvenlik Notu</p>
                           Şifreniz yalnızca şifreli bağlantı kurmak için anlık olarak kullanılır ve sunucularımıza <u>asla kaydedilmez</u>.
                       </div>

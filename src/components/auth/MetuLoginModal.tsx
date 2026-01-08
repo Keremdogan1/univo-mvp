@@ -67,7 +67,7 @@ export default function MetuLoginModal({ isOpen, onClose, onSuccess }: MetuLogin
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-neutral-900 w-full max-w-md relative border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]">
+            <div className="bg-white dark:bg-neutral-900 w-full max-w-md relative border-4 border-black dark:border-neutral-700 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]">
                 
                 {/* Header */}
                 <div className="bg-[var(--primary-color)] text-white p-6 relative overflow-hidden">
