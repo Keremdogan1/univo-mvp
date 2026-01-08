@@ -1,4 +1,4 @@
-import { Calendar, ChevronRight, Download, Search, Briefcase, Megaphone, Bookmark, Star, Filter, ArrowRight, Share2, Mail, CheckCircle, RotateCcw, X, Lock, Loader2, Trash2, GraduationCap } from 'lucide-react';
+import { Calendar, ChevronRight, Download, Search, Briefcase, Megaphone, Bookmark, Star, Filter, ArrowRight, Share2, Mail, CheckCircle, RotateCcw, X, Lock, Loader2, Trash2, GraduationCap, Heart, BookOpen } from 'lucide-react';
 import * as React from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -115,10 +115,6 @@ export default function OfficialView() {
                 // Update Cache
                 localStorage.setItem('univo_cached_emails', JSON.stringify(mappedEmails));
                 localStorage.setItem('univo_email_user', data.username || savedUser);
-            } else if (res.status === 401) {
-                // Session expired or invalid
-                // Optional: Clear connected state if strict
-                // setIsEmailConnected(false); 
             }
         } catch (e) {
             console.error('Session check failed', e);
@@ -334,8 +330,6 @@ export default function OfficialView() {
 
       let scoreA = parseDate(a.date);
       let scoreB = parseDate(b.date);
-    
-      // ... rest of sorting logic
 
       // Boost Unread
       const isReadA = readIds.includes(String(a.id));
@@ -392,15 +386,10 @@ export default function OfficialView() {
   ]);
 
   // Filtered Lists
-  // GÜNDEM: Unread Items AND NOT Emails (Announcements Only) AND Last 7 Days
   const filteredNews = allNews.filter(item => {
-    // 1. Blocked sources filter
     if (blockedSources.includes(item.source)) return false;
-
     if (activeTab === 'agenda') return (item.type === 'announcement' || item.type === 'event');
-    // Emails tab: only show emails if user is logged in
     if (activeTab === 'emails') return user && item.type === 'email';
-    if (activeTab === 'odtuclass') return false; // Handled separately
     if (activeTab === 'starred') return starredIds.includes(String(item.id));
     if (activeTab === 'history') return readIds.includes(String(item.id));
     return true;
@@ -432,15 +421,14 @@ export default function OfficialView() {
         </div>
       </div>
 
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
+        <div className="lg:col-span-2 space-y-8 min-w-0">
             
             {/* Pinned Announcement */}
             {news[0] && (
-                <div className="border-4 border-black dark:border-white p-4 sm:p-6 bg-yellow-50 dark:bg-yellow-900/20 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative overflow-hidden">
-                     <div className="absolute -top-3 left-6 bg-red-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm">
+                <div className="border-4 border-black dark:border-white p-4 sm:p-6 bg-yellow-50 dark:bg-yellow-900/20 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10">
+                     <div className="absolute -top-3 left-6 bg-red-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20">
                         Önemli Duyuru
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2 break-words">
@@ -483,10 +471,8 @@ export default function OfficialView() {
                             ? 'text-black dark:text-white' 
                             : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
                         }`}
-                        title={tab.id === 'history' ? 'Çöp Kutusu' : tab.label}
                     >
                         {tab.icon}
-                        {/* Show label only for active tab on small screens, always on larger */}
                         {tab.label && (
                             <span className={activeTab === tab.id && !isContentCollapsed ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
                         )}
@@ -513,15 +499,10 @@ export default function OfficialView() {
                 )}
             </div>
 
-            {/* Featured Post (Only show on Agenda for impact, or always? Let's hide on Archive) */}
-
-
-            {/* News List - Collapsible on mobile */}
             {!isContentCollapsed && (
             <div className="grid gap-6">
                 {displayedItems.length === 0 ? (
                     <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-900 border-2 border-dashed border-neutral-200 dark:border-neutral-800 transition-colors">
-                        {/* Login prompt for protected tabs */}
                         {!user && (activeTab === 'emails' || activeTab === 'odtuclass' || activeTab === 'starred' || activeTab === 'history') ? (
                             <div className="space-y-3">
                                 <Lock size={32} className="mx-auto text-neutral-300 dark:text-neutral-600" />
@@ -547,10 +528,8 @@ export default function OfficialView() {
                     </div>
                 ) : (
                     displayedItems.map((item: any, index: number) => {
-                        // Reuse existing item logic
                         const isExpanded = expandedId === item.id;
                         const isRead = readIds.includes(String(item.id));
-                        const isFollowing = followedSources.includes(item.source);
 
                         return (
                         <article 
@@ -565,26 +544,24 @@ export default function OfficialView() {
                                 borderLeftColor: isRead 
                                     ? 'transparent' 
                                     : (item.type === 'event' 
-                                        ? '#2563eb' // Blue-600
+                                        ? '#2563eb' 
                                         : item.type === 'email' 
-                                            ? '#d97706' // Amber-600
+                                            ? '#d97706' 
                                             : (item.type === 'grade' || item.type === 'assignment')
-                                                ? '#7c3aed' // Violet
-                                                : '#059669' // Emerald-600
+                                                ? '#7c3aed' 
+                                                : '#059669'
                                       )
                             }}
                         >   
-                            {/* Star Indicator - Ribbon Style */}
                             {starredIds.includes(String(item.id)) && (
                                 <div className="absolute -left-1 top-4 z-20 shadow-sm">
-                                    <div className="bg-yellow-400 text-white p-1 rounded-r-md shadow-md animate-in slide-in-from-left-2">
+                                    <div className="bg-yellow-400 text-white p-1 rounded-r-md shadow-md">
                                         <Star size={12} className="fill-white" />
                                     </div>
                                     <div className="absolute top-full left-0 w-1 h-1 bg-yellow-600 rounded-bl-full brightness-75"></div>
                                 </div>
                             )}
 
-                            {/* Source Controls - Absolute positioned near expand button */}
                             {(activeTab !== 'history') && (
                                 <div className="absolute right-12 top-4 z-20 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <button 
@@ -593,7 +570,6 @@ export default function OfficialView() {
                                             ${subscribedSources.includes(item.source) 
                                                 ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800' 
                                                 : 'bg-white dark:bg-neutral-800 text-emerald-600 border-neutral-200 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
-                                        title={subscribedSources.includes(item.source) ? "Abonelikten Çık" : "Kaynağa Abone Ol"}
                                     >
                                         {subscribedSources.includes(item.source) ? <CheckCircle size={10} className="fill-current"/> : <Megaphone size={10}/>}
                                         {subscribedSources.includes(item.source) ? 'Abone' : 'Abone Ol'}
@@ -601,14 +577,12 @@ export default function OfficialView() {
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); handleBlockSource(item.source); }}
                                         className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-neutral-800 text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded shadow-sm text-[9px] font-bold uppercase transition-all hover:scale-105 active:scale-95 border border-neutral-200 dark:border-neutral-700 hover:border-red-200 dark:hover:border-red-800"
-                                        title="Kaynağı Engelle"
                                     >
                                         <X size={10}/> Engelle
                                     </button>
                                 </div>
                             )}
 
-                            {/* Expand Icon Indicator */}
                             <div className="absolute right-4 top-4 flex items-center gap-3 z-10 text-neutral-300 dark:text-neutral-600 group-hover:text-black dark:group-hover:text-white transition-colors">
                                 <div className="font-bold ml-1 text-2xl leading-none select-none">
                                     {isExpanded ? '−' : '+'}
@@ -642,18 +616,13 @@ export default function OfficialView() {
                                     {item.title}
                                 </h4>
                                 
-                                {/* Summary */}
                                 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                                     <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed mb-3 pt-2 border-t border-neutral-200 dark:border-neutral-800">
                                         {item.summary || 'Detaylar için bağlantıya tıklayınız.'}
                                     </p>
                                     
-                                    {/* Responsive Actions Area - Dynamic Colors */}
                                     <div className="flex flex-wrap items-center gap-2 pt-2 mb-4">
-                                        {/* Dynamic Theme Class Generator */}
                                         {(() => {
-                                            // Always use colorful active classes, regardless of isRead
-                                            // Violet for ODTUClass, Blue for Events, Amber for Email, Emerald for Announcement
                                             const activeColorClass = item.type === 'email' 
                                                 ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-600 !text-amber-800 dark:!text-amber-400' 
                                                 : item.type === 'event'
@@ -662,7 +631,6 @@ export default function OfficialView() {
                                                         ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-600 !text-violet-800 dark:!text-violet-400' 
                                                         : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 !text-emerald-800 dark:!text-emerald-400';
                                             
-                                            // Use hoverClass for better interactivity
                                             const hoverClass = item.type === 'email' ? 'hover:bg-amber-100 dark:hover:bg-amber-900/40' : item.type === 'event' ? 'hover:bg-blue-100 dark:hover:bg-blue-900/40' : (item.type === 'grade' || item.type === 'assignment') ? 'hover:bg-violet-100 dark:hover:bg-violet-900/40' : 'hover:bg-emerald-100 dark:hover:bg-emerald-900/40';
                                             const shadowClass = 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.3)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]';
 
@@ -678,7 +646,7 @@ export default function OfficialView() {
 
                                                 <button
                                                     onClick={(e) => handleStar(String(item.id), e)}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${starredIds.includes(String(item.id)) ? activeColorClass : activeColorClass} ${hoverClass}`}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-wider transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${shadowClass} ${activeColorClass} ${hoverClass}`}
                                                 >
                                                     <Star size={12} className={starredIds.includes(String(item.id)) ? 'fill-current' : ''} />
                                                     {starredIds.includes(String(item.id)) ? 'Yıldızlı' : 'Yıldızla'}
@@ -697,15 +665,11 @@ export default function OfficialView() {
                                             </>
                                             );
                                         })()}
-
                                     </div> 
-
                                 </div>
-
                                 <span className="text-xs text-neutral-500 block mt-2">{item.source} · {item.date}</span>
                             </div>
 
-                            {/* Geri Al button - Always visible at bottom right for history items */}
                             {activeTab === 'history' && (
                                 <button
                                     onClick={(e) => handleUndoRead(String(item.id), e)}
@@ -723,17 +687,14 @@ export default function OfficialView() {
             )}
         </div>
 
-        {/* Sidebar / Teknokent */}
+        {/* Sidebar */}
         <div className="space-y-6">
-
-             {/* Teknokent Job */}
             {news[1] && (
                 <article className="border-4 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative transition-colors group cursor-pointer hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b-2 border-black dark:border-white pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
                         <Briefcase size={20} className="text-neutral-900 dark:text-white" />
                         Kariyer & Staj
                     </h3>
-                    
                     <h4 className="font-bold text-lg mb-2 group-hover:underline decoration-2 underline-offset-2 dark:text-white">{news[1].title}</h4>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
                         {news[1].summary}
@@ -751,7 +712,6 @@ export default function OfficialView() {
                 <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b-2 border-black dark:border-white pb-2">
                     Günün Menüsü
                 </h4>
-                
                 {loadingMenu ? (
                     <div className="text-center text-sm text-neutral-500 py-4">Menü Yükleniyor...</div>
                 ) : (
@@ -767,8 +727,7 @@ export default function OfficialView() {
                                 </div>
                             </div>
                         )}
-
-                         {(menu.lunch?.length > 0) && (
+                        {(menu.lunch?.length > 0) && (
                             <div>
                                 <h5 className="font-bold text-sm uppercase mb-3 flex items-center gap-2 text-neutral-900 dark:text-white">
                                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}></span>
@@ -777,11 +736,7 @@ export default function OfficialView() {
                                 <div className="grid grid-cols-2 gap-3">
                                     {(menu.lunch).map((item: any, index: number) => (
                                         <div key={index} className="group relative overflow-hidden rounded-lg aspect-square border border-neutral-200 dark:border-neutral-700">
-                                            <img 
-                                                src={item.image} 
-                                                alt={item.name}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                            />
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
                                                 <span className="text-white text-[10px] font-bold leading-tight line-clamp-2">{item.name}</span>
                                             </div>
@@ -790,7 +745,6 @@ export default function OfficialView() {
                                 </div>
                             </div>
                         )}
-
                         {menu.dinner?.length > 0 && (
                             <div>
                                 <h5 className="font-bold text-sm uppercase mb-3 flex items-center gap-2 text-neutral-900 dark:text-white">
@@ -800,11 +754,7 @@ export default function OfficialView() {
                                 <div className="grid grid-cols-2 gap-3">
                                     {menu.dinner.map((item: any, index: number) => (
                                         <div key={index} className="group relative overflow-hidden rounded-lg aspect-square border border-neutral-200 dark:border-neutral-700">
-                                            <img 
-                                                src={item.image} 
-                                                alt={item.name}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                            />
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
                                                 <span className="text-white text-[10px] font-bold leading-tight line-clamp-2">{item.name}</span>
                                             </div>
@@ -813,7 +763,6 @@ export default function OfficialView() {
                                 </div>
                             </div>
                         )}
-
                         {(!menu.lunch?.length && !menu.breakfast?.length && !menu.dinner?.length) && (
                             <div className="text-center text-sm text-neutral-500 italic pb-2">Bugün için menü bilgisi bulunamadı.</div>
                         )}
@@ -823,87 +772,39 @@ export default function OfficialView() {
         </div>
       </div>
 
-      {/* LOGIN MODAL */}
-        {showLoginModal && (
+      {showLoginModal && (
            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-white/10 backdrop-blur-sm p-4">
                <div className="bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] w-full max-w-md p-8 relative animate-in fade-in zoom-in duration-200">
-                  <button 
-                    onClick={() => setShowLoginModal(false)}
-                    className="absolute right-4 top-4 text-black dark:text-white hover:rotate-90 transition-transform"
-                  >
-                      <X size={24} strokeWidth={3}/>
-                  </button>
-                  
+                  <button onClick={() => setShowLoginModal(false)} className="absolute right-4 top-4 text-black dark:text-white hover:rotate-90 transition-transform"><X size={24} strokeWidth={3}/></button>
                   <div className="text-center mb-8">
-                      <div className="w-16 h-16 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center mx-auto mb-4 border-2 border-transparent">
-                          <Lock size={32} />
-                      </div>
+                      <div className="w-16 h-16 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center mx-auto mb-4 border-2 border-transparent"><Lock size={32} /></div>
                       <h3 className="text-2xl font-black font-serif uppercase tracking-tight dark:text-white">ODTÜ Giriş</h3>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">
-                          E-postalarınıza erişmek için ODTÜ kullanıcı kodunuzu kullanın.
-                      </p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">E-postalarınıza erişmek için ODTÜ kullanıcı kodunuzu kullanın.</p>
                   </div>
-
                   <form onSubmit={handleImapLogin} className="space-y-6">
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Kullanıcı Kodu</label>
                           <div className="relative group">
-                              <input 
-                                  type="text"
-                                  required
-                                  placeholder="e123456 (Sadece kod)"
-                                  className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900"
-                                  value={loginForm.username}
-                                  onChange={e => setLoginForm({...loginForm, username: e.target.value})}
-                              />
+                              <input type="text" required placeholder="e123456 (Sadece kod)" className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} />
                               <span className="absolute right-3 top-3.5 text-neutral-500 font-bold pointer-events-none bg-white dark:bg-neutral-900 px-1 text-xs">@metu.edu.tr</span>
                           </div>
                       </div>
-                      
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Şifre</label>
-                          <input 
-                              type="password"
-                              required
-                              placeholder="ODTÜ Şifreniz"
-                              className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900"
-                              value={loginForm.password}
-                              onChange={e => setLoginForm({...loginForm, password: e.target.value})}
-                          />
+                          <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border-2 border-black dark:border-white font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} />
                       </div>
-
-                      {loginError && (
-                          <div className="p-3 bg-red-50 text-red-600 text-sm font-bold border-2 border-red-100 flex items-center gap-2">
-                              <span className="uppercase">Hata:</span> {loginError}
-                          </div>
-                      )}
-
+                      {loginError && (<div className="p-3 bg-red-50 text-red-600 text-sm font-bold border-2 border-red-100 flex items-center gap-2"><span className="uppercase">Hata:</span> {loginError}</div>)}
                       <div className="bg-neutral-100 dark:bg-neutral-800 p-4 border-2 border-black dark:border-white text-xs text-black dark:text-neutral-300 relative">
-                          <p className="font-black mb-1 uppercase flex items-center gap-1 dark:text-white">
-                             <Lock size={12}/> Güvenlik Notu
-                          </p>
+                          <p className="font-black mb-1 uppercase flex items-center gap-1 dark:text-white"><Lock size={12}/> Güvenlik Notu</p>
                           Şifreniz yalnızca şifreli bağlantı kurmak için anlık olarak kullanılır ve sunucularımıza <u>asla kaydedilmez</u>.
                       </div>
-
-                      <button 
-                          type="submit"
-                          disabled={loadingEmails}
-                          className="w-full py-4 bg-primary text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                          {loadingEmails ? (
-                              <>
-                                <Loader2 size={18} className="animate-spin"/>
-                                BAĞLANIYOR...
-                              </>
-                          ) : (
-                              'GİRİŞ YAP VE BAĞLA'
-                          )}
+                      <button type="submit" disabled={loadingEmails} className="w-full py-4 bg-primary text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                          {loadingEmails ? (<><Loader2 size={18} className="animate-spin"/>BAĞLANIYOR...</>) : ('GİRİŞ YAP VE BAĞLA')}
                       </button>
                   </form>
               </div>
-          </div>
-      )}
-
+           </div>
+        )}
     </div>
   );
 }
