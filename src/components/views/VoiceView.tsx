@@ -571,8 +571,9 @@ export default function VoiceView() {
 
         const { data, error } = await supabase
             .from('poll_votes')
-            .select('option_index, user_id, profiles:user_id!inner(id)')
-            .eq('poll_id', pollId);
+            .select('option_index, user_id, profiles:user_id!inner(id, is_archived)')
+            .eq('poll_id', pollId)
+            .eq('profiles.is_archived', false);
 
         if (error) {
             console.error('Fetch Results Error:', error);
@@ -1189,12 +1190,16 @@ export default function VoiceView() {
                                             onClick={() => setSelectedVoterOption(idx)}
                                             className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all flex items-center gap-2 border-2 ${
                                                 isActive 
-                                                ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white shadow-sm' 
-                                                : 'bg-white text-neutral-500 border-neutral-200 hover:border-black dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700 dark:hover:border-white'
+                                                ? 'text-white shadow-sm' 
+                                                : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700 dark:hover:border-primary'
                                             }`}
+                                            style={isActive ? { 
+                                                backgroundColor: 'var(--primary-color, #C8102E)', 
+                                                borderColor: 'var(--primary-color, #C8102E)' 
+                                            } : {}}
                                         >
                                             {option}
-                                            <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isActive ? 'bg-primary text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500'}`}>
+                                            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'}`}>
                                                 {count}
                                             </span>
                                         </button>

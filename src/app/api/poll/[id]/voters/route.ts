@@ -17,18 +17,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       .from('poll_votes')
       .select(`
         option_index,
-        profiles:user_id!inner (id, full_name, nickname, privacy_settings)
+        profiles:user_id!inner (id, full_name, nickname, privacy_settings, is_archived)
       `)
-      .eq('poll_id', pollId) as any;
+      .eq('poll_id', pollId)
+      .eq('profiles.is_archived', false) as any;
 
     if (error && error.message.includes('nickname')) {
         const fallback = await supabase
             .from('poll_votes')
             .select(`
                 option_index,
-                profiles:user_id!inner (id, full_name, privacy_settings)
+                profiles:user_id!inner (id, full_name, privacy_settings, is_archived)
             `)
-            .eq('poll_id', pollId) as any;
+            .eq('poll_id', pollId)
+            .eq('profiles.is_archived', false) as any;
         data = fallback.data;
         error = fallback.error;
     }

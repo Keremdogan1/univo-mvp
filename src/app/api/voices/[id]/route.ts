@@ -28,6 +28,7 @@ export async function DELETE(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+        console.error('Auth error:', authError);
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -47,8 +48,30 @@ export async function DELETE(
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Hard delete using admin client to bypass RLS
-    const supabaseAdmin = getSupabaseAdmin();
+    // Use admin client for deletion to bypass RLS
+    let supabaseAdmin;
+    try {
+        supabaseAdmin = getSupabaseAdmin();
+    } catch (adminError: any) {
+        console.error('Admin client error:', adminError);
+        // Fallback to soft delete using user's client
+        const { error: softDeleteError } = await supabase
+            .from('campus_voices')
+            .update({ moderation_status: 'deleted' })
+            .eq('id', id);
+        
+        if (softDeleteError) {
+            console.error('Soft delete fallback error:', softDeleteError);
+            return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+        }
+        return NextResponse.json({ success: true });
+    }
+
+    // Delete related records first (cascade)
+    await supabaseAdmin.from('voice_reactions').delete().eq('voice_id', id);
+    await supabaseAdmin.from('voice_comments').delete().eq('voice_id', id);
+
+    // Hard delete the voice post
     const { error: deleteError } = await supabaseAdmin
         .from('campus_voices')
         .delete()
