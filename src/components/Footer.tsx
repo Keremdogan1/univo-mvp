@@ -1,4 +1,15 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+
 export default function Footer() {
+  const pathname = usePathname();
+  
+  // Hide footer on login and register pages
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
+  
   return (
     <footer className="bg-white dark:bg-neutral-900 mt-20 pb-12 transition-colors">
       {/* Double Line Separator */}

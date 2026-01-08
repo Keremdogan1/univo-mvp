@@ -432,24 +432,24 @@ export default function OfficialView() {
       </div>
 
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden">
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
             
             {/* Pinned Announcement */}
             {news[0] && (
-                <div className="border-4 border-black dark:border-white p-6 bg-yellow-50 dark:bg-yellow-900/20 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative">
+                <div className="border-4 border-black dark:border-white p-4 sm:p-6 bg-yellow-50 dark:bg-yellow-900/20 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] relative overflow-hidden">
                      <div className="absolute -top-3 left-6 bg-red-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm">
                         Önemli Duyuru
                     </div>
-                    <h3 className="text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2 break-words">
                         <Megaphone size={20} className="text-red-600" />
                         {news[0].title}
                     </h3>
                     <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4 leading-relaxed">
                         {news[0].summary}
                     </p>
-                     <div className="flex justify-between items-center text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
+                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
                         <span>{news[0].source} · {news[0].date}</span>
                         <a href={news[0].link} className="flex items-center gap-1 hover:underline decoration-2 underline-offset-2 text-black dark:text-white">
                             Detaylar <ArrowRight size={12}/>
@@ -458,27 +458,30 @@ export default function OfficialView() {
                 </div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex border-b-2 border-neutral-200 dark:border-neutral-800 mb-6 gap-4 md:gap-8 relative overflow-x-auto no-scrollbar scroll-smooth">
+            {/* Tab Navigation - Icons always visible, active tab shows label */}
+            <div className="flex border-b-2 border-neutral-200 dark:border-neutral-800 mb-6 gap-1 sm:gap-2 md:gap-4 overflow-x-auto no-scrollbar scroll-smooth">
                 {[
-                    { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="mb-0.5"/> },
-                    { id: 'emails', label: 'E-POSTALAR', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="mb-0.5"/> },
-                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="mb-0.5"/> },
-                    { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="mb-0.5"/> },
-                    { id: 'history', label: '', icon: <Trash2 size={16} />, count: readIds.length }
+                    { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="shrink-0"/> },
+                    { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="shrink-0"/> },
+                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="shrink-0"/> },
+                    { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0"/> },
+                    { id: 'history', label: '', icon: <Trash2 size={14} className="shrink-0"/>, count: readIds.length }
                 ].map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`pb-3 font-black text-sm tracking-wider uppercase transition-colors relative flex items-center gap-2 shrink-0 ${
+                        className={`pb-3 pt-1 px-2 font-black text-xs tracking-wider uppercase transition-colors relative flex items-center gap-1 shrink-0 ${
                             activeTab === tab.id 
                             ? 'text-black dark:text-white' 
                             : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
                         }`}
                         title={tab.id === 'history' ? 'Çöp Kutusu' : tab.label}
                     >
-                        {tab.icon && tab.icon}
-                        {tab.label}
+                        {tab.icon}
+                        {/* Show label only for active tab on small screens, always on larger */}
+                        {tab.label && (
+                            <span className={activeTab === tab.id ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
+                        )}
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
                             activeTab === tab.id 
                             ? 'bg-black text-white dark:bg-white dark:text-black' 
@@ -497,7 +500,7 @@ export default function OfficialView() {
                         onClick={handleClearHistory}
                         className="ml-auto pb-3 text-[10px] font-black uppercase text-red-600 hover:text-red-700 transition-colors flex items-center gap-1 shrink-0"
                     >
-                        <X size={12}/> Tümünü Sil
+                        <X size={12}/> Sil
                     </button>
                 )}
             </div>
@@ -542,7 +545,7 @@ export default function OfficialView() {
                         <article 
                             key={index} 
                             onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                            className={`flex gap-4 items-start p-4 transition-all duration-300 border-l-4 cursor-pointer relative bg-white dark:bg-neutral-900 shadow-sm group
+                            className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-3 sm:p-4 transition-all duration-300 border-l-4 cursor-pointer relative bg-white dark:bg-neutral-900 shadow-sm group min-w-0 overflow-hidden
                                 ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white/5' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}
                                 ${isRead && (activeTab !== 'history' && activeTab !== 'starred') ? 'hidden' : ''} 
                                 ${isRead ? 'opacity-75 grayscale' : ''}
@@ -624,7 +627,7 @@ export default function OfficialView() {
                                     )}
                                 </div>
                                 
-                                <h4 className={`text-lg font-bold font-serif mb-2 transition-colors ${isExpanded ? (item.type === 'email' ? 'text-yellow-700 dark:text-yellow-500' : item.type === 'event' ? 'text-blue-700 dark:text-blue-500' : 'text-emerald-700 dark:text-emerald-500') : 'text-black dark:text-white'}`}>
+                                <h4 className={`text-base sm:text-lg font-bold font-serif mb-2 transition-colors break-words ${isExpanded ? (item.type === 'email' ? 'text-yellow-700 dark:text-yellow-500' : item.type === 'event' ? 'text-blue-700 dark:text-blue-500' : 'text-emerald-700 dark:text-emerald-500') : 'text-black dark:text-white'}`}>
                                     {item.title}
                                 </h4>
                                 

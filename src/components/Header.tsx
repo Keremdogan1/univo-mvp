@@ -63,12 +63,6 @@ function HeaderContent() {
 
   const navItems = [
     {
-      id: 'global-chat',
-      label: 'Global Konuşma',
-      href: '#',
-      icon: Globe
-    },
-    {
       id: 'voice',
       label: 'Kampüsün Sesi',
       href: '/?view=voice',
@@ -85,12 +79,6 @@ function HeaderContent() {
       label: 'Resmi Gündem',
       href: '/?view=official',
       icon: Building2
-    },
-    {
-      id: 'global-news',
-      label: 'Global Haber',
-      href: '#',
-      icon: Radio
     }
   ];
 
@@ -126,8 +114,8 @@ function HeaderContent() {
               </h1>
             </Link>
 
-            {/* Center: Desktop Navigation */}
-            <nav className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
+            {/* Center: Desktop Navigation - Only show on large screens to avoid overlap */}
+            <nav className="hidden xl:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
               <ul className="flex items-center gap-1">
                 {navItems.map((item) => {
                   const isActive = currentView === item.id;
@@ -159,13 +147,13 @@ function HeaderContent() {
             </nav>
 
             {/* Right: Tools (Search, Auth, DarkMode, Menu) */}
-            <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            <div className="flex items-center gap-2 xl:gap-3 shrink-0">
 
               {/* Dashboard Link (Desktop) - Subtle */}
               {user && canAccessDashboard && (
                 <Link
                   href="/dashboard"
-                  className={`hidden md:flex items-center justify-center p-2.5 rounded-full transition-all ${pathname?.startsWith('/dashboard')
+                  className={`hidden xl:flex items-center justify-center p-2.5 rounded-full transition-all ${pathname?.startsWith('/dashboard')
                     ? 'bg-neutral-100 text-black dark:bg-neutral-800 dark:text-white shadow-sm font-bold'
                     : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                     }`}
@@ -180,24 +168,24 @@ function HeaderContent() {
               {/* Search (Desktop) - Prominent */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="hidden md:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
+                className="hidden xl:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
                 aria-label="Search"
               >
                 <SearchIcon size={20} />
               </button>
 
               {/* Notification Center (Desktop) - Prominent */}
-              <div className="hidden md:block">
+              <div className="hidden xl:block">
                 <NotificationCenter />
               </div>
 
               {/* Auth Button (Desktop) */}
-              <div className="hidden md:block pl-2">
+              <div className="hidden xl:block pl-2">
                 <AuthButton />
               </div>
 
               {/* Mobile Header Actions (Search & Auth) */}
-              <div className="flex md:hidden items-center gap-2">
+              <div className="flex xl:hidden items-center gap-2">
                 {/* Mobile Notification Center */}
                 <NotificationCenter />
 
@@ -217,23 +205,25 @@ function HeaderContent() {
       </header>
 
       {/* Mobile Bottom Navigation - Moved outside header to prevent transform issues */}
-      {/* Mobile Bottom Navigation - Universal Design */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center h-16 w-full max-w-md mx-auto px-2">
-          <ul className="grid grid-flow-col auto-cols-fr w-full h-full">
+      {/* Mobile Bottom Navigation - Shows on mobile and tablet (below lg) */}
+      <nav className="xl:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-center h-16 w-full px-1">
+          <ul className="flex justify-around items-center w-full h-full max-w-sm">
             {navItems.map((item) => {
               const isActive = currentView === item.id;
               return (
-                <li key={item.id} className="flex justify-center items-center h-full">
+                <li key={item.id} className="flex-1 flex justify-center items-center h-full">
                   <Link
                     href={item.href}
-                    className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 active:scale-95 ${isActive ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
+                    className={`relative flex flex-col items-center justify-center w-full h-full gap-0.5 transition-all duration-300 active:scale-95 ${isActive ? 'text-[var(--primary-color,#C8102E)]' : 'text-neutral-400 dark:text-neutral-500'
                       }`}
                   >
-                    <item.icon size={22} className={`${isActive ? 'fill-current' : ''} transition-transform duration-300 ${isActive ? '-translate-y-0.5' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
-                    <span className={`text-[10px] font-bold uppercase tracking-tight text-center leading-none max-w-[80px] transition-all duration-300 ${isActive ? 'scale-105' : ''}`}>
+                    <item.icon size={20} className="transition-transform duration-300" strokeWidth={isActive ? 2.5 : 2} />
+                    <span className={`text-[9px] font-bold uppercase tracking-tight text-center leading-none transition-all duration-300`}>
                       {item.label}
                     </span>
+                    {/* Animated Underline */}
+                    <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 bg-[var(--primary-color,#C8102E)] rounded-full transition-all duration-300 ${isActive ? 'w-8 opacity-100' : 'w-0 opacity-0'}`}></span>
                   </Link>
                 </li>
               );
@@ -241,14 +231,15 @@ function HeaderContent() {
 
             {/* Dashboard Link */}
             {user && canAccessDashboard && (
-              <li className="flex justify-center items-center h-full">
+              <li className="flex-1 flex justify-center items-center h-full">
                 <Link
                   href="/dashboard"
-                  className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 active:scale-95 ${pathname?.startsWith('/dashboard') ? 'text-[#C8102E]' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300'
+                  className={`relative flex flex-col items-center justify-center w-full h-full gap-0.5 transition-all duration-300 active:scale-95 ${pathname?.startsWith('/dashboard') ? 'text-[var(--primary-color,#C8102E)]' : 'text-neutral-400 dark:text-neutral-500'
                     }`}
                 >
-                  <LayoutDashboard size={22} strokeWidth={pathname?.startsWith('/dashboard') ? 2.5 : 2} />
-                  <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-none">Panel</span>
+                  <LayoutDashboard size={20} strokeWidth={pathname?.startsWith('/dashboard') ? 2.5 : 2} />
+                  <span className="text-[9px] font-bold uppercase tracking-tight text-center leading-none">Panel</span>
+                  <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 bg-[var(--primary-color,#C8102E)] rounded-full transition-all duration-300 ${pathname?.startsWith('/dashboard') ? 'w-8 opacity-100' : 'w-0 opacity-0'}`}></span>
                 </Link>
               </li>
             )}
