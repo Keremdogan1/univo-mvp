@@ -305,6 +305,12 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
           toast.success('Profil bilgileriniz güncellendi!');
           setShowDetectionCard(false);
+          // Update local profile state immediately
+          setProfile(prev => prev ? { 
+              ...prev, 
+              department: detectionResult.detectedDepartment,
+              class_year: detectionResult.detectedClass
+          } : null);
           fetchProfileData();
       } catch (err: any) {
           toast.error('Güncelleme hatası: ' + err.message);
@@ -556,7 +562,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             Evet, Doğru
                         </button>
                         <button 
-                            onClick={() => setShowDetectionCard(false)}
+                            onClick={() => router.push(`/profile/${targetId}/edit`)}
                             className="flex-1 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                         >
                             Değil, Düzenle

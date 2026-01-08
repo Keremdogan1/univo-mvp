@@ -100,6 +100,7 @@ export default function LoginPage() {
                 toast.success(`Hoş geldin, ${result.studentInfo?.fullName || 'Öğrenci'}!`, { duration: 2000 });
                 router.push('/');
                 router.refresh();
+                // We keep loading true while redirecting to avoid double clicks
             } else {
                 throw new Error(result.error || 'Giriş başarısız.');
             }

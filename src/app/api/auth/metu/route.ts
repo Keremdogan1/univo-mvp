@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const client = wrapper(axios.create({ 
         jar,
         withCredentials: true,
-        timeout: 5000, // 5 second timeout for faster response
+        timeout: 15000, // Increased to 15 seconds for slower connections/devices
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
