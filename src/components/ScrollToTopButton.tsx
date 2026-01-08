@@ -24,7 +24,7 @@ export default function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-[9999] w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95 md:hidden"
+      className="fixed z-[9999] w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95 bottom-20 right-4 md:bottom-6 md:right-6"
       style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
       aria-label="Yukarı çık"
     >

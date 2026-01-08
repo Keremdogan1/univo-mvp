@@ -68,6 +68,9 @@ export default function OfficialView() {
   const [starredIds, setStarredIds] = React.useState<string[]>([]);
   const [blockedSources, setBlockedSources] = React.useState<string[]>([]);
   const [subscribedSources, setSubscribedSources] = React.useState<string[]>([]);
+  
+  // Pagination State - Show 10 items at a time
+  const [displayLimit, setDisplayLimit] = React.useState(10);
 
   // Check Session & Auto-Connect
   React.useEffect(() => {
@@ -402,6 +405,10 @@ export default function OfficialView() {
     return true;
   });
 
+  // Paginated items - show only up to displayLimit
+  const paginatedItems = displayedItems.slice(0, displayLimit);
+  const hasMoreItems = displayedItems.length > displayLimit;
+
   return (
     <div className="container mx-auto px-4 py-8 relative">
       {/* Newspaper Header - Sticky on mobile */}
@@ -458,7 +465,18 @@ export default function OfficialView() {
                     { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="shrink-0"/> },
                     { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0"/> },
                     { id: 'history', label: '', icon: <Trash2 size={14} className="shrink-0"/>, count: readIds.length }
-                ].map(tab => (
+                ].map(tab => {
+                    const isActive = activeTab === tab.id && !isContentCollapsed;
+                    // Define colors for each tab type with transition
+                    const iconColor = isActive ? (
+                        tab.id === 'agenda' ? 'text-emerald-600' :
+                        tab.id === 'emails' ? 'text-amber-600' :
+                        tab.id === 'odtuclass' ? 'text-violet-600' :
+                        tab.id === 'starred' ? 'text-yellow-500' :
+                        tab.id === 'history' ? 'text-neutral-600' : 'text-primary'
+                    ) : 'text-neutral-400 dark:text-neutral-500';
+                    
+                    return (
                     <button
                         key={tab.id}
                         onClick={() => {
@@ -467,15 +485,18 @@ export default function OfficialView() {
                             } else {
                                 setActiveTab(tab.id as any);
                                 setIsContentCollapsed(false);
+                                setDisplayLimit(10); // Reset pagination on tab change
                             }
                         }}
-                        className={`pb-3 pt-1 px-2 font-black text-xs tracking-wider uppercase transition-colors relative flex items-center gap-1 shrink-0 ${
-                            activeTab === tab.id && !isContentCollapsed
+                        className={`pb-3 pt-1 px-2 font-black text-xs tracking-wider uppercase transition-all duration-300 relative flex items-center gap-1 shrink-0 ${
+                            isActive
                             ? 'text-black dark:text-white' 
                             : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300'
                         }`}
                     >
-                        {tab.icon}
+                        <span className={`transition-colors duration-300 ${iconColor}`}>
+                            {tab.icon}
+                        </span>
                         {tab.label && (
                             <span className={activeTab === tab.id && !isContentCollapsed ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
                         )}
@@ -490,7 +511,8 @@ export default function OfficialView() {
                             <div className="absolute bottom-[-2px] left-0 right-0 h-0.5 bg-black dark:bg-white animate-in fade-in slide-in-from-left-2 duration-300" />
                         )}
                     </button>
-                ))}
+                    );
+                })}
 
                 {activeTab === 'history' && readIds.length > 0 && (
                     <button 
@@ -504,7 +526,7 @@ export default function OfficialView() {
 
             {!isContentCollapsed && (
             <div className="grid gap-6">
-                {displayedItems.length === 0 ? (
+                {paginatedItems.length === 0 ? (
                     <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-900 border-2 border-dashed border-neutral-200 dark:border-neutral-800 transition-colors">
                         {!user && (activeTab === 'emails' || activeTab === 'odtuclass' || activeTab === 'starred' || activeTab === 'history') ? (
                             <div className="space-y-3">
@@ -530,7 +552,8 @@ export default function OfficialView() {
                         )}
                     </div>
                 ) : (
-                    displayedItems.map((item: any, index: number) => {
+                    <>
+                    {paginatedItems.map((item: any, index: number) => {
                         const isExpanded = expandedId === item.id;
                         const isRead = readIds.includes(String(item.id));
 
@@ -684,7 +707,18 @@ export default function OfficialView() {
                             )}
                         </article>
                         );
-                    })
+                    })}
+                    
+                    {/* Load More Button */}
+                    {hasMoreItems && (
+                        <button
+                            onClick={() => setDisplayLimit(prev => prev + 10)}
+                            className="w-full py-4 bg-neutral-100 dark:bg-neutral-800 border-2 border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 font-bold text-sm uppercase tracking-wider hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all rounded-lg"
+                        >
+                            Daha Fazlasını Göster ({displayedItems.length - displayLimit} gönderi daha)
+                        </button>
+                    )}
+                    </>
                 )}
             </div>
             )}
