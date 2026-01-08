@@ -97,7 +97,7 @@ export default function OfficialView() {
             }
 
             // Verify with server (Cookie check)
-            const res = await fetch('/api/auth/imap');
+            const res = await fetch('/api/auth/imap', { credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
                 
@@ -149,34 +149,46 @@ export default function OfficialView() {
           const res = await fetch('/api/auth/imap', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(loginForm)
+              body: JSON.stringify(loginForm),
+              credentials: 'include' // Ensure cookie is set
           });
+
           const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Giriş yapılamadı');
 
-          if (!res.ok) {
-             throw new Error(data.error || 'Giriş yapılamadı. Kullanıcı adı veya şifre hatalı olabilir.');
-          }
-
-          const mappedEmails = (data.emails || []).map((msg: any) => ({
+          // Map raw IMAP data using same logic as checkSession
+          const mappedEmails = (data.emails || []).map((msg: any) => {
+              let senderName = msg.from || 'Bilinmeyen Gönderen';
+              const nameMatch = senderName.match(/^"?([^"<]+)"?\s*</);
+              if (nameMatch && nameMatch[1]) {
+                  senderName = nameMatch[1].trim();
+              } else if (senderName.includes('@')) {
+                  senderName = senderName.split('@')[0].replace(/[<>"]/g, '');
+              }
+              return {
                   id: `email-${msg.id}`,
                   type: 'email',
                   title: msg.subject,
-                  source: 'ODTÜ E-Posta', 
+                  source: senderName,
                   date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
-                  summary: `Gönderen: ${msg.from}`,
-                  link: `https://mail.metu.edu.tr`
-          }));
+                  summary: `E-posta içeriği için tıklayınız.`,
+                  link: `https://metumail.metu.edu.tr/`
+              };
+          });
 
           setEmails(mappedEmails);
           setIsEmailConnected(true);
           setShowLoginModal(false);
-          
-          // Persist data
+          toast.success('E-postalar başarıyla getirildi');
+
+          // Update Cache
           localStorage.setItem('univo_cached_emails', JSON.stringify(mappedEmails));
           localStorage.setItem('univo_email_user', loginForm.username);
 
-      } catch (err: any) {
-          setLoginError(err.message);
+      } catch (error: any) {
+          console.error('Login failed', error);
+          setLoginError(error.message);
+          toast.error(error.message || 'E-posta bağlantısı kurulamadı');
       } finally {
           setLoadingEmails(false);
       }
