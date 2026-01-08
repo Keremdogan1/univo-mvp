@@ -140,17 +140,6 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
       const achievementBadges: any[] = [];
       const now = new Date().toISOString();
 
-      // Verified Badge - Has student_id
-      if (profileData?.student_id && profileData.student_id.length > 0) {
-        achievementBadges.push({
-          id: 'verified',
-          name: 'Doğrulanmış Öğrenci',
-          description: 'ODTÜ öğrenci kimliği ile doğrulanmış hesap.',
-          icon: 'BadgeCheck',
-          color: '#3B82F6',
-          awarded_at: profileData.created_at || now
-        });
-      }
 
       // Profile Completed Badge
       const validDepts = ['Bilgisayar Mühendisliği', 'Elektrik-Elektronik Mühendisliği', 'Makina Mühendisliği', 'İnşaat Mühendisliği'];
