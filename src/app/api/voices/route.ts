@@ -71,7 +71,8 @@ export async function GET(request: Request) {
           dislikes,
           comments: voice.voice_comments.length
         },
-        voice_comments: voice.voice_comments.map((c: any) => ({
+        reactions: voice.voice_reactions || [],
+        comments: (voice.voice_comments || []).map((c: any) => ({
           id: c.id,
           content: c.content,
           created_at: c.created_at,

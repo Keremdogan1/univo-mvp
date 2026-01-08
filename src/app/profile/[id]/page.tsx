@@ -571,7 +571,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             )}
 
             {/* Profile Completion Warning Card */}
-            {isOwnProfile && (!profile.department || !profile.class_year) && (
+            {isOwnProfile && profile && (!profile.department || !profile.class_year) && (
                 <div className="bg-amber-50 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800/50 rounded-xl p-6 mb-6">
                     <div className="flex gap-4">
                         <div className="p-3 bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400 rounded-full shrink-0 h-fit">

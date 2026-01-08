@@ -756,9 +756,10 @@ export default function VoiceView() {
                             <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz bir ses yok. İlk sen ol!</div>
                         ) : (
                             voices.map((voice) => {
-                                const myReaction = user ? voice.reactions.find(r => r.user_id === user.id)?.reaction_type : null;
-                                const likeCount = voice.reactions.filter(r => r.reaction_type === 'like').length;
-                                const dislikeCount = voice.reactions.filter(r => r.reaction_type === 'dislike').length;
+                                const reactions = voice.reactions || [];
+                                const myReaction = user ? reactions.find(r => r.user_id === user.id)?.reaction_type : null;
+                                const likeCount = reactions.filter(r => r.reaction_type === 'like').length;
+                                const dislikeCount = reactions.filter(r => r.reaction_type === 'dislike').length;
                                 const netVote = likeCount - dislikeCount;
 
                                 return (
