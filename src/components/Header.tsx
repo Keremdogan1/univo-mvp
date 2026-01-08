@@ -32,6 +32,60 @@ function HeaderContent() {
 
   // ... (existing code)
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [localProfile, setLocalProfile] = useState<any>(null); // Renamed to avoid conflict with useAuth's profile
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      getProfile();
+      fetchUnreadCount();
+
+      // Subscribe to notifications
+      const channel = supabase
+        .channel(`header_notifications:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            fetchUnreadCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const getProfile = async () => {
+      const { data } = await supabase.from('profiles').select('*').eq('id', user?.id).single();
+      setLocalProfile(data);
+  };
+
+  const fetchUnreadCount = async () => {
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user?.id)
+      .eq('read', false);
+    setUnreadCount(count || 0);
+  };
+
   // Scroll detection for mobile header hide
   useEffect(() => {
     const handleScroll = () => {
@@ -269,28 +323,33 @@ function HeaderContent() {
                   }`}
               >
                 {user ? (
-                  profile?.avatar_url ? (
-                    <div className={`relative w-6 h-6 rounded-full overflow-hidden border-2 ${pathname?.startsWith('/profile') ? 'border-[var(--primary-color,#C8102E)]' : 'border-transparent'}`}>
-                      <Image
-                        src={profile.avatar_url}
-                        alt="Profile"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs bg-[var(--primary-color,#C8102E)] shadow-sm">
-                      {(profile?.full_name || 'U').charAt(0).toUpperCase()}
-                    </div>
-                  )
+                  <div className="relative">
+                    {profile?.avatar_url ? (
+                      <div className={`relative w-6 h-6 rounded-full overflow-hidden border-2 ${pathname?.startsWith('/profile') ? 'border-[var(--primary-color,#C8102E)]' : 'border-transparent'}`}>
+                        <Image
+                          src={profile.avatar_url}
+                          alt="Profile"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs bg-[var(--primary-color,#C8102E)] shadow-sm">
+                        {(profile?.full_name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    
+                    {/* Notification Dot - Shows only when unreadCount > 0 */}
+                    {unreadCount > 0 && (
+                       <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 z-50">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--primary-color,#C8102E)] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--primary-color,#C8102E)] ring-2 ring-white dark:ring-black"></span>
+                       </span>
+                    )}
+                  </div>
                 ) : (
                   <div className="relative">
                     <User size={22} strokeWidth={pathname?.startsWith('/profile') || pathname === '/login' ? 2.5 : 2} />
-                    {/* Notification Dot - Top Left */}
-                    <span className="absolute -top-1 -left-1 flex h-2.5 w-2.5">
-                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--primary-color,#C8102E)] opacity-75"></span>
-                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--primary-color,#C8102E)]"></span>
-                    </span>
                   </div>
                 )}
                 <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-none">
