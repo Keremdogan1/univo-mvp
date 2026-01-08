@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Menu, X, MessageCircle, Users, Building2, LayoutDashboard, User, Settings, LogOut, Globe, Radio } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import AuthButton from './AuthButton';
-import GlobalSearch from './search/GlobalSearch';
 import { Search as SearchIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -21,7 +20,6 @@ const ALLOWED_DASHBOARD_USERS = [
 ];
 
 function HeaderContent() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCommunityAdmin, setIsCommunityAdmin] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const searchParams = useSearchParams();
@@ -115,30 +113,30 @@ function HeaderContent() {
             </Link>
 
             {/* Center: Desktop Navigation - Only show on large screens to avoid overlap */}
-            <nav className="hidden xl:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
-              <ul className="flex items-center gap-1">
+            <nav className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
+              <ul className="flex items-center gap-0.5">
                 {navItems.map((item) => {
-                  const isActive = currentView === item.id;
+                  const isActive = pathname === '/' && currentView === item.id;
                   return (
                     <li key={item.id}>
                       <Link
                         href={item.href}
                         onClick={(e) => item.href === '#' && e.preventDefault()}
-                        className={`flex items-center gap-2 px-3.5 py-2 transition-all duration-200 relative group ${isActive
+                        className={`flex items-center gap-1.5 px-3 py-2 transition-all duration-200 relative group ${isActive
                           ? 'text-[var(--primary-color)] font-bold'
                           : 'text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary-color)] font-medium'
                           }`}
                       >
-                        <item.icon size={18} className={`relative z-10 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                        <span className="text-sm relative z-10">{item.label}</span>
+                        <item.icon size={16} className={`relative z-10 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                        <span className="text-xs relative z-10">{item.label}</span>
 
                         {/* Active Underline */}
                         {isActive && (
-                          <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--primary-color)] rounded-full animate-in fade-in zoom-in duration-200"></span>
+                          <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full animate-in fade-in zoom-in duration-200"></span>
                         )}
 
                         {/* Hover Underline */}
-                        <span className={`absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--primary-color)] rounded-full transition-all duration-200 ${isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-75'}`}></span>
+                        <span className={`absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full transition-all duration-200 ${isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-75'}`}></span>
                       </Link>
                     </li>
                   );
@@ -147,19 +145,19 @@ function HeaderContent() {
             </nav>
 
             {/* Right: Tools (Search, Auth, DarkMode, Menu) */}
-            <div className="flex items-center gap-2 xl:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
 
               {/* Dashboard Link (Desktop) - Subtle */}
               {user && canAccessDashboard && (
                 <Link
                   href="/dashboard"
-                  className={`hidden xl:flex items-center justify-center p-2.5 rounded-full transition-all ${pathname?.startsWith('/dashboard')
+                  className={`hidden lg:flex items-center justify-center p-2 rounded-full transition-all ${pathname?.startsWith('/dashboard')
                     ? 'bg-neutral-100 text-black dark:bg-neutral-800 dark:text-white shadow-sm font-bold'
                     : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                     }`}
                   title="Kontrol Paneli"
                 >
-                  <LayoutDashboard size={20} />
+                  <LayoutDashboard size={18} />
                 </Link>
               )}
 
@@ -167,30 +165,30 @@ function HeaderContent() {
 
               {/* Search (Desktop) - Prominent */}
               <button
-                onClick={() => setIsSearchOpen(true)}
-                className="hidden xl:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
+                onClick={() => window.dispatchEvent(new CustomEvent('univo-search-toggle'))}
+                className="hidden lg:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
                 aria-label="Search"
               >
-                <SearchIcon size={20} />
+                <SearchIcon size={18} />
               </button>
 
               {/* Notification Center (Desktop) - Prominent */}
-              <div className="hidden xl:block">
+              <div className="hidden lg:block">
                 <NotificationCenter />
               </div>
 
               {/* Auth Button (Desktop) */}
-              <div className="hidden xl:block pl-2">
+              <div className="hidden lg:block pl-1">
                 <AuthButton />
               </div>
 
               {/* Mobile Header Actions (Search) */}
-              <div className="flex xl:hidden items-center gap-2">
+              <div className="flex lg:hidden items-center gap-2">
                 {/* Mobile Notification Center */}
                 <NotificationCenter />
 
                 <button
-                  onClick={() => setIsSearchOpen(true)}
+                  onClick={() => window.dispatchEvent(new CustomEvent('univo-search-toggle'))}
                   className="p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all"
                 >
                   <SearchIcon size={24} />
@@ -200,17 +198,15 @@ function HeaderContent() {
             </div>
           </div>
         </div>
-
-        <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </header>
 
       {/* Mobile Bottom Navigation - Moved outside header to prevent transform issues */}
-      {/* Mobile Bottom Navigation - Shows on mobile and tablet (below lg) */}
-      <nav className="xl:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      {/* Mobile Bottom Navigation - Shows on mobile only (below lg) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-center h-16 w-full px-1">
           <ul className="flex justify-around items-center w-full h-full max-w-sm">
             {navItems.map((item) => {
-              const isActive = currentView === item.id;
+              const isActive = pathname === '/' && currentView === item.id;
               return (
                 <li key={item.id} className="flex-1 flex justify-center items-center h-full">
                   <Link

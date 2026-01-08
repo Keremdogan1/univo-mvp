@@ -3,10 +3,6 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// We need a Service Role client or just standard client depending on RLS.
-// For search, usually standard anon client is enough if RLS policies allow reading.
-// Initializing a simple client here for server-side use. 
-// Ideally should use @supabase/ssr package context but for simple actions:
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -18,12 +14,26 @@ export interface SearchResults {
   users: any[];
 }
 
+function turkishUpper(str: string): string {
+    const map: Record<string, string> = {
+        'i': 'İ',
+        'ı': 'I',
+        'ş': 'Ş',
+        'ğ': 'Ğ',
+        'ü': 'Ü',
+        'ö': 'Ö',
+        'ç': 'Ç'
+    };
+    return str.split('').map(c => map[c.toLowerCase()] || c.toUpperCase()).join('');
+}
+
 export async function searchContent(query: string): Promise<SearchResults> {
   if (!query || query.length < 2) {
       return { events: [], voices: [], announcements: [], users: [] };
   }
 
   const searchQuery = `%${query}%`;
+  const searchTrUpper = `%${turkishUpper(query)}%`;
 
   // Parallel Queries
   // 1. Events
@@ -41,11 +51,12 @@ export async function searchContent(query: string): Promise<SearchResults> {
       .ilike('content', searchQuery)
       .limit(5);
 
-  // 3. Users
+  // 3. User search - combining variations
+  // Note: Values in .or() filters should be double-quoted if they contain special characters
   const usersPromise = supabase
       .from('profiles')
       .select('id, full_name, avatar_url, department, class_year')
-      .ilike('full_name', searchQuery)
+      .or(`full_name.ilike."${searchQuery}",full_name.ilike."${searchTrUpper}"`)
       .limit(5);
 
   const [eventsResult, voicesResult, usersResult] = await Promise.all([

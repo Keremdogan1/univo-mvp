@@ -6,7 +6,8 @@ import { Search, X, Calendar, MessageSquare, Building2, Loader2, ChevronRight, U
 import { useRouter } from 'next/navigation';
 import { searchContent, SearchResults } from '@/app/actions/search';
 
-export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function GlobalSearch() {
+  const [isVisible, setIsVisible] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,10 +15,18 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    const handleToggle = () => setIsVisible(prev => !prev);
+    window.addEventListener('univo-search-toggle', handleToggle);
+    return () => window.removeEventListener('univo-search-toggle', handleToggle);
+  }, []);
+
+  useEffect(() => {
+    if (isVisible && inputRef.current) {
         setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isVisible]);
+
+  const onClose = () => setIsVisible(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,12 +66,12 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
       onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4">
+    <div className="fixed inset-0 z-[20000] flex items-start justify-center pt-20 px-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={onClose} />
       
       {/* Modal */}
       <div className="relative w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 animate-in fade-in zoom-in-95 duration-200 transition-colors">

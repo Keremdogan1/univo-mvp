@@ -30,7 +30,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               href="/"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary-color)] !text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
             >
               <Home size={20} />

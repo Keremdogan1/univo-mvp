@@ -63,6 +63,14 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to send friend request' }, { status: 500 });
     }
 
+    // Deduplicate notifications: Delete any existing friend_request notification from this requester to this receiver
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', receiverId)
+      .eq('actor_id', requesterId)
+      .eq('type', 'friend_request');
+
     // Get requester's name for notification
     const { data: requesterProfile } = await supabase
       .from('profiles')
@@ -126,6 +134,20 @@ export async function DELETE(
       console.error('Unfriend error:', deleteError);
       return NextResponse.json({ error: 'Failed to remove friendship' }, { status: 500 });
     }
+
+    // Cleanup: Remove associated friend_request notification
+    await supabase
+      .from('notifications')
+      .delete()
+      .or(`and(user_id.eq.${otherUserId},actor_id.eq.${currentUserId}),and(user_id.eq.${currentUserId},actor_id.eq.${otherUserId})`)
+      .eq('type', 'friend_request');
+
+    // Also cleanup accepted notifications
+    await supabase
+      .from('notifications')
+      .delete()
+      .or(`and(user_id.eq.${otherUserId},actor_id.eq.${currentUserId}),and(user_id.eq.${currentUserId},actor_id.eq.${otherUserId})`)
+      .eq('type', 'friend_request_accepted');
 
     return NextResponse.json({ 
       message: 'Friendship removed successfully'

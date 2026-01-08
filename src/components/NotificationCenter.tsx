@@ -25,13 +25,36 @@ export default function NotificationCenter() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [actingId, setActingId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      
+      // Real-time subscription for new notifications
+      const channel = supabase
+        .channel(`notifications:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Notification change detected:', payload.eventType);
+            fetchNotifications(); // Refresh both list and count for any change
+          }
+        )
+        .subscribe((status) => {
+          console.log(`Notification subscription status for ${user.id}:`, status);
+        });
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
@@ -59,8 +82,11 @@ export default function NotificationCenter() {
 
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
+        console.log('Fetched notifications:', data.notifications?.length, 'Unread:', data.unreadCount);
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      } else {
+        console.error('Fetch notifications failed:', response.status, await response.text());
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -115,6 +141,7 @@ export default function NotificationCenter() {
   };
 
   const handleFriendRequest = async (actorId: string, action: 'accept' | 'reject', notificationId: string) => {
+    setActingId(notificationId);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
@@ -143,10 +170,11 @@ export default function NotificationCenter() {
       if (response.ok) {
         // Mark notification as read (or delete it)
         markAsRead(notificationId);
-        // Optional: Trigger a refresh or show success toast
       }
     } catch (error) {
       console.error(`Error handling friend request (${action}):`, error);
+    } finally {
+      setActingId(null);
     }
   };
 
@@ -206,7 +234,7 @@ export default function NotificationCenter() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] z-50 max-h-[500px] flex flex-col">
+        <div className="fixed sm:absolute right-0 sm:right-0 left-0 sm:left-auto top-[64px] sm:top-full sm:mt-2 mx-auto sm:mx-0 w-[calc(100%-32px)] sm:w-80 bg-white dark:bg-neutral-900 border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] z-50 max-h-[calc(100vh-180px)] sm:max-h-[500px] flex flex-col">
           <div className="p-4 border-b-2 border-black dark:border-white flex justify-between items-center">
             <h3 className="font-bold font-serif text-lg dark:text-white">Bildirimler</h3>
             {unreadCount > 0 && (
@@ -231,13 +259,16 @@ export default function NotificationCenter() {
                 <div
                   key={notification.id}
                   className={`p-4 border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors ${
-                    !notification.read ? 'bg-red-50/30 dark:bg-red-900/10' : ''
+                    !notification.read ? 'bg-neutral-50/50 dark:bg-white/[0.02]' : ''
                   }`}
                 >
                   <div className="flex gap-3">
                     {notification.actor && (
                       <Link href={`/profile/${notification.actor.id}`}>
-                        <div className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+                        <div 
+                          className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm shrink-0"
+                          style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                        >
                           {notification.actor.full_name?.charAt(0) || '?'}
                         </div>
                       </Link>
@@ -252,16 +283,18 @@ export default function NotificationCenter() {
                         <div className="flex gap-2 mt-2 mb-1">
                           <button
                             onClick={() => handleFriendRequest(notification.actor!.id, 'accept', notification.id)}
-                            className="text-white text-xs font-bold px-3 py-1.5 rounded-md hover:opacity-90 transition-colors"
+                            disabled={actingId === notification.id}
+                            className="text-white text-xs font-bold px-3 py-1.5 rounded-md hover:opacity-90 transition-colors disabled:opacity-50"
                             style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                           >
-                            Kabul Et
+                            {actingId === notification.id ? '...' : 'Kabul Et'}
                           </button>
                           <button
                             onClick={() => handleFriendRequest(notification.actor!.id, 'reject', notification.id)}
-                            className="bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-bold px-3 py-1.5 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                            disabled={actingId === notification.id}
+                            className="bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 text-xs font-bold px-3 py-1.5 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
                           >
-                            Reddet
+                            {actingId === notification.id ? '...' : 'Reddet'}
                           </button>
                         </div>
                       ) : (
@@ -275,19 +308,12 @@ export default function NotificationCenter() {
                       {!notification.read && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="p-1 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition-colors"
+                          className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors group"
                           title="Okundu işaretle"
                         >
-                          <Check size={14} className="text-green-600 dark:text-green-400" />
+                          <Check size={16} className="text-neutral-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors" />
                         </button>
                       )}
-                      <button
-                        onClick={() => deleteNotification(notification.id)}
-                        className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                        title="Sil"
-                      >
-                        <X size={14} className="text-red-600 dark:text-red-400" />
-                      </button>
                     </div>
                   </div>
                 </div>

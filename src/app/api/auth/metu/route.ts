@@ -4,6 +4,7 @@ import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
 import getSupabaseAdmin from '@/lib/supabase-admin';
+import { analyzeCourses } from '@/lib/course-analyzer';
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     const client = wrapper(axios.create({ 
         jar,
         withCredentials: true,
-        timeout: 5000, // 5 second timeout for faster response
+        timeout: 15000, 
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -30,7 +31,6 @@ export async function POST(request: Request) {
     const loginPageUrl = `${baseUrl}/login/index.php`;
 
     // A. Internal METU Login (Scraping)
-    // First, verify credentials by trying to log in
     try {
         const initialRes = await client.get(loginPageUrl);
         const $ = cheerio.load(initialRes.data);
@@ -42,82 +42,73 @@ export async function POST(request: Request) {
         formData.append('anchor', '');
         if (loginToken) formData.append('logintoken', loginToken as string);
 
-        // Allow axios to follow redirects (cookie jar handles state)
         const loginRes = await client.post(loginPageUrl, formData, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Referer': loginPageUrl }
         });
 
-        console.log('ODTÜ Login Final Status:', loginRes.status);
-        console.log('ODTÜ Login Final URL:', loginRes.config.url);
-
-        // Check if we ultimately landed on the dashboard (or my page)
-        // Moodle dashboard usually has '/my/' in the URL
         const finalUrl = loginRes.config.url || '';
         const isDashboard = finalUrl.includes('/my/') || loginRes.data.includes('user/profile.php') || loginRes.data.includes('Log out');
 
         if (!isDashboard) {
-             // Try to see if it's just a landing page that requires clicking "Continue"
-             // But usually axios follows valid redirects.
-             // If we are still on login page, it failed.
              const $fail = cheerio.load(loginRes.data);
              const errorMsg = $fail('.loginerrors').text();
              
              if (errorMsg) {
                  return NextResponse.json({ error: errorMsg }, { status: 401 });
              } else {
-                 // Fallback: If we can't find specific error but url is login
                  if (finalUrl.includes('login')) {
                     return NextResponse.json({ error: 'Giriş yapılamadı. Kullanıcı adı veya şifre hatalı.' }, { status: 401 });
                  }
              }
         }
         
-        // We are on the dashboard (or redirected page)
-        // Use loginRes.data directly since we followed redirects
         const $dash = cheerio.load(loginRes.data);
-        
         let fullName = $dash('.usertext').text() || $dash('.user-name').text() || $dash('#action-menu-toggle-1 span.userbutton span.usertext').text();
         if (fullName) fullName = fullName.replace('You are logged in as', '').trim();
         
-        // --- ENHANCED SCRAPING: Get Department & Courses ---
-        // SKIPPED FOR PERFORMANCE - Profile scraping causes timeout on Vercel
-        // Department can be entered manually by user
-        let department = '';
+        // --- SCRAPING & ANALYSIS ---
         let courses: { name: string, url: string }[] = [];
-        // Profile scraping disabled to speed up login
-        // try {
-        //     const profileUrl = $dash('a[href*="user/profile.php"]').first().attr('href');
-        //     if (profileUrl) {
-        //         const profileRes = await client.get(profileUrl);
-        //         // ... scraping logic ...
-        //     }
-        // } catch (scrapeErr) {
-        //     console.warn('Could not scrape department or courses:', scrapeErr);
-        // }
+        try {
+            const courseLinks = $dash('a[href*="course/view.php?id="]');
+            courseLinks.each((_, el) => {
+                const name = $(el).text().trim();
+                const url = $(el).attr('href');
+                if (name && url && !courses.find(c => c.url === url)) {
+                    courses.push({ name, url });
+                }
+            });
+        } catch (scrapeErr) {
+            console.warn('Could not scrape courses:', scrapeErr);
+        }
 
-        // --- 3. UNIVO AUTHENTICATION (Proxy Strategy) ---
-        
+        let detectedDept = '';
+        let detectedClass = '';
+        if (courses.length > 0) {
+            const results = analyzeCourses(courses);
+            detectedDept = results.detectedDepartment || '';
+            detectedClass = results.detectedClass || '';
+        }
+
+        // --- 3. UNIVO AUTHENTICATION ---
         const eduEmail = `${username}@metu.edu.tr`;
         const supabaseAdmin = getSupabaseAdmin();
         
-        // A. Check if user already exists
-        const { data: { users }, error: fetchError } = await supabaseAdmin.auth.admin.listUsers();
+        const listRes = await supabaseAdmin.auth.admin.listUsers();
+        const users = listRes.data?.users || [];
         let user = users.find(u => u.email === eduEmail);
 
         if (!user) {
-            // B. Create User (if new)
-            // We set a random password because user will use ODTÜ Auth to login primarily.
             const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
-            
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
                 email: eduEmail,
                 password: randomPassword,
-                email_confirm: true, // Auto-confirm since they verified via ODTÜ credentials
+                email_confirm: true,
                 user_metadata: {
                     full_name: fullName || username,
                     is_metu_verified: true,
                     student_username: username,
-                    department: department,
+                    department: detectedDept,
+                    class_year: detectedClass,
                     odtu_courses: courses
                 }
             });
@@ -125,24 +116,23 @@ export async function POST(request: Request) {
             if (createError) throw createError;
             user = newUser.user;
 
-            // Create Profile Record
             if (user) {
                 await supabaseAdmin.from('profiles').insert({
                     id: user.id,
                     full_name: fullName || username,
-                    student_id: username.replace('e', ''), // Simple heuristic
-                    department: department || null,
+                    student_id: username.replace('e', ''),
+                    department: detectedDept || null,
+                    class_year: detectedClass || null,
                     is_metu_verified: true,
                     role: 'student'
                 });
             }
-        } 
-        
-        // C. Update Metadata if exists (re-verify & update department)
-        if (user) {
+        } else {
+             // C. Update Metadata if exists
              const updates: any = {};
              if (!user.user_metadata.is_metu_verified) updates.is_metu_verified = true;
-             if (department && !user.user_metadata.department) updates.department = department;
+             if (detectedDept && !user.user_metadata.department) updates.department = detectedDept;
+             if (detectedClass && !user.user_metadata.class_year) updates.class_year = detectedClass;
              if (courses.length > 0) updates.odtu_courses = courses;
              
              if (Object.keys(updates).length > 0) {
@@ -151,14 +141,20 @@ export async function POST(request: Request) {
                  });
              }
              
-             // Also update profile table if department was missing
-             if (department) {
-                 await supabaseAdmin.from('profiles').update({ department }).eq('id', user.id);
+             // Also update profile table
+             const pUpdates: any = {};
+             if (detectedDept) pUpdates.department = detectedDept;
+             else if (detectedDept === '' && (user.user_metadata.department === 'BASE' || user.user_metadata.department === 'DBE')) {
+                 pUpdates.department = null;
+             }
+             if (detectedClass) pUpdates.class_year = detectedClass;
+             
+             if (Object.keys(pUpdates).length > 0) {
+                 await supabaseAdmin.from('profiles').update(pUpdates).eq('id', user.id);
              }
         }
 
-        // --- DIRECT SESSION CREATION (No Magic Link Redirect) ---
-        // Generate a magic link token and immediately verify it server-side
+        // --- DIRECT SESSION CREATION ---
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'magiclink',
             email: eduEmail
@@ -166,30 +162,20 @@ export async function POST(request: Request) {
 
         if (linkError) throw linkError;
 
-        // Extract the token from the action link
-        const actionLink = linkData.properties.action_link;
         const tokenHash = linkData.properties.hashed_token;
-
-        // Verify the OTP server-side to create a session immediately
         const { data: sessionData, error: verifyError } = await supabaseAdmin.auth.verifyOtp({
             token_hash: tokenHash,
             type: 'magiclink'
         });
 
-        if (verifyError) {
-            console.error('OTP Verify Error:', verifyError);
-            throw verifyError;
-        }
+        if (verifyError) throw verifyError;
 
-        console.log('ODTÜ Auth Success:', fullName, 'Dept:', department);
-
-        // Return session tokens directly - no redirect needed!
         return NextResponse.json({
             success: true,
             studentInfo: {
                 fullName: fullName?.trim(),
                 username: username,
-                department: department
+                department: detectedDept || 'Hazırlık'
             },
             session: sessionData.session ? {
                 access_token: sessionData.session.access_token,

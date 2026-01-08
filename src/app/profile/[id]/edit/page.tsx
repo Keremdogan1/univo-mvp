@@ -22,11 +22,13 @@ interface PrivacySettings {
   show_interests: boolean;
   show_activities: boolean;
   show_friends: boolean;
+  show_polls: boolean;
 }
 
 interface Profile {
   id: string;
   full_name: string;
+  nickname?: string;
   avatar_url?: string;
   department?: string;
   class_year?: string;
@@ -48,6 +50,20 @@ const CLASS_OPTIONS = [
   'Yüksek Lisans', 'Doktora', 'Mezun', 'Akademisyen'
 ];
 
+const cleanDept = (dept?: string) => {
+    if (!dept) return '';
+    return dept
+        .replace(/\.base/gi, '')
+        .replace(/base/gi, '')
+        .replace(/dbe/gi, '')
+        .replace(/\.hazırlık/gi, '')
+        .replace(/hazırlık/gi, '')
+        .split('.')
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+};
+
 export default function EditProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { user } = useAuth();
@@ -58,13 +74,14 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   const [formData, setFormData] = useState<Profile>({
     id: '',
     full_name: '',
+    nickname: '',
     avatar_url: '',
     department: '',
     class_year: '',
     bio: '',
     interests: [],
     social_links: { linkedin: '', github: '', website: '', twitter: '', instagram: '' },
-    privacy_settings: { show_email: false, show_interests: true, show_activities: true, show_friends: true }
+    privacy_settings: { show_email: false, show_interests: true, show_activities: true, show_friends: true, show_polls: true }
   });
   
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -93,13 +110,14 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
         setFormData({
           id: data.id,
           full_name: data.full_name || '',
+          nickname: data.nickname || '',
           avatar_url: data.avatar_url || '',
-          department: data.department || '',
+          department: cleanDept(data.department || ''),
           class_year: data.class_year || '',
           bio: data.bio || '',
           interests: data.interests || [],
           social_links: data.social_links || { linkedin: '', github: '', website: '', twitter: '', instagram: '' },
-          privacy_settings: data.privacy_settings || { show_email: false, show_interests: true, show_activities: true, show_friends: true }
+          privacy_settings: data.privacy_settings || { show_email: false, show_interests: true, show_activities: true, show_friends: true, show_polls: true }
         });
       }
     } catch (error) {
@@ -127,14 +145,17 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   };
 
   const handlePrivacyToggle = (key: keyof PrivacySettings) => {
-      setFormData(prev => ({
-          ...prev,
-          privacy_settings: {
-              ...prev.privacy_settings!,
-              [key]: !prev.privacy_settings![key]
-          }
-      }));
-  };
+    setFormData(prev => {
+        const currentVal = prev.privacy_settings?.[key] ?? true; // Defaults to true
+        return {
+            ...prev,
+            privacy_settings: {
+                ...prev.privacy_settings!,
+                [key]: !currentVal
+            }
+        };
+    });
+};
 
   const handleInterestToggle = (interest: string) => {
     setFormData(prev => {
@@ -207,8 +228,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
 
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: id,
+        .update({
           full_name: formData.full_name,
           avatar_url: avatarUrl,
           department: formData.department,
@@ -218,15 +238,16 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
           social_links: formData.social_links,
           privacy_settings: formData.privacy_settings,
           updated_at: new Date().toISOString()
-        });
+        })
+        .eq('id', id);
 
       if (error) throw error;
 
       router.push(`/profile/${id}`);
       router.refresh();
-    } catch (error) {
-      console.error('Error updating profile:', JSON.stringify(error, null, 2));
-      toast.error(`Profil güncellenirken bir hata oluştu.`);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast.error(`Profil güncellenirken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`);
     } finally {
       setSaving(false);
     }
@@ -234,7 +255,10 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-[#0a0a0a]">
-        <div className="text-center text-neutral-600 dark:text-neutral-400">Yükleniyor...</div>
+        <div className="text-center">
+            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'var(--primary-color, #C8102E)', borderTopColor: 'transparent' }}></div>
+            <p className="text-neutral-600 dark:text-neutral-400">Yükleniyor...</p>
+        </div>
     </div>
   );
 
@@ -343,6 +367,20 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 flex items-center gap-1">
+                    <Quote size={14} className="text-neutral-500" /> Rumuz (Anonim Paylaşımlar İçin)
+                  </label>
+                  <input
+                    type="text"
+                    name="nickname"
+                    value={formData.nickname}
+                    onChange={handleChange}
+                    placeholder="Kampüs Kedisi, ODTÜ'lü..."
+                    className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded-md focus:ring-2 focus:ring-[#C8102E] focus:border-transparent outline-none bg-white dark:bg-neutral-800 dark:text-white"
+                  />
                 </div>
               </div>
             </div>
@@ -497,6 +535,22 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                             type="checkbox" 
                             checked={formData.privacy_settings?.show_friends} 
                             onChange={() => handlePrivacyToggle('show_friends')}
+                            className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
+                        />
+                    </label>
+
+                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                        <div className="flex items-center gap-3">
+                            {formData.privacy_settings?.show_polls !== false ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
+                            <div>
+                                <span className="font-medium text-neutral-900 dark:text-white block">Anket Katılımlarımı Göster</span>
+                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Katılımcı listesinde isminiz veya rumuzunuz görünür.</span>
+                            </div>
+                        </div>
+                        <input 
+                            type="checkbox" 
+                            checked={formData.privacy_settings?.show_polls !== false} 
+                            onChange={() => handlePrivacyToggle('show_polls')}
                             className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
                         />
                     </label>

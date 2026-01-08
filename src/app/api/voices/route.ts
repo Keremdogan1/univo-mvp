@@ -17,11 +17,12 @@ export async function GET(request: Request) {
     const sort = searchParams.get('sort');
 
 
+    // 1. Try with nickname
     let query = supabase
       .from('campus_voices')
       .select(`
         *,
-        profiles:user_id (full_name, department, avatar_url),
+        profiles:user_id (full_name, nickname, department, avatar_url, student_id),
         voice_reactions (user_id, reaction_type),
         voice_comments (id, content, created_at, user_id, user:user_id (full_name))
       `)
@@ -31,47 +32,97 @@ export async function GET(request: Request) {
       query = query.contains('tags', [tag]);
     }
 
-    if (sort === 'popular') {
-      query = query.order('created_at', { ascending: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
+    // Always sort by newest first by default or specified
+    query = query.order('created_at', { ascending: false });
 
-    const { data, error } = await query;
+    let { data, error } = await query as any;
+
+    // 2. Fallback if nickname column doesn't exist yet
+    if (error && error.message.includes('nickname')) {
+      console.warn('Nickname column missing, falling back...');
+      let fallbackQuery = supabase
+        .from('campus_voices')
+        .select(`
+          *,
+          profiles:user_id (full_name, department, avatar_url, student_id),
+          voice_reactions (user_id, reaction_type),
+          voice_comments (id, content, created_at, user_id, user:user_id (full_name))
+        `)
+        .eq('moderation_status', 'approved');
+      
+      if (tag) {
+        fallbackQuery = fallbackQuery.contains('tags', [tag]);
+      }
+      
+      fallbackQuery = fallbackQuery.order('created_at', { ascending: false });
+      
+      const fallbackResult = await fallbackQuery as any;
+      data = fallbackResult.data;
+      error = fallbackResult.error;
+    }
 
     if (error) {
       console.error('Error fetching voices:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const formattedData = data.map((voice: any) => {
+    const toTitleCase = (str: string) => {
+      if (!str) return str;
+      return str.split(' ').map(word => {
+        if (!word) return word;
+        return word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR');
+      }).join(' ');
+    };
+
+    const formattedData = (data as any[] || []).map((voice: any) => {
       const likes = voice.voice_reactions.filter((r: any) => r.reaction_type === 'like').length;
       const dislikes = voice.voice_reactions.filter((r: any) => r.reaction_type === 'dislike').length;
+      
+      const cleanDept = (dept: string) => {
+        if (!dept) return dept;
+        // Remove .base, BASE, DBE suffixes or variations
+        return dept.replace(/\.base$/i, '').replace(/\s*BASE$/i, '').replace(/\s*DBE$/i, '').trim();
+      };
+
+      // Map profile data based on anonymity
+      let user = voice.is_anonymous ? 
+        { full_name: 'Rumuzlu Öğrenci', nickname: voice.profiles?.nickname, department: '', avatar_url: null } : 
+        { ...voice.profiles };
+
+      if (user && user.full_name && !voice.is_anonymous) {
+        user.full_name = toTitleCase(user.full_name);
+      }
+      
+      if (user && user.department) {
+        user.department = cleanDept(user.department);
+      }
+
+      // Determine if user is verified (has student_id)
+      const isVerified = !voice.is_anonymous && voice.profiles?.student_id && voice.profiles.student_id.length > 0;
 
       return {
         id: voice.id,
-        user_id: voice.user_id, // include user_id
+        user_id: voice.user_id,
         content: voice.content,
-        created_at: voice.created_at,
         is_anonymous: voice.is_anonymous,
         is_editors_choice: voice.is_editors_choice,
+        is_verified: isVerified,
         tags: voice.tags,
-        user: voice.is_anonymous ?
-          { full_name: 'Rumuzu Öğrenci', department: 'Kampüs', avatar_url: null } :
-          voice.profiles,
+        user,
         counts: {
           likes,
           dislikes,
           comments: voice.voice_comments.length
         },
-        reactions: voice.voice_reactions,
-        comments: voice.voice_comments.map((c: any) => ({
+        reactions: voice.voice_reactions || [],
+        comments: (voice.voice_comments || []).map((c: any) => ({
           id: c.id,
           content: c.content,
           created_at: c.created_at,
-          user: c.user?.full_name || 'Kullanıcı',
+          user: toTitleCase(c.user?.full_name || 'Kullanıcı'),
           user_id: c.user_id
-        }))
+        })),
+        created_at: voice.created_at
       };
     });
 

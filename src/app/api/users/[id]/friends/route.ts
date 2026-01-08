@@ -98,17 +98,34 @@ export async function GET(
        }, { status: 500 });
     }
 
+    const toTitleCase = (str: string) => {
+      if (!str) return str;
+      return str.split(' ').map(word => {
+        if (!word) return word;
+        const trimmed = word.trim();
+        if (!trimmed) return '';
+        return trimmed.charAt(0).toLocaleUpperCase('tr-TR') + trimmed.slice(1).toLocaleLowerCase('tr-TR');
+      }).filter(Boolean).join(' ');
+    };
+
     // Combine data
     const friends = friendships.map((f: any) => {
       // Logic: if I am requester, friend is receiver.
       const friendId = f.requester_id === userId ? f.receiver_id : f.requester_id;
       
-      const profile = profiles?.find((p: any) => p.id === friendId);
+      const p = profiles?.find((p: any) => p.id === friendId);
       
-      if (!profile) return null;
+      if (!p) return null;
+
+      const cleanDept = (dept: string) => {
+        if (!dept) return dept;
+        return dept.replace(/\.base$/i, '').replace(/\s*BASE$/i, '').replace(/\s*DBE$/i, '').trim();
+      };
 
       return {
-        ...profile,
+        ...p,
+        full_name: toTitleCase(p.full_name),
+        department: cleanDept(p.department),
         friendshipId: f.id,
         friendsSince: f.created_at
       };

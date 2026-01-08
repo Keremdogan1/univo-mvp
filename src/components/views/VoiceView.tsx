@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus } from 'lucide-react';
+import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -18,9 +18,11 @@ interface Voice {
     created_at: string;
     is_anonymous: boolean;
     is_editors_choice: boolean;
+    is_verified?: boolean;
     tags: string[] | null;
     user: {
         full_name: string;
+        nickname?: string;
         department: string;
         avatar_url?: string;
     };
@@ -97,6 +99,12 @@ export default function VoiceView() {
     // Filter state
     const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
     const [allTags, setAllTags] = useState<{ tag: string, count: number }[]>([]);
+
+    // Poll Voters State
+    const [showVotersModal, setShowVotersModal] = useState(false);
+    const [voters, setVoters] = useState<{ user_id: string, display_name: string, option_index: number }[]>([]);
+    const [isLoadingVoters, setIsLoadingVoters] = useState(false);
+    const [selectedVoterOption, setSelectedVoterOption] = useState(0);
 
     useEffect(() => {
         fetchVoices();
@@ -564,8 +572,9 @@ export default function VoiceView() {
 
         const { data, error } = await supabase
             .from('poll_votes')
-            .select('option_index, user_id')
-            .eq('poll_id', pollId);
+            .select('option_index, user_id, profiles:user_id!inner(id, is_archived)')
+            .eq('poll_id', pollId)
+            .eq('profiles.is_archived', false);
 
         if (error) {
             console.error('Fetch Results Error:', error);
@@ -610,6 +619,26 @@ export default function VoiceView() {
         fetchPoll();
     }, [user]);
 
+    const fetchVoters = async () => {
+        if (!activePoll) return;
+        setIsLoadingVoters(true);
+        setSelectedVoterOption(0);
+        setShowVotersModal(true);
+        try {
+            const pollId = activePoll.question.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_');
+            const res = await fetch(`/api/poll/${pollId}/voters`);
+            const data = await res.json();
+            if (data.voters) {
+                setVoters(data.voters);
+            }
+        } catch (e) {
+            console.error('Failed to fetch voters', e);
+            toast.error('Katılımcılar yüklenemedi');
+        } finally {
+            setIsLoadingVoters(false);
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Newspaper Header - Sticky on mobile */}
@@ -636,7 +665,8 @@ export default function VoiceView() {
                         {activeTagFilter && (
                             <button
                                 onClick={() => setActiveTagFilter(null)}
-                                className="text-xs font-black uppercase bg-neutral-900 text-white dark:bg-white dark:text-black px-3 py-1.5 rounded-full flex items-center gap-2 transition-all hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white shadow-sm"
+                                className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white"
+                                style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                             >
                                 <span>{activeTagFilter}</span>
                                 <X size={12} strokeWidth={3} />
@@ -731,9 +761,10 @@ export default function VoiceView() {
                             <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz bir ses yok. İlk sen ol!</div>
                         ) : (
                             voices.map((voice) => {
-                                const myReaction = user ? voice.reactions.find(r => r.user_id === user.id)?.reaction_type : null;
-                                const likeCount = voice.reactions.filter(r => r.reaction_type === 'like').length;
-                                const dislikeCount = voice.reactions.filter(r => r.reaction_type === 'dislike').length;
+                                const reactions = voice.reactions || [];
+                                const myReaction = user ? reactions.find(r => r.user_id === user.id)?.reaction_type : null;
+                                const likeCount = reactions.filter(r => r.reaction_type === 'like').length;
+                                const dislikeCount = reactions.filter(r => r.reaction_type === 'dislike').length;
                                 const netVote = likeCount - dislikeCount;
 
                                 return (
@@ -758,16 +789,25 @@ export default function VoiceView() {
                                                 {/* Meta */}
                                                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                     {voice.is_anonymous ? (
-                                                        <span className="font-bold text-neutral-600 dark:text-neutral-400 italic">Rumuzlu Öğrenci</span>
+                                                        <span className="font-bold text-neutral-600 dark:text-neutral-400 italic">
+                                                            {voice.user.nickname || 'Rumuzlu Öğrenci'}
+                                                        </span>
                                                     ) : (
-                                                        <Link href={`/profile/${voice.user_id}`} className="font-bold text-neutral-900 dark:text-white hover:underline">
-                                                            {voice.user.full_name}
-                                                        </Link>
+                                                        <>
+                                                            <Link href={`/profile/${voice.user_id}`} className="font-bold text-neutral-900 dark:text-white hover:underline flex items-center gap-1">
+                                                                {voice.user.full_name}
+                                                                {voice.is_verified && (
+                                                                    <BadgeCheck size={16} className="text-blue-500 fill-blue-500" />
+                                                                )}
+                                                            </Link>
+                                                        </>
                                                     )}
 
-                                                    <span className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border-l border-neutral-300 dark:border-neutral-700 pl-2 ml-1">
-                                                        {voice.user.department || 'Kampüs'}
-                                                    </span>
+                                                    {voice.user.department && (
+                                                        <span className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border-l border-neutral-300 dark:border-neutral-700 pl-2 ml-1">
+                                                            {voice.user.department}
+                                                        </span>
+                                                    )}
 
 
                                                     {/* 3-Dot Menu (Moved to Top Right) */}
@@ -1017,9 +1057,10 @@ export default function VoiceView() {
                                                             key={idx}
                                                             onClick={() => handlePollVote(idx)}
                                                             className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden ${isSelected
-                                                                ? 'border-black dark:border-white bg-neutral-50 dark:bg-neutral-800'
-                                                                : 'border-neutral-200 dark:border-neutral-800 hover:border-black dark:hover:border-white'
+                                                                ? 'border-primary dark:border-primary bg-primary/5 dark:bg-primary/10'
+                                                                : 'border-neutral-200 dark:border-neutral-800 hover:border-primary dark:hover:border-primary'
                                                                 }`}
+                                                            style={isSelected ? { borderColor: 'var(--primary-color)' } : {}}
                                                         >
                                                             {showResults && (
                                                                 <div
@@ -1029,16 +1070,32 @@ export default function VoiceView() {
                                                             )}
 
                                                             <div className="relative p-3 flex justify-between items-center z-10 font-bold">
-                                                                <span className={isSelected ? 'text-black dark:text-white' : 'text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors'}>
+                                                                <span className={isSelected ? 'text-primary dark:text-primary-light' : 'text-neutral-800 dark:text-neutral-200 group-hover:text-primary transition-colors'}>
                                                                     {option}
                                                                 </span>
-                                                                {showResults && <span className="text-sm font-black dark:text-white">{percentage}%</span>}
+                                                                {showResults && <span className="text-sm font-black text-primary dark:text-primary-light">{percentage}%</span>}
                                                             </div>
                                                         </button>
                                                     );
                                                 })}
                                             </div>
-                                            {userVote !== null && <div className="text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium">{totalVotes} oy kullanıldı</div>}
+                                            {userVote !== null && (
+                                                <div className="flex flex-col items-center mt-3">
+                                                    {totalVotes > 0 ? (
+                                                        <button 
+                                                            onClick={fetchVoters}
+                                                            className="text-xs text-neutral-500 dark:text-neutral-400 font-bold hover:text-primary transition-all relative group py-1"
+                                                        >
+                                                            {totalVotes} oy kullanıldı
+                                                            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full"></span>
+                                                        </button>
+                                                    ) : (
+                                                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium italic">
+                                                            Henüz oy kullanılmadı
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -1051,20 +1108,31 @@ export default function VoiceView() {
                                     </h3>
                                     <div className="space-y-3">
                                         {allTags.length > 0 ? (
-                                            allTags.slice(0, 5).map((topic, index) => (
-                                                <div key={topic.tag} onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-xl font-serif font-black text-neutral-300 dark:text-neutral-700 w-6">{index + 1}</span>
-                                                        <div className="flex flex-col">
-                                                            <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
-                                                                {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
-                                                            </span>
-                                                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                            allTags.slice(0, 5).map((topic, index) => {
+                                                const isActive = activeTagFilter === topic.tag;
+                                                return (
+                                                    <div 
+                                                        key={topic.tag} 
+                                                        onClick={() => setActiveTagFilter(isActive ? null : topic.tag)} 
+                                                        className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-all border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${
+                                                            isActive 
+                                                                ? 'bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/30' 
+                                                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`text-xl font-serif font-black w-6 ${isActive ? 'text-primary' : 'text-neutral-300 dark:text-neutral-700'}`}>{index + 1}</span>
+                                                            <div className="flex flex-col">
+                                                                <span className={`font-bold transition-colors font-serif ${isActive ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
+                                                                    {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
+                                                                </span>
+                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                                            </div>
                                                         </div>
+                                                        <ArrowRight size={16} className={`transition-transform ${isActive ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
                                                     </div>
-                                                    <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <div className="text-center py-6 text-neutral-400 text-sm italic">
                                                 Henüz gündem oluşmadı.
@@ -1111,6 +1179,95 @@ export default function VoiceView() {
                     </div>
                 </div>
             </div>
+
+            {/* Poll Voters Modal */}
+            {showVotersModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowVotersModal(false)} />
+                    <div className="relative w-full max-w-lg bg-white dark:bg-neutral-900 border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] overflow-hidden animate-in zoom-in duration-200">
+                        {/* Header */}
+                        <div className="flex justify-between items-center p-6 border-b-4 border-black dark:border-white bg-neutral-50 dark:bg-neutral-800">
+                            <h3 className="text-xl font-bold font-serif uppercase tracking-tight dark:text-white flex items-center gap-2">
+                                <Users size={24} className="text-primary" />
+                                Oy Kullananlar
+                            </h3>
+                            <button onClick={() => setShowVotersModal(false)} className="hover:text-primary transition-colors p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Horizontal Options Tabs */}
+                        <div className="px-6 py-4 bg-white dark:bg-neutral-900 border-b-2 border-neutral-100 dark:border-neutral-800">
+                            <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2">
+                                {activePoll?.options.map((option, idx) => {
+                                    const count = voters.filter(v => v.option_index === idx).length;
+                                    const isActive = selectedVoterOption === idx;
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setSelectedVoterOption(idx)}
+                                            className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all flex items-center gap-2 border-2 ${
+                                                isActive 
+                                                ? 'text-white shadow-sm' 
+                                                : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700 dark:hover:border-primary'
+                                            }`}
+                                            style={isActive ? { 
+                                                backgroundColor: 'var(--primary-color, #C8102E)', 
+                                                borderColor: 'var(--primary-color, #C8102E)' 
+                                            } : {}}
+                                        >
+                                            {option}
+                                            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'}`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Voters List */}
+                        <div className="p-6 max-h-[50vh] overflow-y-auto bg-neutral-50/50 dark:bg-neutral-900/50">
+                            {isLoadingVoters ? (
+                                <div className="text-center py-12 text-neutral-400 animate-pulse font-bold flex flex-col items-center gap-2">
+                                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    Yükleniyor...
+                                </div>
+                            ) : voters.length === 0 ? (
+                                <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz katılımcı verisi yok.</div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {voters.filter(v => v.option_index === selectedVoterOption).length === 0 ? (
+                                        <div className="text-center py-12 text-neutral-400 italic">Bu seçeneğe henüz oy verilmemiş.</div>
+                                    ) : (
+                                        <div className="flex flex-col gap-3">
+                                            {voters
+                                                .filter(v => v.option_index === selectedVoterOption)
+                                                .map(voter => (
+                                                    <div 
+                                                        key={voter.user_id}
+                                                        className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm"
+                                                    >
+                                                        <div 
+                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black shadow-sm"
+                                                            style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                                        >
+                                                            {voter.display_name.charAt(0)}
+                                                        </div>
+                                                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200 truncate">
+                                                            {voter.display_name.split(' ').map((word: string) => word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR')).join(' ')}
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

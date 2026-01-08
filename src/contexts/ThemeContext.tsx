@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from './AuthContext';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type ColorTheme = 'default' | 'blue' | 'green' | 'purple' | 'orange';
@@ -16,21 +18,42 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const { user, profile } = useAuth();
   const [theme, setTheme] = useState<Theme>('system');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
   const [colorTheme, setColorTheme] = useState<ColorTheme>('default');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const lastSyncedRef = React.useRef<string>('');
 
+  // Initial load from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
+    try {
+      const savedTheme = localStorage.getItem('theme') as Theme | null;
+      const savedColorTheme = localStorage.getItem('colorTheme') as ColorTheme | null;
+      
+      if (savedTheme) setTheme(savedTheme);
+      if (savedColorTheme) setColorTheme(savedColorTheme);
+    } catch (e) {
+      console.warn('LocalStorage not available');
     }
-
-    const savedColorTheme = localStorage.getItem('colorTheme') as ColorTheme | null;
-    if (savedColorTheme) {
-      setColorTheme(savedColorTheme);
-    }
+    setIsInitialLoad(false);
   }, []);
+
+  // Update from profile when it loads (only if different)
+  useEffect(() => {
+    if (profile && (profile as any).theme_preference) {
+      const { theme: dbTheme, colorTheme: dbColorTheme } = (profile as any).theme_preference;
+      
+      if (dbTheme && dbTheme !== theme) {
+        setTheme(dbTheme);
+      }
+      if (dbColorTheme && dbColorTheme !== colorTheme) {
+        setColorTheme(dbColorTheme);
+      }
+      // Initialize synced ref to avoid immediate re-sync
+      lastSyncedRef.current = JSON.stringify({ theme: dbTheme, colorTheme: dbColorTheme });
+    }
+  }, [profile]);
 
   // Handle Light/Dark Mode
   useEffect(() => {
@@ -49,10 +72,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('light', 'dark');
       root.classList.add(activeTheme);
 
-      if (theme !== 'system') {
-        localStorage.setItem('theme', theme);
-      } else {
-        localStorage.removeItem('theme');
+      try {
+        if (theme !== 'system') {
+          localStorage.setItem('theme', theme);
+        } else {
+          localStorage.removeItem('theme');
+        }
+      } catch (e) {}
+
+      // Sync to DB (debounced/checked)
+      if (!isInitialLoad && user) {
+        syncThemeToDb(theme, colorTheme);
       }
     };
 
@@ -67,14 +97,42 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, [theme, user]);
 
   // Handle Color Theme
   useEffect(() => {
     const root = window.document.documentElement;
     root.setAttribute('data-theme-color', colorTheme);
-    localStorage.setItem('colorTheme', colorTheme);
-  }, [colorTheme]);
+    try {
+      localStorage.setItem('colorTheme', colorTheme);
+    } catch (e) {}
+
+    // Sync to DB
+    if (!isInitialLoad && user) {
+      syncThemeToDb(theme, colorTheme);
+    }
+  }, [colorTheme, user]);
+
+  const syncThemeToDb = async (t: Theme, ct: ColorTheme) => {
+    if (!user) return;
+    
+    // Check if truly different from last sync
+    const syncKey = JSON.stringify({ theme: t, colorTheme: ct });
+    if (lastSyncedRef.current === syncKey) return;
+    
+    lastSyncedRef.current = syncKey;
+
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          theme_preference: { theme: t, colorTheme: ct }
+        })
+        .eq('id', user.id);
+    } catch (error) {
+      console.error('Error syncing theme to DB:', error);
+    }
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, colorTheme, setColorTheme }}>

@@ -65,11 +65,12 @@ export default function CreateEventPage() {
             .select('user_id')
             .eq('community_id', communityId);
           
-          if (followers && followers.length > 0) {
+          if (followers && followers.length > 0 && user) {
               const notifications = followers.map(f => ({
                   user_id: f.user_id,
-                  content: `Takip ettiğiniz topluluk yeni bir etkinlik yayınladı: ${formData.title}`,
-                  link: `/events/${data.id}`,
+                  type: 'event_created',
+                  actor_id: user.id,
+                  message: `Takip ettiğiniz topluluk yeni bir etkinlik yayınladı: ${formData.title}`,
                   read: false
               }));
               
