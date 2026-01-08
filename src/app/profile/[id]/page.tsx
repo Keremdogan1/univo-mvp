@@ -252,9 +252,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
   };
 
   const handleProfileDetection = async () => {
-    if (!user || detecting) return;
+    if (!user || detecting || sessionStorage.getItem('univo_detection_dismissed')) return;
     
-    // Check if already confirmed or detected recently
+    // Check if already confirmed
     if (user.user_metadata.profile_confirmed) return;
 
     try {
@@ -266,7 +266,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         });
         
         const data = await response.json();
-        if (data.success && data.detection.detectedDepartment) {
+        if (data.success && data.detection.detectedClass) {
             setDetectionResult(data.detection);
             // Only show card if the detected info is DIFFERENT from current profile
             const isDifferent = data.detection.detectedDepartment !== profile?.department || 
@@ -281,6 +281,12 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
     } finally {
         setDetecting(false);
     }
+  };
+
+  const dismissDetection = () => {
+      setShowDetectionCard(false);
+      // Optional: Store in session to not show again until refresh
+      sessionStorage.setItem('univo_detection_dismissed', 'true');
   };
 
   const confirmDetection = async () => {
@@ -550,7 +556,10 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                     <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4 leading-relaxed">
                         ODTÜClass derslerini analiz ettik. Bilgilerin şu şekilde görünüyor:
                         <div className="mt-2 font-bold text-neutral-900 dark:text-white bg-white/50 dark:bg-black/20 p-2 rounded border border-primary/20">
-                            {detectionResult.detectedDepartment} · {detectionResult.detectedClass}
+                            {detectionResult.detectedDepartment 
+                                ? `${detectionResult.detectedDepartment} · ${detectionResult.detectedClass}`
+                                : detectionResult.detectedClass
+                            }
                         </div>
                     </p>
                     
@@ -562,12 +571,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             Evet, Doğru
                         </button>
                         <button 
-                            onClick={() => router.push(`/profile/${targetId}/edit`)}
+                            onClick={dismissDetection}
                             className="flex-1 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                         >
-                            Değil, Düzenle
+                            Kapat
                         </button>
                     </div>
+                    
+                    <button 
+                        onClick={() => router.push(`/profile/${targetId}/edit`)}
+                        className="w-full mt-2 py-1.5 text-xs text-neutral-500 hover:text-primary transition-colors hover:underline"
+                    >
+                        Bilgiler Yanlış, Kendim Düzenleyeceğim
+                    </button>
                 </div>
             )}
 

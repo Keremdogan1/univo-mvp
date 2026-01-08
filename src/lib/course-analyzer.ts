@@ -36,13 +36,14 @@ export const DEPT_CODES: Record<string, string> = {
   'PSY': 'Psikoloji',
   'PHIL': 'Felsefe',
   'HIST': 'Tarih',
-  'DBE': 'Hazırlık (DBE)',
+  'DBE': 'Hazırlık',
+  'BASE': 'Hazırlık',
   'ENG': 'İngilizce',
   'EFL': 'İngilizce',
 };
 
 // Common/service courses that don't indicate department
-const COMMON_DEPTS = ['MATH', 'PHYS', 'CHEM', 'ENG', 'HIST', 'TK', 'IS', 'EFL', 'MUS', 'PE'];
+const COMMON_DEPTS = ['MATH', 'PHYS', 'CHEM', 'ENG', 'HIST', 'TK', 'IS', 'EFL', 'MUS', 'PE', 'BASE', 'DBE'];
 
 export interface CourseInfo {
   name: string;
@@ -68,7 +69,7 @@ export interface DetectionResult {
  *           "DBE 1010 - English" -> { dept: "DBE", num: 1010 }
  */
 function parseCourseCode(courseName: string): { dept: string; num: number } | null {
-  // Match patterns like "CENG 101", "EE 101", "DBE 1010"
+  // Match patterns like "CENG 101", "EE 101", "DBE 1010", "BASE 101"
   const match = courseName.match(/^([A-Z]{2,4})\s*(\d{3,4})/i);
   if (match) {
     return {
@@ -85,8 +86,8 @@ function parseCourseCode(courseName: string): { dept: string; num: number } | nu
  * DBE courses (1xxx) = Prep
  */
 function getClassLevel(courseNum: number, dept: string): string {
-  if (dept === 'DBE') return 'Hazırlık';
-  if (courseNum >= 1000) return 'Hazırlık'; // DBE-style numbering
+  if (dept === 'DBE' || dept === 'BASE' || dept === 'EFL') return 'Hazırlık';
+  if (courseNum >= 1000 && (dept === 'DBE' || dept === 'BASE')) return 'Hazırlık'; // DBE-style numbering
   
   const level = Math.floor(courseNum / 100);
   switch (level) {
@@ -115,7 +116,7 @@ export function analyzeCourses(courses: CourseInfo[]): DetectionResult {
     const { dept, num } = parsed;
 
     // Check if prep student
-    if (dept === 'DBE' || dept === 'EFL') {
+    if (dept === 'DBE' || dept === 'BASE' || dept === 'EFL') {
       isPrep = true;
     }
 
@@ -163,14 +164,13 @@ export function analyzeCourses(courses: CourseInfo[]): DetectionResult {
   if (maxDeptCount >= 3) confidence = 'high';
   else if (maxDeptCount >= 2) confidence = 'medium';
 
-  // For prep students, department detection confidence is low
-  if (isPrep && !detectedDeptCode) {
-    confidence = 'low';
-  }
+  // If it's a prep student and we didn't find a real department, or it's just 'Hazırlık', clear it
+  const finalDeptName = detectedDeptCode ? (DEPT_CODES[detectedDeptCode] || detectedDeptCode) : null;
+  const isRedundantDept = isPrep && (finalDeptName === 'Hazırlık' || !detectedDeptCode);
 
   return {
-    detectedDepartment: detectedDeptCode ? (DEPT_CODES[detectedDeptCode] || detectedDeptCode) : null,
-    detectedDepartmentCode: detectedDeptCode,
+    detectedDepartment: isRedundantDept ? null : finalDeptName,
+    detectedDepartmentCode: isRedundantDept ? null : detectedDeptCode,
     detectedClass,
     confidence,
     isPrep,
