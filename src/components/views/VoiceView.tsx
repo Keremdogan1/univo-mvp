@@ -41,6 +41,8 @@ interface Voice {
         created_at: string;
         user: string;
         user_id: string;
+        user_avatar?: string;
+        user_theme?: string;
     }>;
 }
 
@@ -578,7 +580,7 @@ export default function VoiceView() {
                                 </div>
                                 {/* Back: Global */}
                                 <div 
-                                    className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md flex items-center justify-center"
+                                    className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md flex items-center justify-center transform rotate-x-180"
                                     style={{ transform: 'rotateX(180deg)' }}
                                 >
                                     <img src="/earth_image.jpg" alt="Global" className="w-full h-full object-cover" />
@@ -588,7 +590,7 @@ export default function VoiceView() {
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 mt-4">
+                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-8 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 mt-4">
                     <span>SAYI: {issueNumber}</span>
                     <span>{isGlobalMode ? 'DÜNYA GÜNDEMİ' : 'SERBEST KÜRSÜ'}</span>
                     <span>{formattedDate.toUpperCase()}</span>
@@ -778,8 +780,12 @@ export default function VoiceView() {
                                                                 <div className="flex-1">
                                                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                                         {voice.is_anonymous ? (
-                                                                            <span className="font-bold text-neutral-600 dark:text-neutral-400 italic">
+                                                                            <span className="font-bold text-neutral-600 dark:text-neutral-400 italic flex items-center gap-1">
                                                                                 {voice.user.nickname || 'Rumuzlu Öğrenci'}
+                                                                                <span className="bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1" title="Anonim Paylaşım">
+                                                                                    <Ghost size={10} />
+                                                                                    Gizli
+                                                                                </span>
                                                                             </span>
                                                                         ) : (
                                                                             <Link href={`/profile/${voice.user_id}`} className="font-bold text-neutral-900 dark:text-white hover:underline">
@@ -914,8 +920,15 @@ export default function VoiceView() {
                                                                             <div className="space-y-4 mb-4">
                                                                                 {voice.comments.map(comment => (
                                                                                     <div key={comment.id} className="flex gap-3">
-                                                                                        <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center text-xs font-bold text-neutral-500 dark:text-neutral-400">
-                                                                                            {comment.user.charAt(0)}
+                                                                                        <div 
+                                                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden shrink-0 border border-neutral-200 dark:border-neutral-700"
+                                                                                            style={{ backgroundColor: comment.user_theme || '#999' }}
+                                                                                        >
+                                                                                            {comment.user_avatar ? (
+                                                                                                <img src={comment.user_avatar} alt={comment.user} className="w-full h-full object-cover" />
+                                                                                            ) : (
+                                                                                                comment.user.charAt(0)
+                                                                                            )}
                                                                                         </div>
                                                                                         <div className="flex-1 bg-neutral-50 dark:bg-neutral-900 rounded-2xl rounded-tl-none p-3">
                                                                                             <div className="flex justify-between items-baseline mb-1">
@@ -934,7 +947,7 @@ export default function VoiceView() {
                                                                                     <input
                                                                                         type="text"
                                                                                         placeholder="Yorumunu yaz..."
-                                                                                        className="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-sm focus:outline-none focus:border-black dark:focus:border-[#C8102E] font-serif dark:text-white transition-colors"
+                                                                                        className="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-sm focus:outline-none focus:border-black dark:focus:border-white font-serif dark:text-white transition-colors"
                                                                                         value={newComment}
                                                                                         onChange={(e) => setNewComment(e.target.value)}
                                                                                         autoFocus

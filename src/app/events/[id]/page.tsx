@@ -108,17 +108,17 @@ export default async function EventDetailPage({
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">
-             {/* Event Poster (Moved Here) */}
+             {/* Lead / Excerpt (Moved Up) */}
+             <div className="text-xl font-serif font-medium leading-relaxed italic border-l-4 border-neutral-300 dark:border-neutral-700 pl-6 mb-8 text-neutral-800 dark:text-neutral-300 transition-colors">
+                "{event.excerpt}"
+             </div>
+
+             {/* Event Poster (Moved Down) */}
              {event.image_url && (
                <div className="mb-8 rounded-xl overflow-hidden shadow-lg border-2 border-neutral-200 dark:border-neutral-800">
                   <img src={event.image_url} alt={event.title} className="w-full h-auto object-cover max-h-[500px]" />
                </div>
              )}
-
-             {/* Lead / Excerpt */}
-             <div className="text-xl font-serif font-medium leading-relaxed italic border-l-4 border-neutral-300 dark:border-neutral-700 pl-6 mb-8 text-neutral-800 dark:text-neutral-300 transition-colors">
-                "{event.excerpt}"
-             </div>
 
              {/* Description Body */}
              <div className="prose prose-lg max-w-none font-serif text-neutral-900 dark:text-neutral-200 leading-relaxed prose-headings:font-sans prose-headings:font-bold prose-headings:uppercase prose-p:text-neutral-800 dark:prose-p:text-neutral-300 transition-colors">

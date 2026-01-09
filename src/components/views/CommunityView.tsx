@@ -114,7 +114,7 @@ export default function CommunityView() {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-4 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-8 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <span>ÖĞRENCİ BÜLTENİ</span>
           <span>{formattedDate.toUpperCase()}</span>

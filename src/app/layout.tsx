@@ -71,7 +71,7 @@ export default function RootLayout({
             <MetuVerificationGuard>
               <Header />
               <GlobalSearch />
-              <main className="flex-1 bg-white dark:bg-[#0a0a0a] transition-colors duration-300 pb-20 md:pb-0">
+              <main className="flex-1 bg-white dark:bg-[#0a0a0a] pb-20 md:pb-0">
                 <Toaster
                   position="top-center"
                   richColors
