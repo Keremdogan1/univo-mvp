@@ -567,7 +567,7 @@ export default function OfficialView() {
                 {[
                     { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="shrink-0"/> },
                     { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="shrink-0"/> },
-                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.filter(item => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0"/> },
+                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.filter((item: any) => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0"/> },
                     { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0"/> },
                     { id: 'history', label: '', icon: <Trash2 size={14} className="shrink-0"/>, count: readIds.length }
                 ].map(tab => {
