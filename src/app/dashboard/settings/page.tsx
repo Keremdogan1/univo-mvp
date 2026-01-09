@@ -350,7 +350,7 @@ export default function SettingsPage() {
                         </div>
                          <a 
                             href={`mailto:destek@univo.app?subject=Topluluk Sahiplik Devri: ${community.name}&body=Merhaba, ${community.name} topluluğunun yönetimini devretmek istiyorum. Devralacak yeni yöneticinin bilgileri:`}
-                            className="bg-red-600 text-white dark:text-black border-2 border-transparent px-4 py-2 font-bold text-xs uppercase hover:bg-red-700 transition-colors"
+                            className="bg-red-600 !text-white dark:!text-black border-2 border-transparent px-4 py-2 font-bold text-xs uppercase hover:bg-red-700 transition-colors"
                         >
                             Destek ile İletişime Geç
                         </a>
@@ -364,7 +364,7 @@ export default function SettingsPage() {
                         <button 
                             type="button"
                             onClick={handleDeleteCommunity}
-                            className="bg-red-600 text-white px-4 py-2 font-bold text-xs uppercase hover:bg-red-700 transition-colors"
+                            className="bg-red-600 !text-white dark:!text-black px-4 py-2 font-bold text-xs uppercase hover:bg-red-700 transition-colors"
                         >
                             Topluluğu Sil
                         </button>
