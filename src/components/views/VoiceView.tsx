@@ -516,22 +516,7 @@ export default function VoiceView() {
                     <span>{formattedDate.toUpperCase()}</span>
                 </div>
 
-                {/* Desktop Toggle Switch - Absolute Right */}
-                <div
-                    className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 items-center cursor-pointer select-none group"
-                    onClick={() => setIsGlobalMode(!isGlobalMode)}
-                    title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
-                >
-                    <div className="mr-3 font-bold font-serif text-sm transition-colors text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300">
-                        {isGlobalMode ? 'ODTÜ' : 'GLOBAL'}
-                    </div>
-                    <div className={`w-14 h-7 rounded-full p-1 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
-                        {/* Track Background for ODTU mode */}
-                        {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
 
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-7' : 'translate-x-0'}`} />
-                    </div>
-                </div>
             </div>
 
             {isGlobalMode ? (
@@ -571,16 +556,34 @@ export default function VoiceView() {
                                     <MessageSquare size={24} />
                                     Öğrenci Kürsüsü
                                 </h3>
-                                {activeTagFilter && (
-                                    <button
-                                        onClick={() => setActiveTagFilter(null)}
-                                        className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white"
-                                        style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                
+                                <div className="flex items-center gap-4">
+                                     {/* Switch Moved Here */}
+                                    <div
+                                        className="hidden md:flex items-center cursor-pointer select-none group"
+                                        onClick={() => setIsGlobalMode(!isGlobalMode)}
+                                        title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
                                     >
-                                        <span>{activeTagFilter}</span>
-                                        <X size={12} strokeWidth={3} />
-                                    </button>
-                                )}
+                                        <div className="mr-2 font-bold font-serif text-xs transition-colors text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300">
+                                            {isGlobalMode ? 'ODTÜ' : 'GLOBAL'}
+                                        </div>
+                                        <div className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
+                                            {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
+                                            <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                        </div>
+                                    </div>
+
+                                    {activeTagFilter && (
+                                        <button
+                                            onClick={() => setActiveTagFilter(null)}
+                                            className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white"
+                                            style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                        >
+                                            <span>{activeTagFilter}</span>
+                                            <X size={12} strokeWidth={3} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Input Area */}
@@ -892,12 +895,10 @@ export default function VoiceView() {
                             {/* Desktop Sidebar Content (Hidden on Mobile) */}
                             <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:pr-2">
                                 {/* Desktop Poll & Trending duplicated for layout */}
-                                {/* This section can be refined but keeping structure intact */}
                                 <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
                                     <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3">
                                         Haftanın Anketi
                                     </h3>
-                                    {/* Simplified Re-render of Poll for Sidebar */}
                                     {activePoll && (
                                         <>
                                             <h4 className="font-bold text-sm mb-3 font-serif leading-tight dark:text-white">"{activePoll.question}"</h4>
@@ -920,6 +921,73 @@ export default function VoiceView() {
                                             </div>
                                         </>
                                     )}
+                                </div>
+
+                                {/* Trending Topics (Desktop) */}
+                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
+                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3 flex items-center gap-2">
+                                        <TrendingUp size={18} style={{ color: 'var(--primary-color, #C8102E)' }} />
+                                        Kampüste Gündem
+                                    </h3>
+                                    <div className="space-y-2">
+                                        {allTags.length > 0 ? (
+                                            allTags.slice(0, 5).map((topic, index) => (
+                                                <div 
+                                                    key={topic.tag} 
+                                                    onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} 
+                                                    className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-neutral-50 dark:bg-neutral-800' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-serif font-black text-neutral-400 dark:text-neutral-600 w-4">{index + 1}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className={`font-bold text-sm transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
+                                                                {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
+                                                            </span>
+                                                            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowRight size={14} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-4 text-neutral-400 text-xs italic">
+                                                Henüz gündem oluşmadı.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Campus Pulse (Desktop) */}
+                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
+                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3">
+                                        Kampüs Nabzı
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3 text-center">
+                                        <div
+                                            className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg"
+                                            style={{
+                                                border: '1px solid var(--primary-color, #C8102E)'
+                                            }}
+                                        >
+                                            <span
+                                                className="block text-2xl font-black font-serif animate-pulse"
+                                                style={{ color: 'var(--primary-color, #C8102E)' }}
+                                            >
+                                                {activeUsers}
+                                            </span>
+                                            <span className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-400">
+                                                Aktif Öğrenci
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+                                            <span className="block text-2xl font-black font-serif text-black dark:text-white">
+                                                {issueNumber}
+                                            </span>
+                                            <span className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-400">
+                                                Gündem Sayısı
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

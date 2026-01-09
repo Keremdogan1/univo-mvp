@@ -291,6 +291,17 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                 Kişisel Bilgiler
               </h2>
               
+              {/* Added Email Field (Read Only) */}
+              <div>
+                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">E-Posta (ODTÜ)</label>
+                 <input 
+                    type="text" 
+                    value={user?.email || ' - '} 
+                    disabled 
+                    className="w-full p-2 border border-neutral-200 dark:border-neutral-700 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 cursor-not-allowed"
+                 />
+              </div>
+              
               {/* Avatar Upload */}
               <div className="flex justify-center mb-6">
                 <div className="relative group cursor-pointer">

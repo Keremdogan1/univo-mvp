@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { User } from '@supabase/supabase-js';
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
@@ -93,9 +94,27 @@ export async function POST(request: Request) {
         const eduEmail = `${username}@metu.edu.tr`;
         const supabaseAdmin = getSupabaseAdmin();
         
-        const listRes = await supabaseAdmin.auth.admin.listUsers();
-        const users = listRes.data?.users || [];
-        let user = users.find(u => u.email === eduEmail);
+        // Pagination handling to find user by email
+        let user: User | undefined;
+        let page = 1;
+        let hasNextPage = true;
+        
+        while (hasNextPage && !user) {
+            const { data: { users: pageUsers }, error } = await supabaseAdmin.auth.admin.listUsers({
+                page: page,
+                perPage: 1000
+            });
+            
+            if (error || !pageUsers || pageUsers.length === 0) {
+                hasNextPage = false;
+            } else {
+                user = pageUsers.find(u => u.email === eduEmail);
+                if (!user && pageUsers.length < 1000) {
+                    hasNextPage = false;
+                }
+                page++;
+            }
+        }
 
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);

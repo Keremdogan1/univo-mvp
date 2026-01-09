@@ -69,13 +69,23 @@ export interface DetectionResult {
  *           "DBE 1010 - English" -> { dept: "DBE", num: 1010 }
  */
 function parseCourseCode(courseName: string): { dept: string; num: number } | null {
-  // Match patterns like "CENG 101", "EE 101", "DBE 1010", "BASE 101"
-  const match = courseName.match(/^([A-Z]{2,4})\s*(\d{3,4})/i);
+  // Regex to match "CENG 101" or "101 CENG" or "101ceng"
+  // Group 1/2: Dept then Num
+  // Group 3/4: Num then Dept
+  const regex = /([a-zA-Z]{2,5})\s*(\d{3,4})|(\d{3,4})\s*([a-zA-Z]{2,5})/i;
+  const match = courseName.match(regex);
+
   if (match) {
-    return {
-      dept: match[1].toUpperCase(),
-      num: parseInt(match[2], 10)
-    };
+    // Check which group matched
+    const deptStr = match[1] || match[4];
+    const numStr = match[2] || match[3];
+    
+    if (deptStr && numStr) {
+      return {
+        dept: deptStr.toUpperCase(),
+        num: parseInt(numStr, 10)
+      };
+    }
   }
   return null;
 }
