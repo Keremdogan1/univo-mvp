@@ -16,6 +16,8 @@ export default function CommunityView() {
   const [isGlobalMode, setIsGlobalMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [popularEvents, setPopularEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPopularEvents = async () => {
@@ -46,12 +48,29 @@ export default function CommunityView() {
       }
     };
     fetchPopularEvents();
+
+    const fetchAllEvents = async () => {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+            .from('events')
+            .select(`
+                *,
+                community:communities(id, name, logo_url, category),
+                event_attendees(count)
+            `)
+            .gte('date', today)
+            .order('date', { ascending: true });
+        
+        if (data) setEvents(data);
+        setLoading(false);
+    };
+    fetchAllEvents();
   }, []);
 
   const filteredEvents =
     selectedCategory === 'all'
-      ? mockEvents.filter((event) => event.community.category !== 'Resmi')
-      : mockEvents.filter((event) => event.community.category === selectedCategory);
+      ? events.filter((event) => event.community?.category !== 'Resmi')
+      : events.filter((event) => event.community?.category === selectedCategory);
 
   // Date & Issue Logic
   const today = new Date();
@@ -65,9 +84,9 @@ export default function CommunityView() {
     <div className="container mx-auto px-4 py-8">
       {/* Newspaper Header - Static on mobile */}
 
-      <div className="relative border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <h2 className="text-[1.35rem] md:text-6xl font-black font-serif uppercase tracking-tighter mb-2 text-black dark:text-white whitespace-nowrap">Topluluk Meydanı</h2>
+      <div className="relative border-b-4 border-black dark:border-neutral-600 pb-6 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-8 -mt-4 -mx-4 px-4">
+        <div className="flex flex-col items-center justify-center gap-6">
+          <h2 className="text-[1.35rem] md:text-6xl font-black font-serif uppercase tracking-tighter text-black dark:text-white whitespace-nowrap leading-none">Topluluk Meydanı</h2>
 
           {/* Global Mode Switch - Custom Morphing Button */}
           <div className="flex items-center gap-3">
@@ -94,7 +113,7 @@ export default function CommunityView() {
             </motion.button>
           </div>
         </div>
-        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-3 mt-6 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <span>ÖĞRENCİ BÜLTENİ</span>
           <span>{formattedDate.toUpperCase()}</span>

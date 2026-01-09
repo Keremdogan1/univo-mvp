@@ -200,8 +200,9 @@ export default function CreateEventPage() {
                 <input 
                     type="text" 
                     name="maps_url" 
+                    required
                     className="w-full px-4 py-2 border-2 border-neutral-100 dark:border-neutral-800 text-sm focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] focus:outline-none placeholder:italic bg-white dark:bg-black text-black dark:text-white transition-colors"
-                    placeholder="Google Maps Linki (Opsiyonel)"
+                    placeholder="Google Maps Linki (Zorunlu) - Haritada Bul'a tıklayıp doğrulayın."
                     onChange={handleChange}
                 />
             </div>

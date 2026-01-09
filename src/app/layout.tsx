@@ -30,10 +30,17 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                // Dark Mode Logic
                 if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark')
+                  document.documentElement.classList.add('dark');
                 } else {
-                  document.documentElement.classList.remove('dark')
+                  document.documentElement.classList.remove('dark');
+                }
+
+                // Theme Color Logic
+                const storedColor = localStorage.getItem('themeColor');
+                if (storedColor) {
+                    document.documentElement.setAttribute('data-theme-color', storedColor);
                 }
                 
                 // Defensive cleanup for rogue extension/overlay
