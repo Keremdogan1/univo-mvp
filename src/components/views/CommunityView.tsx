@@ -56,8 +56,8 @@ export default function CommunityView() {
 
             <div className="mt-8">
               {/* Popular Events - Replaced TrendingWidget */}
-              <div className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none">
-                <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 text-neutral-900 dark:text-white transition-colors">
+              <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 text-neutral-900 dark:text-white transition-colors">
                   <Calendar size={20} className="text-neutral-900 dark:text-white" />
                   Popüler
                 </h3>

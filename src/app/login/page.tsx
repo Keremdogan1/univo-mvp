@@ -295,13 +295,13 @@ export default function LoginPage() {
                         <button 
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4"
+                            className="w-full py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4 relative"
                             style={{ backgroundColor: selectedUni?.color || 'var(--primary-color)' }}
                         >
                             {isLoading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    {isTakingLong ? "Bağlanmak normalden uzun sürüyor..." : "Bağlanılıyor..."}
+                                    <span>Bağlanılıyor...</span>
                                 </>
                             ) : (
                                 <>
@@ -310,6 +310,14 @@ export default function LoginPage() {
                                 </>
                             )}
                         </button>
+                        
+                        {isLoading && isTakingLong && (
+                            <div className="text-center mt-3 animate-in fade-in slide-in-from-top-1">
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium bg-neutral-100 dark:bg-neutral-800 py-2 px-3 rounded-lg inline-block mx-auto border border-neutral-200 dark:border-neutral-700">
+                                    ⏱️ Bağlantı normalden uzun sürüyor, lütfen bekleyin...
+                                </p>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>

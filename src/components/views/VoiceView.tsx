@@ -435,28 +435,36 @@ export default function VoiceView() {
             // Optimistic Update
             const newResults = [...pollResults];
             
+            // Check if we are clicking the SAME option we already voted for (Retraction)
             if (userVote === index) {
-                // Remove vote logic
+                // Decrement count if > 0
                 if (newResults[index] > 0) newResults[index]--;
+                
+                // Update State IMMEDIATELY
                 setPollResults(newResults);
                 setUserVote(null);
 
+                // Perform DB Operation
                 const { error } = await supabase
                     .from('poll_votes')
                     .delete()
-                    .match({ user_id: user.id, poll_id: pollId });
+                    .eq('user_id', user.id)
+                    .eq('poll_id', pollId);
                 
                 if (error) {
                     throw error;
                 }
                 toast.success('Oyunuz geri alındı.');
             } else {
-                // Change/Add vote logic
+                // Changing or Adding Vote
                 if (userVote !== null && newResults[userVote] > 0) newResults[userVote]--; // Remove old vote count
                 newResults[index]++; // Add new vote count
+                
+                // Update State IMMEDIATELY
                 setPollResults(newResults);
                 setUserVote(index);
 
+                // Perform DB Operation
                 const { error } = await supabase
                     .from('poll_votes')
                     .upsert({ user_id: user.id, poll_id: pollId, option_index: index }, { onConflict: 'user_id, poll_id' });
@@ -464,14 +472,14 @@ export default function VoiceView() {
                 if (error) {
                     throw error;
                 }
-                // Don't toast on vote, visual feedback is enough
             }
-            // Background fetch to ensure consistency
-            setTimeout(() => fetchPollResults(activePoll), 500);
+            
+            // Background fetch to ensure consistency (Silent)
+            setTimeout(() => fetchPollResults(activePoll), 1000);
         } catch (e) {
             console.error('Vote Error:', e);
             toast.error('Oylama sırasında bir hata oluştu.');
-            // Revert on error
+            // Revert State on Error
             fetchPollResults(activePoll); 
         }
     };
