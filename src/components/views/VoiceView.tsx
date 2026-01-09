@@ -430,12 +430,27 @@ export default function VoiceView() {
         }
         if (!activePoll) return;
         const pollId = activePoll.question.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_');
+        
         try {
-            const { error } = await supabase
-                .from('poll_votes')
-                .upsert({ user_id: user.id, poll_id: pollId, option_index: index }, { onConflict: 'user_id, poll_id' });
-            if (error) throw error;
-            setUserVote(index);
+            if (userVote === index) {
+                // Remove vote if clicking same option
+                const { error } = await supabase
+                    .from('poll_votes')
+                    .delete()
+                    .match({ user_id: user.id, poll_id: pollId });
+                
+                if (error) throw error;
+                setUserVote(null);
+                toast.success('Oyunuz geri alındı.');
+            } else {
+                // Upsert new vote
+                const { error } = await supabase
+                    .from('poll_votes')
+                    .upsert({ user_id: user.id, poll_id: pollId, option_index: index }, { onConflict: 'user_id, poll_id' });
+                
+                if (error) throw error;
+                setUserVote(index);
+            }
             fetchPollResults(activePoll);
         } catch (e) {
             console.error('Vote Error:', e);
@@ -895,7 +910,7 @@ export default function VoiceView() {
 
                             <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:pr-2">
                                 {/* Desktop Poll - Newspaper Theme */}
-                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
                                     <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-4">
                                         <h3 className="text-lg font-black font-serif uppercase tracking-tight dark:text-white">
                                             Haftanın Anketi
@@ -957,7 +972,7 @@ export default function VoiceView() {
                                 </div>
 
                                 {/* Trending Topics (Desktop) - Newspaper Theme */}
-                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
                                     <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white flex items-center gap-2">
                                         <TrendingUp size={20} style={{ color: 'var(--primary-color, #C8102E)' }} />
                                         Kampüste Gündem
@@ -991,7 +1006,7 @@ export default function VoiceView() {
                                 </div>
 
                                 {/* Campus Pulse (Desktop) - Newspaper Theme */}
-                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
                                     <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white text-center">
                                         Kampüs Nabzı
                                     </h3>
@@ -1067,9 +1082,14 @@ export default function VoiceView() {
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     {voters.filter(v => v.option_index === selectedVoterOption).map(voter => (
-                                        <Link key={voter.user_id} href={`/profile/${voter.user_id}`} className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 shadow-sm">
-                                            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">{voter.display_name.charAt(0)}</div>
-                                            <span className="font-bold">{voter.display_name}</span>
+                                        <Link key={voter.user_id} href={`/profile/${voter.user_id}`} className="flex items-center gap-3 p-3 bg-white dark:bg-[#0a0a0a] rounded border border-neutral-200 dark:border-neutral-800 shadow-sm hover:border-black dark:hover:border-neutral-500 transition-colors">
+                                            <div 
+                                                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white uppercase" 
+                                                style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                            >
+                                                {voter.display_name.charAt(0)}
+                                            </div>
+                                            <span className="font-bold text-black dark:text-white">{voter.display_name}</span>
                                         </Link>
                                     ))}
                                 </div>

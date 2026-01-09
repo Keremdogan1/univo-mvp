@@ -56,21 +56,21 @@ export default function CommunityView() {
 
             <div className="mt-8">
               {/* Popular Events - Replaced TrendingWidget */}
-              <div className="border border-primary dark:border-primary p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(var(--primary-rgb),1)] dark:shadow-[4px_4px_0px_0px_rgba(var(--primary-rgb),0.5)] transition-colors rounded-none">
-                <h3 className="text-xl font-bold border-b-2 border-black dark:border-white pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white transition-colors">
-                  <Calendar size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
+              <div className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none">
+                <h3 className="text-xl font-bold border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 text-neutral-900 dark:text-white transition-colors">
+                  <Calendar size={20} className="text-neutral-900 dark:text-white" />
                   Popüler
                 </h3>
                 <div className="space-y-4">
                   {POPULAR_EVENTS.map(event => (
                     <div key={event.id} onClick={() => router.push('/events/1')} className="group cursor-pointer">
                       <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold font-serif text-neutral-900 dark:text-neutral-100 group-hover:text-primary transition-colors">{event.title}</h4>
-                        <span className="text-xs font-bold bg-primary text-white px-2 py-1 uppercase transition-colors">{event.date}</span>
+                        <h4 className="font-bold font-serif text-neutral-900 dark:text-neutral-100 group-hover:underline decoration-2 underline-offset-2 transition-colors">{event.title}</h4>
+                        <span className="text-xs font-bold bg-black text-white dark:bg-white dark:text-black px-2 py-1 uppercase transition-colors">{event.date}</span>
                       </div>
-                      <div className="flex justify-between items-end border-b border-black dark:border-white pb-2 mb-2 group-last:border-0 group-last:mb-0 group-last:pb-0">
+                      <div className="flex justify-between items-end border-b border-neutral-100 dark:border-neutral-800 pb-2 mb-2 group-last:border-0 group-last:mb-0 group-last:pb-0">
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">{event.attendees} katılımcı</p>
-                        <ArrowRight size={16} className="text-neutral-400 dark:text-neutral-500 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                        <ArrowRight size={16} className="text-neutral-900 dark:text-white group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   ))}

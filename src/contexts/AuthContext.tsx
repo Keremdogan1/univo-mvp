@@ -94,6 +94,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error('Set session error:', setSessionError);
                 return { success: false, error: 'Oturum oluşturulamadı.' };
             }
+
+            // Explicitly verify session existence (Crucial for Mobile)
+            const { data: { session }, error: getSessionError } = await supabase.auth.getSession();
+            if (getSessionError || !session) {
+                console.error('Session verify error:', getSessionError);
+                return { success: false, error: 'Cihazınızda oturum açılamadı (Cookie sorunu).' };
+            }
         }
         
         return { 
