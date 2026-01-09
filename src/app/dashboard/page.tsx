@@ -150,7 +150,7 @@ export default function DashboardOverview() {
             </p>
             <Link 
                 href="/dashboard/settings" 
-                className="bg-[#C8102E] !text-white px-8 py-3 font-bold uppercase rounded hover:bg-[#a60d26] transition-colors shadow-lg"
+                className="bg-[var(--primary-color)] !text-white px-8 py-3 font-bold uppercase rounded hover:bg-[var(--primary-color-hover)] transition-colors shadow-lg"
             >
                 Topluluk Oluştur
             </Link>
@@ -221,7 +221,7 @@ export default function DashboardOverview() {
                     <p className="text-sm font-medium text-neutral-900 dark:text-white leading-relaxed">
                         {item.type === 'feedback' && (
                             <>
-                                <span className="font-black hover:text-[#C8102E] cursor-pointer transition-colors">{item.user}</span>, 
+                                <span className="font-black hover:text-[var(--primary-color)] cursor-pointer transition-colors">{item.user}</span>, 
                                 <span className="font-bold italic"> {item.event}</span> etkinliğine 
                                 <span className="inline-flex items-center gap-1 mx-1 px-1.5 py-0.5 bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 rounded text-[10px] font-black uppercase border border-yellow-400/20">
                                     <Star size={10} fill="currentColor"/> {item.rating} Puan
@@ -230,7 +230,7 @@ export default function DashboardOverview() {
                         )}
                         {item.type === 'follower' && (
                             <>
-                                <span className="font-black hover:text-[#C8102E] cursor-pointer transition-colors">{item.user}</span> topluluğa katıldı.
+                                <span className="font-black hover:text-[var(--primary-color)] cursor-pointer transition-colors">{item.user}</span> topluluğa katıldı.
                             </>
                         )}
                         {item.type === 'event_complete' && (
@@ -255,9 +255,9 @@ export default function DashboardOverview() {
 
 function StatCard({ label, value, icon, sub, change }: any) {
     return (
-        <div className="bg-white dark:bg-neutral-900 p-6 border-2 border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-[#C8102E] dark:hover:border-[#C8102E] transition-all group">
+        <div className="bg-white dark:bg-neutral-900 p-6 border-2 border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] transition-all group">
             <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg group-hover:bg-[#C8102E] group-hover:text-white transition-colors dark:text-white">
+                <div className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg group-hover:bg-[var(--primary-color)] group-hover:text-white transition-colors dark:text-white">
                     {icon}
                 </div>
                 {change && <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">{change}</span>}

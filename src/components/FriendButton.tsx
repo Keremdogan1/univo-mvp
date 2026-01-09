@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserPlus, UserCheck, UserX, Clock, Check, X } from 'lucide-react';
+import { UserPlus, UserCheck, UserX, Clock, Check, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -9,22 +9,29 @@ interface FriendButtonProps {
   targetUserId: string;
   onFriendshipChange?: (status: 'none' | 'pending' | 'accepted') => void;
   variant?: 'default' | 'menu-item' | 'profile';
+  className?: string;
 }
 
 export default function FriendButton({ 
   targetUserId, 
   onFriendshipChange,
-  variant = 'default'
+  variant = 'default',
+  className
 }: FriendButtonProps) {
   const { user } = useAuth();
   const [status, setStatus] = useState<'none' | 'pending' | 'accepted'>('none');
   const [isSentByMe, setIsSentByMe] = useState(false);
   const [friendshipId, setFriendshipId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Two loading states: one for initial check, one for actions
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       checkFriendshipStatus();
+    } else {
+        setIsInitialLoading(false);
     }
   }, [user, targetUserId]);
 
@@ -41,21 +48,24 @@ export default function FriendButton({
       
       if (response.ok) {
         const data = await response.json();
-        setStatus(data.status);
-        setIsSentByMe(data.isSentByMe);
-        setFriendshipId(data.friendshipId);
+        // If 404/null comes back as "none", handle it
+        if (data.status) {
+            setStatus(data.status);
+            setIsSentByMe(data.isSentByMe);
+            setFriendshipId(data.friendshipId);
+        }
       }
     } catch (error) {
       console.error('Error checking friendship status:', error);
     } finally {
-      setIsLoading(false);
+      setIsInitialLoading(false);
     }
   };
 
   const sendRequest = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (!user) return;
-    setIsLoading(true);
+    setIsActionLoading(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -72,18 +82,20 @@ export default function FriendButton({
         setStatus('pending');
         setIsSentByMe(true);
         if (onFriendshipChange) onFriendshipChange('pending');
+      } else {
+          console.error("Failed to send request");
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
   const cancelRequest = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (!user) return;
-    setIsLoading(true);
+    setIsActionLoading(true);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -104,18 +116,32 @@ export default function FriendButton({
     } catch (error) {
       console.error('Error cancelling request:', error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
   const respondToRequest = async (action: 'accept' | 'reject', e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!user || !friendshipId) return;
-    setIsLoading(true);
+    if (!user) return; // Allow responding even if friendshipId missing (fallback logic could find it)
+    setIsActionLoading(true);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
+
+      // If we don't have friendshipId, we might need another endpoint or pass it. 
+      // But usually it's set by checkStatus.
+      const url = friendshipId 
+        ? `/api/friend-requests/${friendshipId}`
+        : `/api/users/${targetUserId}/friend-request?action=${action}`; // Fallback if API supports direct user target
+
+      // For now assume friendshipId exists or checkStatus found it
+      if (!friendshipId) {
+          // Retry fetching id? Or just error.
+          console.error("No friendship ID found");
+          setIsActionLoading(false);
+          return;
+      }
 
       const response = await fetch(`/api/friend-requests/${friendshipId}`, {
         method: 'PATCH',
@@ -139,7 +165,7 @@ export default function FriendButton({
     } catch (error) {
       console.error(`Error responding to request (${action}):`, error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
@@ -152,7 +178,7 @@ export default function FriendButton({
     if (variant === 'profile') {
         const base = "w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm mb-4";
         switch (type) {
-            case 'action': return `${base} text-white hover:opacity-90`;
+            case 'action': return `${base} text-white hover:opacity-90 disabled:opacity-70`;
             case 'pending': return `${base} bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200`;
             case 'friend': return `${base} bg-white dark:bg-neutral-900 border-2 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-current hover:opacity-80`;
         }
@@ -161,7 +187,7 @@ export default function FriendButton({
     // Default styles
     switch (type) {
       case 'action': // Add/Accept
-        return "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-colors shadow-sm";
+        return "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-colors shadow-sm disabled:opacity-70";
       case 'pending':
         return "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors";
       case 'friend': 
@@ -174,19 +200,24 @@ export default function FriendButton({
     return null;
   }
 
-  if (isLoading) {
+  if (isInitialLoading) {
     if (variant === 'menu-item') return <div className="px-4 py-2 text-sm text-neutral-400">Yükleniyor...</div>;
-    return <div className="w-32 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse"></div>;
+    return <div className={`w-32 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse ${className}`}></div>;
   }
 
   if (status === 'accepted') {
     return (
       <button
         onClick={cancelRequest}
-        className={getButtonStyles('friend')}
+        disabled={isActionLoading}
+        className={`${getButtonStyles('friend')} ${className}`}
       >
-        <UserCheck size={variant === 'menu-item' ? 14 : 18} className="group-hover:hidden" />
-        <UserX size={variant === 'menu-item' ? 14 : 18} className="hidden group-hover:block" />
+        {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : (
+            <>
+                <UserCheck size={variant === 'menu-item' ? 14 : 18} className="group-hover:hidden" />
+                <UserX size={variant === 'menu-item' ? 14 : 18} className="hidden group-hover:block" />
+            </>
+        )}
         <span className="group-hover:hidden">Arkadaşsınız</span>
         <span className="hidden group-hover:inline">Arkadaşlıktan Çıkar</span>
       </button>
@@ -198,40 +229,44 @@ export default function FriendButton({
       return (
         <button
           onClick={cancelRequest} 
-          className={getButtonStyles('pending')}
+          disabled={isActionLoading}
+          className={`${getButtonStyles('pending')} ${className}`}
         >
-          <Clock size={variant === 'menu-item' ? 14 : 18} />
+          {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Clock size={variant === 'menu-item' ? 14 : 18} />}
           İstek Gönderildi
         </button>
       );
     } else {
-      // Received request - For menu item, maybe just show "Accept" or simplified view
+      // Received request
       if (variant === 'menu-item') {
          return (
              <button
                 onClick={(e) => respondToRequest('accept', e)}
+                disabled={isActionLoading}
                 className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors"
                 style={{ color: 'var(--primary-color, #C8102E)' }}
              >
-                <UserPlus size={14} />
+                {isActionLoading ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
                 İsteği Kabul Et
              </button>
          );
       }
 
       return (
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${className}`}>
           <button
             onClick={(e) => respondToRequest('accept', e)}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-colors"
+            disabled={isActionLoading}
+            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-colors disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
           >
-            <Check size={16} />
+            {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
             Kabul Et
           </button>
           <button
             onClick={(e) => respondToRequest('reject', e)}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition-colors"
+            disabled={isActionLoading}
+            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition-colors disabled:opacity-50"
           >
             <X size={16} />
             Reddet
@@ -245,12 +280,13 @@ export default function FriendButton({
   return (
     <button
       onClick={sendRequest}
-      className={variant === 'menu-item' ? 
+      disabled={isActionLoading}
+      className={`${variant === 'menu-item' ? 
         "w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-2 transition-colors" : 
-        getButtonStyles('action')}
+        getButtonStyles('action')} ${className}`}
       style={variant !== 'menu-item' ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
     >
-      <UserPlus size={variant === 'menu-item' ? 14 : 18} />
+      {isActionLoading ? <Loader2 size={variant === 'menu-item' ? 14 : 18} className="animate-spin" /> : <UserPlus size={variant === 'menu-item' ? 14 : 18} />}
       Arkadaş Ekle
     </button>
   );

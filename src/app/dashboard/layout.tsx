@@ -37,7 +37,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     checkAdminStatus();
   }, [user, authLoading]);
 
-  if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>;
+  if (loading || authLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100 dark:bg-[#0a0a0a]">
+        <div className="text-center">
+            <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4 border-[var(--primary-color)] dark:border-white"></div>
+            <p className="text-neutral-600 dark:text-neutral-400 font-serif">Panel Yükleniyor...</p>
+        </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-[#0a0a0a] flex transition-colors">
@@ -64,7 +71,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
             <button 
                 onClick={() => signOut()} 
-                className="w-full flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-white hover:bg-[#C8102E] rounded-lg transition-all text-sm font-bold uppercase tracking-wide group"
+                className="w-full flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-white hover:bg-[var(--primary-color)] rounded-lg transition-all text-sm font-bold uppercase tracking-wide group"
             >
                 <LogOut size={20} className="group-hover:text-white" />
                 Çıkış Yap
@@ -86,8 +93,8 @@ function NavLink({ href, icon, label, active }: { href: string; icon: React.Reac
             href={href} 
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-bold uppercase tracking-wide group ${
                 active 
-                ? 'bg-[#C8102E] text-white shadow-md' 
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-white hover:bg-[#C8102E]'
+                ? 'bg-[var(--primary-color)] text-white shadow-md' 
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-white hover:bg-[var(--primary-color)]'
             }`}
         >
             <span className={active ? 'text-white' : 'group-hover:text-white'}>{icon}</span>

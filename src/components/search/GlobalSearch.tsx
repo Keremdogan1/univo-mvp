@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, X, Calendar, MessageSquare, Building2, Loader2, ChevronRight, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { searchContent, SearchResults } from '@/app/actions/search';
+import { toTitleCase } from '@/lib/utils';
 
 export default function GlobalSearch() {
   const [isVisible, setIsVisible] = useState(false);
@@ -15,9 +16,28 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const handleToggle = () => setIsVisible(prev => !prev);
+    const handleToggle = () => {
+        setIsVisible(prev => {
+            if (!prev) {
+                window.history.pushState({ searchOpen: true }, '');
+                return true;
+            }
+            if (window.history.state?.searchOpen) window.history.back();
+            return false;
+        });
+    };
+    
+    const handlePopState = () => {
+        setIsVisible(false);
+    };
+
     window.addEventListener('univo-search-toggle', handleToggle);
-    return () => window.removeEventListener('univo-search-toggle', handleToggle);
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+        window.removeEventListener('univo-search-toggle', handleToggle);
+        window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
 
   useEffect(() => {
@@ -26,7 +46,13 @@ export default function GlobalSearch() {
     }
   }, [isVisible]);
 
-  const onClose = () => setIsVisible(false);
+  const onClose = () => {
+      if (window.history.state?.searchOpen) {
+           window.history.back();
+      } else {
+           setIsVisible(false);
+      }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -124,7 +150,7 @@ export default function GlobalSearch() {
                                 <button 
                                     key={event.id}
                                     onClick={() => handleSelect(`/events/${event.id}`)}
-                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-primary dark:hover:border-primary hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] hover:shadow-sm transition-all text-left group"
                                 >
                                     <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Calendar size={20} />
@@ -137,7 +163,7 @@ export default function GlobalSearch() {
                                             <span>{event.location}</span>
                                         </p>
                                     </div>
-                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary" />
+                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-[var(--primary-color)]" />
                                 </button>
                             ))}
                         </div>
@@ -151,7 +177,7 @@ export default function GlobalSearch() {
                                 <button 
                                     key={voice.id}
                                     onClick={() => handleSelect(`/?view=voice`)} // Currently deep link to voice doesn't exist, going to feed
-                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] hover:shadow-sm transition-all text-left group"
                                 >
                                     <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                         <MessageSquare size={20} />
@@ -162,7 +188,7 @@ export default function GlobalSearch() {
                                             {new Date(voice.created_at).toLocaleDateString()}
                                         </p>
                                     </div>
-                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-blue-500" />
+                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-[var(--primary-color)]" />
                                 </button>
                             ))}
                         </div>
@@ -176,7 +202,7 @@ export default function GlobalSearch() {
                                 <button 
                                     key={user.id}
                                     onClick={() => handleSelect(`/profile/${user.id}`)}
-                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-500 dark:hover:border-purple-500 hover:shadow-sm transition-all text-left group"
+                                    className="w-full flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] hover:shadow-sm transition-all text-left group"
                                 >
                                     <div 
                                         className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border border-neutral-200 dark:border-neutral-700 ${user.avatar_url ? 'bg-neutral-100' : 'bg-primary text-white'}`}
@@ -189,12 +215,12 @@ export default function GlobalSearch() {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-neutral-900 dark:text-white truncate">{user.full_name}</h4>
+                                        <h4 className="font-bold text-neutral-900 dark:text-white truncate">{toTitleCase(user.full_name)}</h4>
                                         <p className="text-xs text-neutral-500 truncate">
                                             {user.department || user.class_year || 'Öğrenci'}
                                         </p>
                                     </div>
-                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-purple-500" />
+                                    <ChevronRight size={16} className="text-neutral-300 group-hover:text-[var(--primary-color)]" />
                                 </button>
                             ))}
                         </div>

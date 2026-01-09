@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import NotificationCenter from '../NotificationCenter';
 
 export default function OfficialView() {
   const { user } = useAuth();
@@ -96,7 +97,26 @@ export default function OfficialView() {
             }
 
             // Verify with server (Cookie check)
-            const res = await fetch('/api/auth/imap');
+            // Prepare starred UIDs to ensure they are fetched
+            let starredHeader = '[]';
+            if (savedStars) {
+                const ids = JSON.parse(savedStars);
+                const emailUids = ids
+                    .map((id: string) => {
+                        // Try to extract number from any format (email-123, 123, etc)
+                        const match = id.match(/(\d+)/);
+                        return match ? parseInt(match[1], 10) : null;
+                    })
+                    .filter((n: number | null) => n !== null);
+                starredHeader = JSON.stringify(emailUids);
+            }
+
+            const res = await fetch('/api/auth/imap', { 
+                headers: {
+                    'X-Starred-Uids': starredHeader
+                },
+                credentials: 'include' 
+            });
             if (res.ok) {
                 const data = await res.json();
                 
@@ -145,37 +165,58 @@ export default function OfficialView() {
       setLoginError('');
 
       try {
+          // Get starred UIDs to fetch them immediately upon login
+          const savedStars = localStorage.getItem('univo_starred_ids');
+          let starredUids: number[] = [];
+          if (savedStars) {
+              starredUids = JSON.parse(savedStars)
+                .filter((id: string) => id.startsWith('email-'))
+                .map((id: string) => parseInt(id.replace('email-', ''), 10));
+          }
+
           const res = await fetch('/api/auth/imap', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(loginForm)
+              body: JSON.stringify({ ...loginForm, starredUids }),
+              credentials: 'include' // Ensure cookie is set
           });
+
           const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Giriş yapılamadı');
 
-          if (!res.ok) {
-             throw new Error(data.error || 'Giriş yapılamadı. Kullanıcı adı veya şifre hatalı olabilir.');
-          }
-
-          const mappedEmails = (data.emails || []).map((msg: any) => ({
+          // Map raw IMAP data using same logic as checkSession
+          const mappedEmails = (data.emails || []).map((msg: any) => {
+              let senderName = msg.from || 'Bilinmeyen Gönderen';
+              const nameMatch = senderName.match(/^"?([^"<]+)"?\s*</);
+              if (nameMatch && nameMatch[1]) {
+                  senderName = nameMatch[1].trim();
+              } else if (senderName.includes('@')) {
+                  senderName = senderName.split('@')[0].replace(/[<>"]/g, '');
+              }
+              return {
                   id: `email-${msg.id}`,
                   type: 'email',
                   title: msg.subject,
-                  source: 'ODTÜ E-Posta', 
+                  source: senderName,
                   date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
-                  summary: `Gönderen: ${msg.from}`,
-                  link: `https://mail.metu.edu.tr`
-          }));
+                  summary: `E-posta içeriği için tıklayınız.`,
+                  link: `https://metumail.metu.edu.tr/`
+              };
+          });
 
           setEmails(mappedEmails);
           setIsEmailConnected(true);
           setShowLoginModal(false);
-          
-          // Persist data
+          toast.success('E-postalar başarıyla getirildi');
+
+          // Update Cache
           localStorage.setItem('univo_cached_emails', JSON.stringify(mappedEmails));
           localStorage.setItem('univo_email_user', loginForm.username);
 
-      } catch (err: any) {
-          setLoginError(err.message);
+      } catch (error: any) {
+          console.error('Login failed', error);
+          setLoginError(error.message);
+          toast.error(error.message || 'E-posta bağlantısı kurulamadı');
       } finally {
           setLoadingEmails(false);
       }
@@ -359,16 +400,32 @@ export default function OfficialView() {
 
   // ODTUClass Data (Real or Mock) - Only show if user is logged in
   const realCourses = user?.user_metadata?.odtu_courses;
-  const odtuClassData = !user ? [] : ((realCourses && realCourses.length > 0) ? realCourses.map((c: any) => ({
-      id: `oc-${c.url}`,
-      title: c.name,
-      source: 'ODTÜClass',
-      type: 'grade', // Use 'grade' type styling (Violet) for courses
-      course: c.name.split(' ')[0], // Heuristic for short code
-      date: 'Güz 2025',
-      summary: 'Ders sayfasına gitmek için tıklayınız.',
-      link: c.url
-  })) : [
+  const odtuClassData = !user ? [] : ((realCourses && realCourses.length > 0) ? realCourses.map((c: any) => {
+      // Ensure absolute and clean URL
+      let cleanLink = c.url;
+      const baseUrl = 'https://odtuclass2025f.metu.edu.tr';
+
+      if (!cleanLink.startsWith('http')) {
+          cleanLink = cleanLink.startsWith('/') ? `${baseUrl}${cleanLink}` : `${baseUrl}/${cleanLink}`;
+      }
+
+      // Extract ID to reconstruct a clean course link (removes session keys/anchors)
+      const idMatch = cleanLink.match(/id=(\d+)/);
+      if (idMatch && idMatch[1]) {
+          cleanLink = `${baseUrl}/course/view.php?id=${idMatch[1]}`;
+      }
+
+      return {
+        id: `oc-${c.url}`,
+        title: c.name,
+        source: 'ODTÜClass',
+        type: 'grade', // Use 'grade' type styling (Violet) for courses
+        course: c.name.split(' ')[0], // Heuristic for short code
+        date: 'Güz 2025',
+        summary: 'Ders sayfasına gitmek için tıklayınız.',
+        link: cleanLink
+      };
+  }) : [
     {
         id: 'oc1',
         title: 'PHYS105 - Midterm 2 Sonuçları',
@@ -401,22 +458,57 @@ export default function OfficialView() {
     }
   ]);
 
-  // Filtered Lists
-  const filteredNews = allNews.filter(item => {
-    if (blockedSources.includes(item.source)) return false;
-    if (activeTab === 'agenda') return (item.type === 'announcement' || item.type === 'event');
-    if (activeTab === 'emails') return user && item.type === 'email';
-    if (activeTab === 'starred') return starredIds.includes(String(item.id));
-    if (activeTab === 'history') return readIds.includes(String(item.id));
-    return true;
-  });
+  // Filtered Lists Logic
+  const getDisplayedItems = () => {
+      if (activeTab === 'odtuclass') return odtuClassData;
+      
+      if (activeTab === 'starred') {
+          // Special handling for Starred tab to show GHOST ITEMS
+          const finalList: any[] = [];
+          if (starredIds && starredIds.length > 0) {
+              starredIds.forEach(starId => {
+                  const found = allNews.find(i => String(i.id) === String(starId));
+                  if (found) {
+                      finalList.push(found);
+                  } else {
+                      // Ghost Item (Saved locally but missing from server)
+                      finalList.push({
+                          id: starId,
+                          type: 'unknown',
+                          title: 'İçerik Ulaşılamıyor',
+                          source: 'Bilinmeyen Kaynak',
+                          date: 'Tarih Yok',
+                          summary: `Bu içerik sunucudan alınamadı. (ID: ${starId})`,
+                          isGhost: true
+                      });
+                  }
+              });
+          }
+          return finalList;
+      }
 
-  const displayedItems = activeTab === 'odtuclass' ? odtuClassData : filteredNews.filter(item => {
-    if (activeTab === 'agenda' || activeTab === 'emails') {
-        return !readIds.includes(String(item.id));
-    }
-    return true;
-  });
+      // Standard Filtering for other tabs
+      return allNews.filter(item => {
+          if (blockedSources.includes(item.source)) return false;
+          
+          if (activeTab === 'agenda') {
+              // Show only unread announcements/event
+              return (item.type === 'announcement' || item.type === 'event') && !readIds.includes(String(item.id));
+          }
+          
+          if (activeTab === 'emails') {
+              return user && item.type === 'email' && !readIds.includes(String(item.id));
+          }
+          
+          if (activeTab === 'history') {
+              return readIds.includes(String(item.id));
+          }
+          
+          return true;
+      });
+  };
+
+  const displayedItems = getDisplayedItems();
 
   // Paginated items - show only up to displayLimit
   const paginatedItems = displayedItems.slice(0, displayLimit);
@@ -424,10 +516,10 @@ export default function OfficialView() {
 
   return (
     <div className="container mx-auto px-4 py-8 relative">
-      {/* Newspaper Header - Sticky on mobile */}
-      <div className="border-b-4 border-black dark:border-white pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
+      {/* Newspaper Header - Static on mobile */}
+      <div className="relative border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
         <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white">Resmi Gündem</h2>
-        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-white pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+        <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
           <span>SAYI: {issueNumber}</span>
           <Link 
             href="/official/archive" 
@@ -445,25 +537,25 @@ export default function OfficialView() {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8 min-w-0">
             
-            {/* Pinned Announcement */}
+            {/* Pinned Announcement - Newspaper Theme */}
             {news[0] && (
-                <div className="border-2 border-black dark:border-white p-4 sm:p-6 bg-neutral-50 dark:bg-white/5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10 rounded-none">
+                <div className="border-4 border-black dark:border-neutral-600 p-4 sm:p-6 bg-neutral-50 dark:bg-[#0a0a0a] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10 rounded-none transition-colors group">
                      <div 
-                        className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20"
+                        className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20 border-2 border-black dark:border-white"
                         style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                       >
                         Önemli Duyuru
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2 break-words">
-                        <Megaphone size={20} className="text-primary" />
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white mt-2 break-words font-serif uppercase tracking-tight">
+                        <Megaphone size={20} className="text-black dark:text-white" />
                         {news[0].title}
                     </h3>
-                    <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4 leading-relaxed">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed font-serif">
                         {news[0].summary}
                     </p>
                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
                         <span>{news[0].source} · {news[0].date}</span>
-                        <a href={news[0].link} className="flex items-center gap-1 hover:underline decoration-2 underline-offset-2 text-black dark:text-white">
+                        <a href={news[0].link} className="flex items-center gap-1 hover:underline decoration-2 underline-offset-2 text-black dark:text-white group-hover:translate-x-1 transition-transform">
                             Detaylar <ArrowRight size={12}/>
                         </a>
                     </div>
@@ -475,7 +567,7 @@ export default function OfficialView() {
                 {[
                     { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="shrink-0"/> },
                     { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="shrink-0"/> },
-                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.length, icon: <GraduationCap size={14} className="shrink-0"/> },
+                    { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.filter((item: any) => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0"/> },
                     { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0"/> },
                     { id: 'history', label: '', icon: <Trash2 size={14} className="shrink-0"/>, count: readIds.length }
                 ].map(tab => {
@@ -578,6 +670,7 @@ export default function OfficialView() {
                                 ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}
                                 ${isRead && (activeTab !== 'history' && activeTab !== 'starred') ? 'hidden' : ''} 
                                 ${isRead ? 'opacity-75 grayscale' : ''}
+                                ${item.isGhost ? 'opacity-60 bg-neutral-100 dark:bg-neutral-900/50' : ''}
                             `}
                             style={{ 
                                 borderLeftColor: isRead 
@@ -586,9 +679,11 @@ export default function OfficialView() {
                                         ? '#2563eb' 
                                         : item.type === 'email' 
                                             ? '#d97706' 
-                                            : (item.type === 'grade' || item.type === 'assignment')
-                                                ? '#7c3aed' 
-                                                : '#059669'
+                                            : item.isGhost
+                                                ? '#9ca3af' // Gray for ghost items
+                                                : (item.type === 'grade' || item.type === 'assignment')
+                                                    ? '#7c3aed' 
+                                                    : '#059669'
                                       )
                             }}
                         >   
@@ -716,6 +811,23 @@ export default function OfficialView() {
                                 <span className="text-xs text-neutral-500 block mt-2">{item.source} · {item.date}</span>
                             </div>
 
+                            {activeTab !== 'history' && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (activeTab === 'starred') {
+                                            handleStar(String(item.id), e);
+                                        } else {
+                                            handleMarkRead(String(item.id), e);
+                                        }
+                                    }}
+                                    className="absolute bottom-3 right-3 p-2 bg-white dark:bg-neutral-800 rounded-full shadow-md border border-neutral-200 dark:border-neutral-700 text-neutral-400 hover:text-red-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all opacity-0 group-hover:opacity-100 z-10 scale-90 hover:scale-100"
+                                    title={activeTab === 'starred' ? "Listeden Kaldır" : "Gündemden Kaldır"}
+                                >
+                                    <Trash2 size={14} strokeWidth={2.5} />
+                                </button>
+                             )}
+
                             {activeTab === 'history' && (
                                 <button
                                     onClick={(e) => handleUndoRead(String(item.id), e)}
@@ -747,12 +859,12 @@ export default function OfficialView() {
         {/* Sidebar */}
         <div className="space-y-6">
             {news[1] && (
-                <article className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative transition-colors group cursor-pointer hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] rounded-none">
-                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
+                <article className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] group cursor-pointer hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                     <h3 className="text-lg font-black font-serif uppercase tracking-tight mb-4 flex items-center gap-2 border-b-2 border-black dark:border-neutral-600 pb-2 text-neutral-900 dark:text-white">
                         <Briefcase size={20} className="text-neutral-900 dark:text-white" />
                         Kariyer & Staj
                     </h3>
-                    <h4 className="font-bold text-lg mb-2 group-hover:underline decoration-2 underline-offset-2 dark:text-white">{news[1].title}</h4>
+                    <h4 className="font-bold text-lg mb-2 group-hover:underline decoration-2 underline-offset-2 dark:text-white font-serif">{news[1].title}</h4>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
                         {news[1].summary}
                     </p>
@@ -765,8 +877,8 @@ export default function OfficialView() {
                 </article>
             )}
 
-            <div className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
-                <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-2">
+            <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                <h4 className="text-lg font-black font-serif uppercase tracking-tight mb-4 flex items-center gap-2 border-b-2 border-black dark:border-neutral-600 pb-2 text-neutral-900 dark:text-white">
                     Günün Menüsü
                 </h4>
                 {loadingMenu ? (
@@ -775,11 +887,11 @@ export default function OfficialView() {
                     <div className="space-y-6">
                         {menu.breakfast?.length > 0 && (
                              <div>
-                                <h5 className="font-bold text-neutral-900 dark:text-white text-sm uppercase mb-2 flex items-center gap-2">
+                                <h5 className="font-bold text-neutral-900 dark:text-white text-sm uppercase mb-2 flex items-center gap-2 font-serif">
                                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}></span>
                                     Kahvaltı
                                 </h5>
-                                <div className="text-sm text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800 p-3 rounded border border-neutral-100 dark:border-neutral-700 transition-colors">
+                                <div className="text-sm text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-800 p-3 rounded border border-neutral-200 dark:border-neutral-700 transition-colors">
                                     {menu.breakfast.map((i: any) => i.name).join(', ')}
                                 </div>
                             </div>
@@ -839,13 +951,25 @@ export default function OfficialView() {
                       <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">E-postalarınıza erişmek için ODTÜ kullanıcı kodunuzu kullanın.</p>
                   </div>
                   <form onSubmit={handleImapLogin} className="space-y-6">
-                      <div>
-                          <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Kullanıcı Kodu</label>
-                          <div className="relative group">
-                              <input type="text" required placeholder="e123456 (Sadece kod)" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} />
-                              <span className="absolute right-3 top-3.5 text-neutral-500 font-bold pointer-events-none bg-white dark:bg-neutral-900 px-1 text-xs">@metu.edu.tr</span>
-                          </div>
-                      </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-neutral-500 dark:text-neutral-500 mb-1.5 ml-1">Kullanıcı Adı</label>
+                                <div className="relative">
+                                    <input 
+                                        type="text"
+                                        placeholder="e123456"
+                                        className="w-full p-3 pl-4 pr-32 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:outline-none focus:border-black dark:focus:border-white transition-colors font-mono dark:text-white"
+                                        value={loginForm.username}
+                                        onChange={e => {
+                                            // Auto-strip domain if user pastes it
+                                            let val = e.target.value;
+                                            if (val.includes('@')) val = val.split('@')[0];
+                                            setLoginForm({...loginForm, username: val});
+                                        }}
+                                        disabled={loadingEmails}
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold select-none pointer-events-none text-sm">@metu.edu.tr</span>
+                                </div>
+                            </div>
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Şifre</label>
                           <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} />

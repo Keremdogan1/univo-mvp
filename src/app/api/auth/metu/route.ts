@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
+import { User } from '@supabase/supabase-js';
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
 import getSupabaseAdmin from '@/lib/supabase-admin';
 import { analyzeCourses } from '@/lib/course-analyzer';
+import { toTitleCase } from '@/lib/utils';
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
     const client = wrapper(axios.create({ 
         jar,
         withCredentials: true,
-        timeout: 15000, 
+        timeout: 30000, 
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -64,7 +66,10 @@ export async function POST(request: Request) {
         
         const $dash = cheerio.load(loginRes.data);
         let fullName = $dash('.usertext').text() || $dash('.user-name').text() || $dash('#action-menu-toggle-1 span.userbutton span.usertext').text();
-        if (fullName) fullName = fullName.replace('You are logged in as', '').trim();
+        if (fullName) {
+            fullName = fullName.replace('You are logged in as', '').trim();
+            fullName = toTitleCase(fullName);
+        }
         
         // --- SCRAPING & ANALYSIS ---
         let courses: { name: string, url: string }[] = [];
@@ -72,9 +77,23 @@ export async function POST(request: Request) {
             const courseLinks = $dash('a[href*="course/view.php?id="]');
             courseLinks.each((_, el) => {
                 const name = $(el).text().trim();
-                const url = $(el).attr('href');
-                if (name && url && !courses.find(c => c.url === url)) {
-                    courses.push({ name, url });
+                let url = $(el).attr('href');
+                
+                if (name && url) {
+                    // Ensure absolute URL
+                    if (!url.startsWith('http')) {
+                        url = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+                    }
+
+                    // Clean URL (Keep only ID)
+                    const idMatch = url.match(/id=(\d+)/);
+                    if (idMatch && idMatch[1]) {
+                        url = `${baseUrl}/course/view.php?id=${idMatch[1]}`;
+                    }
+
+                    if (!courses.find(c => c.url === url)) {
+                        courses.push({ name, url });
+                    }
                 }
             });
         } catch (scrapeErr) {
@@ -93,9 +112,27 @@ export async function POST(request: Request) {
         const eduEmail = `${username}@metu.edu.tr`;
         const supabaseAdmin = getSupabaseAdmin();
         
-        const listRes = await supabaseAdmin.auth.admin.listUsers();
-        const users = listRes.data?.users || [];
-        let user = users.find(u => u.email === eduEmail);
+        // Pagination handling to find user by email
+        let user: User | undefined;
+        let page = 1;
+        let hasNextPage = true;
+        
+        while (hasNextPage && !user) {
+            const { data: { users: pageUsers }, error } = await supabaseAdmin.auth.admin.listUsers({
+                page: page,
+                perPage: 1000
+            });
+            
+            if (error || !pageUsers || pageUsers.length === 0) {
+                hasNextPage = false;
+            } else {
+                user = pageUsers.find(u => u.email === eduEmail);
+                if (!user && pageUsers.length < 1000) {
+                    hasNextPage = false;
+                }
+                page++;
+            }
+        }
 
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
@@ -130,6 +167,12 @@ export async function POST(request: Request) {
         } else {
              // C. Update Metadata if exists
              const updates: any = {};
+             
+             // Update Full Name (fix for Turkish characters)
+             if (fullName && user.user_metadata.full_name !== fullName) {
+                 updates.full_name = fullName;
+             }
+
              if (!user.user_metadata.is_metu_verified) updates.is_metu_verified = true;
              if (detectedDept && !user.user_metadata.department) updates.department = detectedDept;
              if (detectedClass && !user.user_metadata.class_year) updates.class_year = detectedClass;
@@ -143,6 +186,8 @@ export async function POST(request: Request) {
              
              // Also update profile table
              const pUpdates: any = {};
+             if (fullName) pUpdates.full_name = fullName;
+
              if (detectedDept) pUpdates.department = detectedDept;
              else if (detectedDept === '' && (user.user_metadata.department === 'BASE' || user.user_metadata.department === 'DBE')) {
                  pUpdates.department = null;

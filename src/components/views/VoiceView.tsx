@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import NotificationCenter from '../NotificationCenter';
 import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, BadgeCheck, Globe, Lock, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,6 +26,7 @@ interface Voice {
         nickname?: string;
         department: string;
         avatar_url?: string;
+        class_year?: string;
     };
     counts: {
         likes: number;
@@ -428,17 +430,67 @@ export default function VoiceView() {
             return;
         }
         if (!activePoll) return;
+        
+        // Prevent spam clicking while processing
+        if (pollLoading) return;
+
         const pollId = activePoll.question.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_');
+        
+        // Snapshot for rollback
+        const previousResults = [...pollResults];
+        const previousVote = userVote;
+
         try {
-            const { error } = await supabase
-                .from('poll_votes')
-                .upsert({ user_id: user.id, poll_id: pollId, option_index: index }, { onConflict: 'user_id, poll_id' });
-            if (error) throw error;
-            setUserVote(index);
-            fetchPollResults(activePoll);
+            // Optimistic Update
+            const newResults = [...pollResults];
+            let action: 'vote' | 'retract' = 'vote';
+            
+            // Check if we are clicking the SAME option we already voted for (Retraction)
+            if (userVote === index) {
+                // Retract: Decrement count if > 0
+                if (newResults[index] > 0) newResults[index]--;
+                setUserVote(null);
+                action = 'retract';
+                toast.success('Oyunuz geri alındı.');
+
+            } else {
+                // Vote/Change: 
+                if (userVote !== null && newResults[userVote] > 0) newResults[userVote]--; // Remove old vote count
+                newResults[index]++; // Add new vote count
+                setUserVote(index);
+                action = 'vote';
+            }
+            
+            // Update UI immediately
+            setPollResults(newResults);
+
+            // Perform DB Operation
+            if (action === 'retract') {
+                const { error } = await supabase
+                    .from('poll_votes')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('poll_id', pollId);
+                
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('poll_votes')
+                    .upsert({ user_id: user.id, poll_id: pollId, option_index: index }, { onConflict: 'user_id, poll_id' });
+                
+                if (error) throw error;
+            }
+            
+            // Success: No need to re-fetch immediately as we trust our optimistic update.
+            // But we can do a background verification later if needed.
+            
         } catch (e) {
             console.error('Vote Error:', e);
             toast.error('Oylama sırasında bir hata oluştu.');
+            
+            // Revert State on Error
+            setPollResults(previousResults);
+            setUserVote(previousVote);
         }
     };
 
@@ -500,36 +552,34 @@ export default function VoiceView() {
 
     return (
         <div className="container mx-auto px-4 py-8 relative">
-            {/* Newspaper Header - Sticky on mobile */}
-            <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center transition-colors md:static sticky top-0 z-[9998] bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 relative">
-                <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white flex items-center justify-center gap-4">
-                    Kampüsün Sesi
-                    {/* Badge for Mode */}
-                    <span className={`hidden md:inline-block text-xs uppercase px-2 py-0.5 rounded border ${isGlobalMode ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-red-100 text-red-700 border-red-200'} align-top translate-y-1`}>
-                        {isGlobalMode ? 'GLOBAL' : 'ODTÜ'}
-                    </span>
-                </h2>
-                <div className="flex justify-between items-center text-sm font-medium border-t border-neutral-200 dark:border-neutral-800 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+            {/* Newspaper Header - Static on mobile */}
+            <div className="border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 relative">
+                <div className="flex flex-col items-center justify-center gap-4">
+                    <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-0 text-black dark:text-white flex items-center justify-center gap-4">
+                        Kampüsün Sesi
+                    </h2>
+                    
+                    {/* Global Mode Switch - Moved Here */}
+                    <div className="flex items-center gap-3">
+                         <div
+                            className="flex items-center cursor-pointer select-none group bg-white dark:bg-black px-2 py-1 rounded-full border-2 border-black dark:border-neutral-600 shadow-sm"
+                            onClick={() => setIsGlobalMode(!isGlobalMode)}
+                            title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
+                        >
+                            <span className={`text-xs font-black uppercase mr-2 ${!isGlobalMode ? 'text-primary' : 'text-neutral-400'}`}>ODTÜ</span>
+                            <div className={`w-8 h-4 rounded-full p-0.5 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
+                                {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
+                                <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-4' : 'translate-x-0'}`} />
+                            </div>
+                            <span className={`text-xs font-black uppercase ml-2 ${isGlobalMode ? 'text-blue-600' : 'text-neutral-400'}`}>Global</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 mt-4">
                     <span>SAYI: {issueNumber}</span>
                     <span>{isGlobalMode ? 'DÜNYA GÜNDEMİ' : 'SERBEST KÜRSÜ'}</span>
                     <span>{formattedDate.toUpperCase()}</span>
-                </div>
-
-                {/* Desktop Toggle Switch - Absolute Right */}
-                <div
-                    className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 items-center cursor-pointer select-none group"
-                    onClick={() => setIsGlobalMode(!isGlobalMode)}
-                    title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
-                >
-                    <div className="mr-3 font-bold font-serif text-sm transition-colors text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300">
-                        {isGlobalMode ? 'ODTÜ' : 'GLOBAL'}
-                    </div>
-                    <div className={`w-14 h-7 rounded-full p-1 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
-                        {/* Track Background for ODTU mode */}
-                        {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
-
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-7' : 'translate-x-0'}`} />
-                    </div>
                 </div>
             </div>
 
@@ -570,16 +620,19 @@ export default function VoiceView() {
                                     <MessageSquare size={24} />
                                     Öğrenci Kürsüsü
                                 </h3>
-                                {activeTagFilter && (
-                                    <button
-                                        onClick={() => setActiveTagFilter(null)}
-                                        className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white"
-                                        style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
-                                    >
-                                        <span>{activeTagFilter}</span>
-                                        <X size={12} strokeWidth={3} />
-                                    </button>
-                                )}
+                                
+                                <div className="flex items-center gap-4">
+                                    {activeTagFilter && (
+                                        <button
+                                            onClick={() => setActiveTagFilter(null)}
+                                            className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white"
+                                            style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                        >
+                                            <span>{activeTagFilter}</span>
+                                            <X size={12} strokeWidth={3} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Input Area */}
@@ -699,9 +752,9 @@ export default function VoiceView() {
                                                                     {voice.user.full_name}
                                                                 </Link>
                                                             )}
-                                                            {voice.user.department && (
-                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border-l border-neutral-300 dark:border-neutral-700 pl-2 ml-1">
-                                                                    {voice.user.department}
+                                                            {(voice.user.department || voice.user.class_year) && (
+                                                                <span className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border-l border-neutral-300 dark:border-neutral-700 pl-2 ml-1 truncate max-w-[120px] sm:max-w-none">
+                                                                    {[voice.user.department, voice.user.class_year].filter(Boolean).join(' • ')}
                                                                 </span>
                                                             )}
                                                             <div className="ml-auto relative">
@@ -741,12 +794,12 @@ export default function VoiceView() {
                                                                                         Sil
                                                                                     </button>
                                                                                 </>
-                                                                            ) : (
+                                                                            ) : !voice.is_anonymous ? (
                                                                                 <FriendButton
                                                                                     targetUserId={voice.user_id}
                                                                                     variant="menu-item"
                                                                                 />
-                                                                            )}
+                                                                            ) : null}
                                                                         </div>
                                                                     </>
                                                                 )}
@@ -886,39 +939,133 @@ export default function VoiceView() {
                                 onTagFilterChange={setActiveTagFilter}
                                 activeUsers={activeUsers}
                                 issueNumber={issueNumber}
+                                onVotersClick={fetchVoters}
                             />
 
-                            {/* Desktop Sidebar Content (Hidden on Mobile) */}
                             <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:pr-2">
-                                {/* Desktop Poll & Trending duplicated for layout */}
-                                {/* This section can be refined but keeping structure intact */}
-                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
-                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3">
-                                        Haftanın Anketi
-                                    </h3>
-                                    {/* Simplified Re-render of Poll for Sidebar */}
+                                {/* Desktop Poll - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                    <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-4">
+                                        <h3 className="text-lg font-black font-serif uppercase tracking-tight dark:text-white">
+                                            Haftanın Anketi
+                                        </h3>
+                                    </div>
+
                                     {activePoll && (
                                         <>
-                                            <h4 className="font-bold text-sm mb-3 font-serif leading-tight dark:text-white">"{activePoll.question}"</h4>
-                                            <div className="space-y-2">
+                                            <h4 className="font-bold text-sm mb-4 font-serif leading-tight dark:text-white">"{activePoll.question}"</h4>
+                                            <div className="space-y-3">
                                                 {activePoll.options.map((option, idx) => {
                                                     const percentage = totalVotes === 0 ? 0 : Math.round((pollResults[idx] / totalVotes) * 100);
                                                     const isSelected = userVote === idx;
+                                                    const showResults = userVote !== null;
+
                                                     return (
-                                                        <div key={idx} className={`text-xs p-2 rounded border ${isSelected ? 'border-primary bg-primary/5' : 'border-neutral-200 dark:border-neutral-800'}`}>
-                                                            <div className="flex justify-between font-bold">
-                                                                <span>{option}</span>
-                                                                <span>{percentage}%</span>
+                                                        <button
+                                                            key={idx}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handlePollVote(idx); 
+                                                            }}
+                                                            className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden rounded-md ${isSelected
+                                                                ? 'border-black dark:border-neutral-300 bg-white dark:bg-neutral-800'
+                                                                : 'border-neutral-200 dark:border-neutral-700 hover:border-black dark:hover:border-neutral-200'
+                                                                }`}
+                                                        >
+                                                            {showResults && (
+                                                                <div
+                                                                    className="absolute top-0 left-0 h-full bg-neutral-200 dark:bg-neutral-700 transition-all duration-500 ease-out"
+                                                                    style={{ width: `${percentage}%` }}
+                                                                />
+                                                            )}
+
+                                                            <div className="relative p-3 flex justify-between items-center z-10">
+                                                                <span className={isSelected ? 'text-black dark:text-white' : 'text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors'}>
+                                                                    {option}
+                                                                </span>
+                                                                {showResults && <span className="text-sm font-black dark:text-white">{percentage}%</span>}
                                                             </div>
-                                                            <div className="h-1 bg-neutral-100 dark:bg-neutral-800 mt-1 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-primary" style={{ width: `${percentage}%` }}></div>
-                                                            </div>
-                                                        </div>
-                                                    )
+                                                        </button>
+                                                    );
                                                 })}
                                             </div>
+                                            {userVote !== null && (
+                                                <button 
+                                                    onClick={fetchVoters}
+                                                    className="w-full text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium font-serif hover:text-primary hover:underline transition-colors block"
+                                                >
+                                                    {totalVotes} oy kullanıldı
+                                                </button>
+                                            )}
                                         </>
                                     )}
+                                </div>
+
+                                {/* Trending Topics (Desktop) - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                    <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white flex items-center gap-2">
+                                        <TrendingUp size={20} style={{ color: 'var(--primary-color, #C8102E)' }} />
+                                        Kampüste Gündem
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {allTags.length > 0 ? (
+                                            allTags.slice(0, 5).map((topic, index) => (
+                                                <div 
+                                                    key={topic.tag} 
+                                                    onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} 
+                                                    className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-200 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-white dark:bg-neutral-900 shadow-sm' : 'hover:bg-white dark:hover:bg-neutral-900'}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-lg font-serif font-black text-neutral-400 dark:text-neutral-600 w-5">{index + 1}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className={`font-bold text-sm transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
+                                                                {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
+                                                            </span>
+                                                            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowRight size={14} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-4 text-neutral-400 text-xs italic font-serif">
+                                                Henüz gündem oluşmadı.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Campus Pulse (Desktop) - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+                                    <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white text-center">
+                                        Kampüs Nabzı
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3 text-center">
+                                        <div
+                                            className="p-3 bg-white dark:bg-neutral-900 rounded border-2 border-[var(--primary-color)]"
+                                            style={{
+                                                borderColor: 'var(--primary-color, #C8102E)'
+                                            }}
+                                        >
+                                            <span
+                                                className="block text-3xl font-black font-serif animate-pulse"
+                                                style={{ color: 'var(--primary-color, #C8102E)' }}
+                                            >
+                                                {activeUsers}
+                                            </span>
+                                            <span className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-400">
+                                                Aktif Öğrenci
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-white dark:bg-neutral-900 rounded border-2 border-neutral-200 dark:border-neutral-700">
+                                            <span className="block text-3xl font-black font-serif text-black dark:text-white">
+                                                {issueNumber}
+                                            </span>
+                                            <span className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-400">
+                                                Gündem Sayısı
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -949,7 +1096,8 @@ export default function VoiceView() {
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedVoterOption(idx)}
-                                            className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all flex items-center gap-2 border-2 ${isActive ? 'text-white border-primary bg-primary' : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'}`}
+                                            style={isActive ? { backgroundColor: 'var(--primary-color, #C8102E)', borderColor: 'var(--primary-color, #C8102E)' } : {}}
+                                            className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all flex items-center gap-2 border-2 ${isActive ? 'text-white' : 'bg-white text-neutral-600 border-neutral-200 hover:border-black dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'}`}
                                         >
                                             {option} <span className="opacity-70">({count})</span>
                                         </button>
@@ -965,9 +1113,14 @@ export default function VoiceView() {
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     {voters.filter(v => v.option_index === selectedVoterOption).map(voter => (
-                                        <Link key={voter.user_id} href={`/profile/${voter.user_id}`} className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 shadow-sm">
-                                            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">{voter.display_name.charAt(0)}</div>
-                                            <span className="font-bold">{voter.display_name}</span>
+                                        <Link key={voter.user_id} href={`/profile/${voter.user_id}`} className="flex items-center gap-3 p-3 bg-white dark:bg-[#0a0a0a] rounded border border-neutral-200 dark:border-neutral-800 shadow-sm hover:border-black dark:hover:border-neutral-500 transition-colors">
+                                            <div 
+                                                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white uppercase" 
+                                                style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                            >
+                                                {voter.display_name.charAt(0)}
+                                            </div>
+                                            <span className="font-bold text-black dark:text-white">{voter.display_name}</span>
                                         </Link>
                                     ))}
                                 </div>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { mockEvents } from '@/data/mockEvents';
-import { Calendar, MapPin, Users, ArrowLeft, Star } from 'lucide-react';
+import { Users, ArrowLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import RSVPButton from '@/components/RSVPButton';
 import AttendeesList from '@/components/AttendeesList';
@@ -51,7 +51,7 @@ export default async function EventDetailPage({
         {/* Newspaper Header Block */}
         <header className="mb-10 text-center border-b-4 border-black dark:border-white pb-8 relative transition-colors">
            <div className="flex justify-center mb-4">
-              <span className="bg-black dark:bg-white text-white dark:text-black px-4 py-1 font-bold uppercase tracking-widest text-sm transition-colors">
+              <span className="bg-black dark:bg-white text-white dark:text-black px-4 py-1 font-bold uppercase tracking-widest text-sm transition-colors rounded-none">
                 {event.category === 'event' ? 'ETKİNLİK HABERİ' : 'DUYURU'}
               </span>
            </div>
@@ -64,7 +64,7 @@ export default async function EventDetailPage({
               <span>{event.time}</span>
               <span className="w-2 h-2 bg-black dark:bg-white rounded-full"></span>
               <a 
-                href="https://www.google.com/maps/search/?api=1&query=ODTÜ+Devrim+Stadyumu" 
+                href={event.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="hover:underline decoration-2 underline-offset-4 cursor-pointer hover:text-primary transition-colors"
@@ -81,7 +81,14 @@ export default async function EventDetailPage({
            </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Event Poster (Moved Up) */}
+        {event.image_url && (
+          <div className="mb-8 rounded-xl overflow-hidden shadow-lg border-2 border-neutral-200 dark:border-neutral-800">
+             <img src={event.image_url} alt={event.title} className="w-full h-auto object-cover max-h-[500px]" />
+          </div>
+        )}
+
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">
              {/* Lead / Excerpt */}
@@ -136,8 +143,9 @@ export default async function EventDetailPage({
           {/* Sidebar / Action Column */}
           <div className="lg:col-span-1 space-y-8">
              {/* Action Card */}
-             <div className="bg-neutral-50 dark:bg-neutral-900 border-4 border-black dark:border-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.3)] transition-colors">
-                <h3 className="text-2xl font-black font-serif uppercase mb-6 border-b-2 border-black dark:border-white pb-2 text-center dark:text-white">
+             <div className="bg-neutral-50 dark:bg-neutral-900 border-2 border-black dark:border-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none">
+                <h3 className="text-xl font-bold font-serif uppercase mb-6 border-b-2 border-black dark:border-white pb-2 flex items-center gap-2 dark:text-white">
+                   <Star size={20} className="text-black dark:text-white" />
                    Katılım Durumu
                 </h3>
 
@@ -160,9 +168,9 @@ export default async function EventDetailPage({
              </div>
 
              {/* Attendees Card */}
-             <div className="border-2 border-black dark:border-white p-6 dark:bg-neutral-900 transition-colors">
-                <h3 className="font-bold uppercase tracking-wider mb-4 flex items-center gap-2 dark:text-white">
-                   <Users size={20} />
+             <div className="bg-white dark:bg-neutral-900 border-2 border-black dark:border-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 font-serif uppercase tracking-tight border-b-2 border-black dark:border-white pb-2 dark:text-white">
+                   <Users size={20} className="text-black dark:text-white" />
                    Katılımcılar
                 </h3>
                 <AttendeesList eventId={id} />

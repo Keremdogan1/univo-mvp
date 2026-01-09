@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram, Camera, Upload } from 'lucide-react';
+import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram, Camera, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { METU_DEPARTMENTS } from '@/lib/constants';
 import Image from 'next/image';
@@ -210,10 +210,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    console.log('Starting profile update...', formData);
 
     try {
       let avatarUrl = formData.avatar_url;
       
+      // Handle Avatar Upload
       if (avatarFile) {
           try {
               const uploadedUrl = await uploadAvatar();
@@ -226,11 +228,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
           }
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
+      // Convert empty string to null for DB if needed, though Supabase handles text columns fine.
+      // But for avatar_url, we want NULL if removed.
+      const updates = {
           full_name: formData.full_name,
-          avatar_url: avatarUrl,
+          nickname: formData.nickname, // Ensure nickname is sent
+          avatar_url: avatarUrl || null, // Convert empty string to null
           department: formData.department,
           class_year: formData.class_year,
           bio: formData.bio,
@@ -238,19 +241,34 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
           social_links: formData.social_links,
           privacy_settings: formData.privacy_settings,
           updated_at: new Date().toISOString()
-        })
+      };
+
+      console.log('Sending updates to Supabase:', updates);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
         .eq('id', id);
 
       if (error) throw error;
 
+      toast.success('Profil başarıyla güncellendi.');
       router.push(`/profile/${id}`);
       router.refresh();
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      toast.error(`Profil güncellenirken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`);
+      toast.error(`Hata: ${error.message || error.details || 'Güncelleme başarısız'}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRemoveAvatar = () => {
+      if(confirm('Profil fotoğrafını kaldırmak istediğinize emin misiniz?')) {
+          setAvatarFile(null);
+          setAvatarPreview(null);
+          setFormData(prev => ({ ...prev, avatar_url: '' }));
+      }
   };
 
   if (loading) return (
@@ -291,8 +309,19 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                 Kişisel Bilgiler
               </h2>
               
+              {/* Added Email Field (Read Only) */}
+              <div>
+                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">E-Posta (ODTÜ)</label>
+                 <input 
+                    type="text" 
+                    value={user?.email || ' - '} 
+                    disabled 
+                    className="w-full p-2 border border-neutral-200 dark:border-neutral-700 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 cursor-not-allowed"
+                 />
+              </div>
+              
               {/* Avatar Upload */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center items-center gap-6 mb-6">
                 <div className="relative group cursor-pointer">
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-md relative bg-neutral-100 dark:bg-neutral-800">
                     {(avatarPreview || formData.avatar_url) ? (
@@ -324,6 +353,17 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                     <Upload size={16} />
                   </div>
                 </div>
+
+                {(avatarPreview || formData.avatar_url) && (
+                    <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-full text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border border-neutral-200 dark:border-neutral-700"
+                        title="Fotoğrafı Kaldır"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -484,78 +524,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                 </div>
             </div>
 
-            {/* Privacy Settings */}
-            <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-[#C8102E]">
-                    <Lock size={20} />
-                    Gizlilik Ayarları
-                </h2>
-                <div className="space-y-3">
-                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                        <div className="flex items-center gap-3">
-                            {formData.privacy_settings?.show_interests ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
-                            <div>
-                                <span className="font-medium text-neutral-900 dark:text-white block">İlgi Alanlarımı Göster</span>
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Profilinizde seçtiğiniz ilgi alanları herkese açık olur.</span>
-                            </div>
-                        </div>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.privacy_settings?.show_interests} 
-                            onChange={() => handlePrivacyToggle('show_interests')}
-                            className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
-                        />
-                    </label>
 
-                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                        <div className="flex items-center gap-3">
-                            {formData.privacy_settings?.show_activities ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
-                            <div>
-                                <span className="font-medium text-neutral-900 dark:text-white block">Aktivitelerimi Göster</span>
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Katıldığınız etkinlikler ve paylaşımlarınız profilde görünür.</span>
-                            </div>
-                        </div>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.privacy_settings?.show_activities} 
-                            onChange={() => handlePrivacyToggle('show_activities')}
-                            className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
-                        />
-                    </label>
-
-                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                        <div className="flex items-center gap-3">
-                            {formData.privacy_settings?.show_friends ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
-                            <div>
-                                <span className="font-medium text-neutral-900 dark:text-white block">Arkadaşlarımı Göster</span>
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Arkadaş listeniz profilde görünür.</span>
-                            </div>
-                        </div>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.privacy_settings?.show_friends} 
-                            onChange={() => handlePrivacyToggle('show_friends')}
-                            className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
-                        />
-                    </label>
-
-                    <label className="flex items-center justify-between p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                        <div className="flex items-center gap-3">
-                            {formData.privacy_settings?.show_polls !== false ? <Eye size={20} className="text-green-600" /> : <EyeOff size={20} className="text-neutral-400" />}
-                            <div>
-                                <span className="font-medium text-neutral-900 dark:text-white block">Anket Katılımlarımı Göster</span>
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Katılımcı listesinde isminiz veya rumuzunuz görünür.</span>
-                            </div>
-                        </div>
-                        <input 
-                            type="checkbox" 
-                            checked={formData.privacy_settings?.show_polls !== false} 
-                            onChange={() => handlePrivacyToggle('show_polls')}
-                            className="w-5 h-5 text-[#C8102E] rounded focus:ring-0 accent-[#C8102E]"
-                        />
-                    </label>
-                </div>
-            </div>
 
             {/* Interests */}
             <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-800">

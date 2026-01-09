@@ -229,8 +229,10 @@ export default function RSVPButton({
              <button
                onClick={() => handleRSVP('going')}
                disabled={loading}
-               className={`w-full py-4 font-black uppercase tracking-wider text-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all disabled:opacity-50 text-white ${
-                 confirming ? 'bg-[#ea2626] animate-pulse' : 'bg-primary hover:bg-neutral-800'
+               className={`w-full py-4 font-black uppercase tracking-wider text-lg border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all disabled:opacity-50 ${
+                 confirming 
+                    ? 'bg-[#ea2626] text-white animate-pulse' 
+                    : 'bg-black text-white dark:bg-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200'
                }`}
              >
                {loading ? 'İşleniyor...' : (confirming ? 'Onaylıyor musunuz?' : 'KATIL')}

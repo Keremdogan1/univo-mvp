@@ -57,6 +57,7 @@ export async function searchContent(query: string): Promise<SearchResults> {
       .from('profiles')
       .select('id, full_name, avatar_url, department, class_year')
       .or(`full_name.ilike."${searchQuery}",full_name.ilike."${searchTrUpper}"`)
+      .not('full_name', 'in', '("Ali Yılmaz","Ayşe Demir","Mehmet Kaya","Sanat Kulübü Başkanı")')
       .limit(5);
 
   const [eventsResult, voicesResult, usersResult] = await Promise.all([

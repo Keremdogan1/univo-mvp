@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toTitleCase } from '@/lib/utils';
 
 export default function AuthButton({ onNavigate }: { onNavigate?: () => void }) {
   const { user, profile, signOut } = useAuth();
@@ -63,7 +64,7 @@ export default function AuthButton({ onNavigate }: { onNavigate?: () => void }) 
           </div>
         )}
         <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 hidden md:block">
-          {profile?.full_name || 'User'}
+          {toTitleCase(profile?.full_name) || 'User'}
         </span>
       </button>
 

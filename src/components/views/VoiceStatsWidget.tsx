@@ -15,6 +15,7 @@ interface VoiceStatsWidgetProps {
     onTagFilterChange: (tag: string | null) => void;
     activeUsers: number;
     issueNumber: number;
+    onVotersClick: () => void;
 }
 
 export default function VoiceStatsWidget({
@@ -28,7 +29,8 @@ export default function VoiceStatsWidget({
     activeTagFilter,
     onTagFilterChange,
     activeUsers,
-    issueNumber
+    issueNumber,
+    onVotersClick
 }: VoiceStatsWidgetProps) {
     const { user } = useAuth(); // Needed for poll "Yapay Zeka" badge pulsing if we want, or simple rendering
 
@@ -96,7 +98,14 @@ export default function VoiceStatsWidget({
                                     );
                                 })}
                             </div>
-                            {userVote !== null && <div className="text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium">{totalVotes} oy kullanıldı</div>}
+                            {userVote !== null && (
+                                <button 
+                                    onClick={onVotersClick}
+                                    className="w-full text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium font-serif hover:text-primary hover:underline transition-colors"
+                                >
+                                    {totalVotes} oy kullanıldı
+                                </button>
+                            )}
                         </>
                     )}
                 </div>

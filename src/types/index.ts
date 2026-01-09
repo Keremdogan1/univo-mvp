@@ -18,4 +18,8 @@ export interface Event {
   excerpt: string;
   description: string;
   image?: string;
+  image_url?: string;
+  quota?: number;
+  registration_link?: string;
+  maps_url?: string;
 }

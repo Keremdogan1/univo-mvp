@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Calendar, MapPin, Quote, Heart, BookOpen, Edit, Globe, Lock, Linkedin, Github, Twitter, Instagram, Camera, Building2, Users, GraduationCap, BadgeCheck, X } from 'lucide-react';
+import { User, Calendar, MapPin, Quote, Heart, BookOpen, Edit, Globe, Lock, Linkedin, Github, Twitter, Instagram, Camera, Building2, Users, GraduationCap, BadgeCheck, X, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import EventFeedbackButton from '@/components/EventFeedbackButton';
@@ -12,7 +12,9 @@ import FriendButton from '@/components/FriendButton';
 import FriendListModal from '@/components/FriendListModal';
 import FollowedCommunitiesModal from '@/components/profile/FollowedCommunitiesModal';
 import { analyzeCourses, formatDetectionMessage } from '@/lib/course-analyzer';
+import NotificationCenter from '@/components/NotificationCenter';
 import { toast } from 'sonner';
+import { toTitleCase } from '@/lib/utils';
 
 interface Profile {
     id: string;
@@ -24,7 +26,6 @@ interface Profile {
     bio?: string;
     interests?: string[];
     privacy_settings?: {
-        show_email: boolean;
         show_interests: boolean;
         show_activities: boolean;
         show_friends: boolean;
@@ -49,7 +50,7 @@ interface EventAttendance {
 
 export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { user } = useAuth();
+    const { user, refreshProfile } = useAuth();
     const router = useRouter();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [upcomingEvents, setUpcomingEvents] = useState<EventAttendance[]>([]);
@@ -98,8 +99,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         longPressTriggered.current = false;
         timerRef.current = setTimeout(() => {
             longPressTriggered.current = true;
-            if (isOwnProfile) {
-                setShowChangePhotoModal(true);
+            // Long press for any profile (if avatar exists) opens lightbox
+            if (profile?.avatar_url) {
+                setIsLightboxOpen(true);
             }
         }, 500); // 500ms for long press
     };
@@ -110,9 +112,16 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             timerRef.current = null;
         }
 
-        // If not long press, open lightbox (only if avatar exists)
-        if (!longPressTriggered.current && profile?.avatar_url) {
-            setIsLightboxOpen(true);
+        // If not long press
+        if (!longPressTriggered.current) {
+             // If Owner -> Change Photo Modal
+             if (user?.id && profile?.id && user.id === profile.id) {
+                 setShowChangePhotoModal(true);
+             } 
+             // Else -> Open Lightbox (only if avatar exists)
+             else if (profile?.avatar_url) {
+                 setIsLightboxOpen(true);
+             }
         }
     };
 
@@ -125,7 +134,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         try {
             let resolvedId = id;
 
-            // UUID Check & Slug Logic (Same as before)
+            // UUID Check & Slug Logic
             const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
             if (!isUUID) {
                 const decodedId = decodeURIComponent(id);
@@ -156,7 +165,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
             setTargetId(resolvedId);
 
-            // 1. Fetch Profile
+            // 1. Fetch Profile First (Critical)
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
@@ -166,102 +175,78 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             if (profileError) throw profileError;
             setProfile(profileData);
 
-            // 2. Fetch Database Badges (if exists)
-            const { data: badgesData } = await supabase
-                .from('user_badges')
-                .select(`
-            awarded_at,
-            badge:badges (
-                id, name, description, icon, color
-            )
-        `)
-                .eq('user_id', resolvedId);
+            // 2. Parallel Fetching for All Other Data
+            const [
+                { data: badgesData },
+                { data: attendanceData },
+                { data: voicesData },
+                { data: commentsData },
+                { count: friends },
+                { count: followed },
+                { count: totalPostsEver }
+            ] = await Promise.all([
+                // Badges
+                supabase
+                    .from('user_badges')
+                    .select(`
+                        awarded_at,
+                        badge:badges (id, name, description, icon, color)
+                    `)
+                    .eq('user_id', resolvedId),
+                
+                // Event Attendance
+                supabase
+                    .from('event_attendees')
+                    .select(`
+                        created_at,
+                        rsvp_status,
+                        events (
+                            id, title, date, time, location, category,
+                            community:communities (id, name, category)
+                        )
+                    `)
+                    .eq('user_id', resolvedId),
 
-            // Start building achievement badges array
-            const achievementBadges: any[] = [];
-            const now = new Date().toISOString();
+                // Voices (Active)
+                supabase
+                    .from('campus_voices')
+                    .select('id, content, created_at, tags')
+                    .eq('user_id', resolvedId)
+                    .eq('moderation_status', 'approved'),
 
+                // Comments
+                supabase
+                    .from('voice_comments')
+                    .select('id, content, created_at, voice_id')
+                    .eq('user_id', resolvedId),
 
-            // Profile Completed Badge - Only requires student_id, department, class_year
-            const hasCompletedProfile = profileData?.student_id &&
-                profileData?.department &&
-                profileData?.class_year;
-            if (hasCompletedProfile) {
-                achievementBadges.push({
-                    id: 'profile-complete',
-                    name: 'Profil Tamamlandı',
-                    description: 'Tüm profil bilgilerini eksiksiz doldurdu.',
-                    icon: 'Sparkles',
-                    color: '#8B5CF6',
-                    awarded_at: profileData.updated_at || now
-                });
-            }
+                // Friend Count
+                supabase
+                    .from('friendships')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'accepted')
+                    .or(`requester_id.eq.${resolvedId},receiver_id.eq.${resolvedId}`),
 
-            // 3. Fetch Events & Activities
-            // Fetch user's attending events with community category
-            const { data: attendanceData } = await supabase
-                .from('event_attendees')
-                .select(`
-          created_at,
-          rsvp_status,
-          events (
-            id,
-            title,
-            date,
-            time,
-            location,
-            category,
-            community:communities (
-                id,
-                name,
-                category
-            )
-          )
-        `)
-                .eq('user_id', resolvedId);
+                // Followed Communities Count
+                supabase
+                    .from('community_followers')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', resolvedId),
 
-            // Fetch User's Voices (Share)
-            const { data: voicesData } = await supabase
-                .from('campus_voices')
-                .select(`
-            id,
-            content,
-            created_at,
-            tags
-        `)
-                .eq('user_id', resolvedId)
-                .eq('moderation_status', 'approved');
-
-            // Fetch User's Comments
-            const { data: commentsData } = await supabase
-                .from('voice_comments')
-                .select(`
-            id,
-            content,
-            created_at,
-            voice_id
-        `)
-                .eq('user_id', resolvedId);
-
-            // Fetch Friend Count
-            const { count: friends } = await supabase
-                .from('friendships')
-                .select('*', { count: 'exact', head: true })
-                .eq('status', 'accepted')
-                .or(`requester_id.eq.${resolvedId},receiver_id.eq.${resolvedId}`);
+                // Total Posts Count (Including deleted/pending for badge)
+                supabase
+                    .from('campus_voices')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', resolvedId)
+            ]);
 
             setFriendCount(friends || 0);
-
-            // Fetch Followed Communities Count
-            const { count: followed } = await supabase
-                .from('community_followers')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', resolvedId);
-
             setFollowedCommunitiesCount(followed || 0);
 
+            // === DATA PROCESSING ===
+
+            // Process Events
             if (attendanceData) {
-                // Process Events for Display
                 const eventsList: EventAttendance[] = attendanceData
                     .filter((item: any) => item.rsvp_status === 'going' && item.events)
                     .map((item: any) => ({
@@ -279,8 +264,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 setUpcomingEvents(upcoming);
                 setPastEvents(past);
 
-                // Process Event Attendance for Activity Feed
-                // Only if privacy allows OR is own profile
+                // Process Activities
                 const showActivities = isOwnProfile || profileData.privacy_settings?.show_activities !== false;
 
                 if (showActivities) {
@@ -290,7 +274,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             id: `evt-${item.events.id}`,
                             type: 'event_attendance',
                             title: item.events.title,
-                            created_at: item.created_at || item.events.date, // Use RSVP time or event time
+                            created_at: item.created_at || item.events.date,
                             target_id: item.events.id,
                             metadata: { location: item.events.location }
                         }));
@@ -317,9 +301,23 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 }
             }
 
-            // === ACTIVITY-BASED BADGES (calculated after fetching activity data) ===
+            // === BADGE LOGIC ===
+            const achievementBadges: any[] = [];
+            const now = new Date().toISOString();
 
-            // First Event Attended Badge
+            // Profile Completed Badge
+            if (profileData?.student_id && profileData?.department && profileData?.class_year) {
+                achievementBadges.push({
+                    id: 'profile-complete',
+                    name: 'Profil Tamamlandı',
+                    description: 'Tüm profil bilgilerini eksiksiz doldurdu.',
+                    icon: 'Sparkles',
+                    color: '#8B5CF6',
+                    awarded_at: profileData.updated_at || now
+                });
+            }
+
+            // First Event Badge
             if (attendanceData && attendanceData.length > 0) {
                 const firstEvent = attendanceData.sort((a: any, b: any) =>
                     new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -334,20 +332,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 });
             }
 
-            // First Post Made Badge - Check if user has EVER made a post (including deleted ones)
-            // Query all voices including deleted to check if badge should persist
-            const { count: totalPostsEver } = await supabase
-                .from('campus_voices')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', resolvedId);
-
+            // First Post Badge
             if (totalPostsEver && totalPostsEver > 0) {
-                // Get first post date from current posts, or use account creation date
                 const firstPostDate = voicesData && voicesData.length > 0
                     ? voicesData.sort((a: any, b: any) =>
                         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                     )[0].created_at
                     : profileData?.created_at || now;
+                    
                 achievementBadges.push({
                     id: 'first-post',
                     name: 'İlk Paylaşım',
@@ -370,7 +362,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 });
             }
 
-            // Active Commenter Badge (5+ comments)
+            // Active Commenter Badge
             if (commentsData && commentsData.length >= 5) {
                 achievementBadges.push({
                     id: 'active-commenter',
@@ -382,7 +374,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 });
             }
 
-            // Early Adopter Badge (profile created before 2026-02-01)
+            // Early Adopter Badge
             const createdAt = profileData?.created_at ? new Date(profileData.created_at) : null;
             if (createdAt && createdAt < new Date('2026-02-01')) {
                 achievementBadges.push({
@@ -395,13 +387,12 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 });
             }
 
-            // Combine Database Badges with Achievement Badges
+            // Combine Badges
             const dbBadges = badgesData ? badgesData.map((item: any) => ({
                 ...item.badge,
                 awarded_at: item.awarded_at
             })) : [];
 
-            // Merge without duplicates (by id)
             const allBadges = [...achievementBadges];
             dbBadges.forEach((dbBadge: any) => {
                 if (!allBadges.find(b => b.id === dbBadge.id)) {
@@ -413,6 +404,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
         } catch (error) {
             console.error('Error fetching profile:', error);
+            toast.error('Profil yüklenirken bir hata oluştu');
         } finally {
             setLoading(false);
         }
@@ -533,19 +525,43 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             // Update Local State
             setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
 
+            // Update Global Auth Context
+            await refreshProfile();
+
             toast.success('Profil fotoğrafı güncellendi');
 
             // Refresh router to update Header/Nav Bar
             router.refresh();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error uploading avatar:', error);
-            toast.error('Fotoğraf yüklenirken bir hata oluştu');
+            toast.error(`Hata: ${error.message || 'Bilinmeyen hata'}`);
         } finally {
             setIsUploading(false);
         }
     };
 
+
+    const handleRemoveAvatar = async () => {
+        if (!confirm('Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?')) return;
+        
+        try {
+            setIsUploading(true);
+            const { error } = await supabase.from('profiles').update({ avatar_url: null }).eq('id', user!.id);
+            if (error) throw error;
+
+            setProfile((prev: any) => prev ? { ...prev, avatar_url: null } : null);
+            await refreshProfile();
+            toast.success('Profil fotoğrafı kaldırıldı.');
+            router.refresh();
+            setShowChangePhotoModal(false);
+        } catch (error: any) {
+            console.error('Remove avatar error:', error);
+            toast.error('Fotoğraf kaldırılamadı.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -608,19 +624,31 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             {showChangePhotoModal && (
                 <div className="fixed inset-0 z-[10001] bg-black/50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
                     <div className="bg-white dark:bg-neutral-900 rounded-xl p-6 max-w-xs w-full shadow-xl border border-neutral-200 dark:border-neutral-800">
-                        <h3 className="text-lg font-bold text-center mb-4 text-neutral-900 dark:text-white">Profil fotoğrafını değiştirmek ister misiniz?</h3>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowChangePhotoModal(false)}
-                                className="flex-1 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
-                            >
-                                Hayır
-                            </button>
+                        <h3 className="text-lg font-bold text-center mb-4 text-neutral-900 dark:text-white">Profil Fotoğrafı</h3>
+                        <div className="flex flex-col gap-3">
                             <button
                                 onClick={triggerFileInput}
-                                className="flex-1 py-2.5 rounded-lg bg-[var(--primary-color,#C8102E)] text-white font-bold hover:opacity-90"
+                                className="w-full py-2.5 rounded-lg bg-[var(--primary-color,#C8102E)] text-white font-bold hover:opacity-90 flex items-center justify-center gap-2"
                             >
-                                Evet
+                                <Camera size={18} />
+                                Yeni Fotoğraf Seç
+                            </button>
+                            
+                            {profile.avatar_url && (
+                                <button
+                                    onClick={handleRemoveAvatar}
+                                    className="w-full py-2.5 rounded-lg border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 size={18} />
+                                    Fotoğrafı Kaldır
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={() => setShowChangePhotoModal(false)}
+                                className="w-full py-2.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white font-medium"
+                            >
+                                İptal
                             </button>
                         </div>
                     </div>
@@ -631,8 +659,26 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
                 {/* Left Column: Identity & Social */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden relative group transition-colors">
+                        {/* Mobile Actions: Settings (Left) & Notifications (Right) - Outside Card */}
+                        {isOwnProfile && (
+                            <div className="flex justify-between items-center px-2 z-30 relative md:hidden">
+                                <button
+                                    onClick={() => router.push('/settings')}
+                                    className="p-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors shadow-sm"
+                                >
+                                    <Settings size={20} />
+                                </button>
+                                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm">
+                                    <NotificationCenter />
+                                </div>
+                            </div>
+                        )}
+
+                    <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden relative group transition-colors !mt-3">
                         <div className="h-32 w-full absolute top-0 left-0 opacity-20" style={{ backgroundImage: 'radial-gradient(currentColor 2px, transparent 2px)', backgroundSize: '20px 20px', color: 'var(--primary-color)' }} />
+
+                        {/* Mobile Actions: Settings (Left) & Notifications (Right) */}
+
 
                         <div className="pt-12 px-6 pb-6 text-center relative z-10">
                             <div
@@ -669,6 +715,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                                     />
                                 )}
 
+                                {/* Desktop: Click to Edit Overlay */}
+                                {isOwnProfile && !isUploading && (
+                                    <div 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowChangePhotoModal(true);
+                                        }}
+                                        className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 cursor-pointer z-10"
+                                    >
+                                        <Camera size={28} className="text-white drop-shadow-md" />
+                                    </div>
+                                )}
+
                                 {/* Status Indicator (Optional) */}
                                 {isUploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-20">
@@ -678,7 +737,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             </div>
 
                             <h2 className="text-2xl font-bold font-serif text-neutral-900 dark:text-white mt-4 mb-2">
-                                {profile.full_name.split(' ').map(word => word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR')).join(' ')}
+                                {toTitleCase(profile.full_name)}
                             </h2>
                             <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest mb-6">
                                 {(() => {
@@ -954,8 +1013,17 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                                             onClick={() => router.push(`/events/${event.id}`)}
                                             className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-primary dark:hover:border-primary hover:shadow-md transition-all cursor-pointer group"
                                         >
-                                            <span className="inline-block px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-[10px] uppercase rounded font-bold mb-3 tracking-wider">
-                                                {(event as any).community?.category || (event.category === 'EVENT' ? 'Etkinlik' : event.category) || 'Etkinlik'}
+                                            <span className="inline-block px-2 py-0.5 bg-[var(--primary-color)] text-white text-[10px] uppercase rounded font-bold mb-3 tracking-wider shadow-sm">
+                                                {(() => {
+                                                    const cat = (event.category || '').toLowerCase();
+                                                    if (cat === 'event') return 'Etkinlik';
+                                                    if (cat === 'workshop') return 'Atölye';
+                                                    if (cat === 'talk') return 'Konuşma';
+                                                    if (cat === 'announcement') return 'Toplantı';
+                                                    // Fallback check community category if event category is missing/generic
+                                                    const commCat = (event as any).community?.category;
+                                                    return commCat || 'Etkinlik';
+                                                })()}
                                             </span>
                                             <h3 className="font-bold text-lg mb-2 text-neutral-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
                                                 {event.title}

@@ -81,9 +81,12 @@ export default function LoginPage() {
         setStep('login');
     };
 
+    const [isTakingLong, setIsTakingLong] = useState(false);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setIsTakingLong(false);
 
         if (!acceptedTerms) {
             setError('Devam etmek için aydınlatma metnini onaylamalısınız.');
@@ -91,12 +94,38 @@ export default function LoginPage() {
         }
 
         setIsLoading(true);
+        
+        // Timer for slow connection message
+        const timer = setTimeout(() => {
+            setIsTakingLong(true);
+        }, 8000); // 8 seconds
 
         try {
             // For now, only ODTÜ is supported
             const result = await signInWithMetu(username, password);
+            clearTimeout(timer);
 
             if (result.success) {
+                // Auto-Connect Email Service (Silent)
+                try {
+                    let starredUids: number[] = [];
+                    const savedStars = localStorage.getItem('univo_starred_ids');
+                    if (savedStars) {
+                        starredUids = JSON.parse(savedStars)
+                            .filter((id: string) => id.startsWith('email-'))
+                            .map((id: string) => parseInt(id.replace('email-', ''), 10));
+                    }
+
+                    await fetch('/api/auth/imap', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, starredUids }),
+                        // credentials: 'include' is default for same-origin, but good to be explicit if needed
+                    });
+                } catch (imapErr) {
+                    console.error('Auto-connect email failed (non-critical):', imapErr);
+                }
+
                 const welcomeName = (result.studentInfo?.fullName || 'Öğrenci')
                     .toLowerCase()
                     .split(' ')
@@ -110,9 +139,11 @@ export default function LoginPage() {
                 throw new Error(result.error || 'Giriş başarısız.');
             }
         } catch (err: any) {
+            clearTimeout(timer);
             console.error(err);
             setError(err.message || 'Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
             setIsLoading(false);
+            setIsTakingLong(false);
         }
     };
 
@@ -140,9 +171,10 @@ export default function LoginPage() {
                                 key={uni.id}
                                 onClick={() => handleSelectUniversity(uni)}
                                 disabled={!uni.enabled}
+                                style={{ '--hover-color': uni.color } as React.CSSProperties}
                                 className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 group ${
                                     uni.enabled 
-                                        ? 'border-neutral-200 dark:border-neutral-700 hover:border-[var(--primary-color)] hover:shadow-md cursor-pointer'
+                                        ? 'border-neutral-200 dark:border-neutral-700 hover:border-[var(--hover-color)] hover:shadow-md cursor-pointer'
                                         : 'border-neutral-100 dark:border-neutral-800 opacity-50 cursor-not-allowed'
                                 }`}
                             >
@@ -161,9 +193,9 @@ export default function LoginPage() {
                                     <p className="text-xs text-neutral-500 dark:text-neutral-400">{uni.fullName}</p>
                                 </div>
                                 {uni.enabled ? (
-                                    <ArrowRight size={20} className="text-neutral-400 group-hover:text-[var(--primary-color)] transition-colors" />
+                                    <ArrowRight size={20} className="text-neutral-400 group-hover:text-[var(--hover-color)] transition-colors" />
                                 ) : (
-                                    <span className="text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-500 px-2 py-1 rounded">Yakında</span>
+                                    <span className="text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-500 px-2 py-1 rounded shrink-0 whitespace-nowrap">Yakında</span>
                                 )}
                             </button>
                         ))}
@@ -179,7 +211,10 @@ export default function LoginPage() {
 
     // Login Form Step
     return (
-        <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex flex-col items-center justify-center p-4">
+        <div 
+            className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex flex-col items-center justify-center p-4"
+            style={{ '--primary-color': selectedUni?.color || '#C8102E' } as React.CSSProperties}
+        >
             <div className="bg-white dark:bg-neutral-900 w-full max-w-md border-2 border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl overflow-hidden">
                 
                 {/* Header with Back Button */}
@@ -284,13 +319,13 @@ export default function LoginPage() {
                         <button 
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4"
+                            className="w-full py-4 sm:py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4 relative z-50 touch-manipulation"
                             style={{ backgroundColor: selectedUni?.color || 'var(--primary-color)' }}
                         >
                             {isLoading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Bağlanılıyor...
+                                    <span>Bağlanılıyor...</span>
                                 </>
                             ) : (
                                 <>
@@ -299,6 +334,14 @@ export default function LoginPage() {
                                 </>
                             )}
                         </button>
+                        
+                        {isLoading && isTakingLong && (
+                            <div className="text-center mt-3 animate-in fade-in slide-in-from-top-1">
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium bg-neutral-100 dark:bg-neutral-800 py-2 px-3 rounded-lg inline-block mx-auto border border-neutral-200 dark:border-neutral-700">
+                                    ⏱️ Bağlantı normalden uzun sürüyor, lütfen bekleyin...
+                                </p>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>
