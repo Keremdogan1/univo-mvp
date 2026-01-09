@@ -6,14 +6,7 @@ import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
 import getSupabaseAdmin from '@/lib/supabase-admin';
 import { analyzeCourses } from '@/lib/course-analyzer';
-
-// Helper for Turkish Title Case
-function toTitleCase(str: string) {
-    if (!str) return '';
-    return str.replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr-TR').split(' ').map(word => 
-        word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1)
-    ).join(' ');
-}
+import { toTitleCase } from '@/lib/utils';
 
 export async function POST(request: Request) {
   try {
