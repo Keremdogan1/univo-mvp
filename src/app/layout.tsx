@@ -37,10 +37,14 @@ export default function RootLayout({
                   document.documentElement.classList.remove('dark');
                 }
 
-                // Theme Color Logic
+                // Theme Color Logic (Immediate Injection)
                 const storedColor = localStorage.getItem('themeColor');
                 if (storedColor) {
                     document.documentElement.setAttribute('data-theme-color', storedColor);
+                    // Also inject style tag for immediate application
+                    const style = document.createElement('style');
+                    style.innerHTML = ':root { --primary-color: ' + storedColor + ' !important; }';
+                    document.head.appendChild(style);
                 }
                 
                 // Defensive cleanup for rogue extension/overlay

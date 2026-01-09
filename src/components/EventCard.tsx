@@ -103,7 +103,7 @@ export default function EventCard({ event, isAttending = false }: EventCardProps
             <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
               <MapPin size={16} />
               <a
-                href="https://www.google.com/maps/search/?api=1&query=ODTÜ+Devrim+Stadyumu"
+                href={event.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
