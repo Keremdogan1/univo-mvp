@@ -50,7 +50,7 @@ interface EventAttendance {
 
 export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { user } = useAuth();
+    const { user, refreshProfile } = useAuth();
     const router = useRouter();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [upcomingEvents, setUpcomingEvents] = useState<EventAttendance[]>([]);
@@ -517,6 +517,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             // Update Local State
             setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
 
+            // Update Global Auth Context
+            await refreshProfile();
+
             toast.success('Profil fotoğrafı güncellendi');
 
             // Refresh router to update Header/Nav Bar
@@ -669,6 +672,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                                         className="hidden"
                                         disabled={isUploading}
                                     />
+                                )}
+
+                                {/* Desktop: Click to Edit Overlay */}
+                                {isOwnProfile && !isUploading && (
+                                    <div 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowChangePhotoModal(true);
+                                        }}
+                                        className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 cursor-pointer z-10"
+                                    >
+                                        <Camera size={28} className="text-white drop-shadow-md" />
+                                    </div>
                                 )}
 
                                 {/* Status Indicator (Optional) */}
