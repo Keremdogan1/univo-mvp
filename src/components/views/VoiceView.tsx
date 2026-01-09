@@ -939,13 +939,6 @@ export default function VoiceView() {
                                         <h3 className="text-lg font-black font-serif uppercase tracking-tight dark:text-white">
                                             Haftanın Anketi
                                         </h3>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
-                                            <span
-                                                className="w-2 h-2 rounded-full animate-pulse"
-                                                style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
-                                            ></span>
-                                            Canlı
-                                        </span>
                                     </div>
 
                                     {activePoll && (
@@ -960,7 +953,10 @@ export default function VoiceView() {
                                                     return (
                                                         <button
                                                             key={idx}
-                                                            onClick={() => handlePollVote(idx)}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handlePollVote(idx); 
+                                                            }}
                                                             className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden rounded-md ${isSelected
                                                                 ? 'border-black dark:border-neutral-300 bg-white dark:bg-neutral-800'
                                                                 : 'border-neutral-200 dark:border-neutral-700 hover:border-black dark:hover:border-neutral-200'

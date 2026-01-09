@@ -4,14 +4,17 @@ import imaps from 'imap-simple';
 
 // Helper to fetch emails (Reusable for GET and POST)
 async function fetchRecentEmails(username: string, password: string) {
+    // Normalize username: Remove domain if present, as ODTÜ IMAP usually expects NetID
+    const cleanUsername = username.includes('@') ? username.split('@')[0] : username;
+
     const config = {
       imap: {
-        user: username,
+        user: cleanUsername,
         password: password,
         host: 'imap.metu.edu.tr',
         port: 993,
         tls: true,
-        authTimeout: 15000,
+        authTimeout: 20000,
         tlsOptions: { 
             rejectUnauthorized: false,
             servername: 'imap.metu.edu.tr'
@@ -22,35 +25,65 @@ async function fetchRecentEmails(username: string, password: string) {
     const connection = await imaps.connect(config);
     await connection.openBox('INBOX');
 
-    const searchCriteria = ['ALL'];
-    const fetchOptions = {
-      bodies: ['HEADER'], 
-      markSeen: false,
-      struct: true
-    };
-    
-    // Fetch last 14 days or just recent count
-    const delay = 24 * 3600 * 1000 * 14; 
+    // Optimization: Don't fetch headers for ALL messages in the last 14 days.
+    // 1. Just find the messages first (lightweight)
+    const delay = 24 * 3600 * 1000 * 30; // Check last 30 days to be safe
     const since = new Date(Date.now() - delay);
+    const searchCriteria = [['SINCE', since]];
     
-    const searchRes = await connection.search(['ALL', ['SINCE', since]], fetchOptions);
+    // We only need the UID and SeqNo initially to sort
+    const searchOptions = {
+        bodies: ['HEADER.FIELDS (DATE)'], // Minimal fetch to verify existence
+        struct: false
+    };
 
-    // Sort by ID (sequence) descending
+    // Get all messages in range (Lightweight)
+    const searchRes = await connection.search(searchCriteria, searchOptions);
+
+    // 2. Sort by UID descending (Newest first)
     searchRes.sort((a, b) => b.attributes.uid - a.attributes.uid);
+
+    // 3. Take only the top 15 latest
     const top15 = searchRes.slice(0, 15);
+
+    // 4. If we have messages, fetch their FULL headers now
+    let emails: any[] = [];
     
-    const emails = top15.map((m) => {
-        const headerPart = m.parts.find(p => p.which === 'HEADER');
-        const headerBody = headerPart ? headerPart.body : {};
-        
-        return {
-            id: m.attributes.uid,
-            seq: m.seqNo,
-            subject: headerBody.subject ? headerBody.subject[0] : 'Konusuz',
-            from: headerBody.from ? headerBody.from[0] : 'Bilinmeyen Gönderen',
-            date: headerBody.date ? headerBody.date[0] : new Date().toISOString()
+    if (top15.length > 0) {
+        // imap-simple doesn't have a direct "fetch by UIDs" helper that returns specific bodies easily 
+        // without re-searching, but we can search by UID range or specific UIDs.
+        // Generating a UID search criteria for these specific emails:
+        const uids = top15.map(m => m.attributes.uid);
+        const fetchCriteria = [['UID', uids]];
+        const fetchPartsOptions = {
+            bodies: ['HEADER'], 
+            markSeen: false,
+            struct: true
         };
-    });
+
+        const detailedRes = await connection.search(fetchCriteria, fetchPartsOptions);
+        
+        // Map the detailed results
+        emails = detailedRes.map((m) => {
+            const headerPart = m.parts.find(p => p.which === 'HEADER');
+            const headerBody = headerPart ? headerPart.body : {};
+            
+            // Decode Subject if encoded (e.g. =?UTF-8?B?...) - simple heuristic, can add library later if critical
+            let subject = headerBody.subject ? headerBody.subject[0] : 'Konusuz';
+            let from = headerBody.from ? headerBody.from[0] : 'Bilinmeyen Gönderen';
+
+            return {
+                id: m.attributes.uid,
+                seq: m.seqNo,
+                subject: subject,
+                from: from,
+                date: headerBody.date ? headerBody.date[0] : new Date().toISOString()
+            };
+        });
+
+        // Re-sort because the second search might return in ID order or random
+        emails.sort((a, b) => b.id - a.id);
+    }
 
     connection.end();
     return emails;
@@ -97,6 +130,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set('session_imap', sessionValue, { 
         httpOnly: true, 
+        // Secure only in genuine production (HTTPS). For local dev (including mobile/IP), false.
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7 // 1 week

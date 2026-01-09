@@ -106,6 +106,18 @@ export default function LoginPage() {
             clearTimeout(timer);
 
             if (result.success) {
+                // Auto-Connect Email Service (Silent)
+                try {
+                    await fetch('/api/auth/imap', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password }),
+                        // credentials: 'include' is default for same-origin, but good to be explicit if needed
+                    });
+                } catch (imapErr) {
+                    console.error('Auto-connect email failed (non-critical):', imapErr);
+                }
+
                 const welcomeName = (result.studentInfo?.fullName || 'Öğrenci')
                     .toLowerCase()
                     .split(' ')
@@ -295,7 +307,7 @@ export default function LoginPage() {
                         <button 
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4 relative"
+                            className="w-full py-4 sm:py-3.5 text-white font-bold text-sm uppercase tracking-wide rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none shadow-sm flex items-center justify-center gap-2 mt-4 relative z-50 touch-manipulation"
                             style={{ backgroundColor: selectedUni?.color || 'var(--primary-color)' }}
                         >
                             {isLoading ? (

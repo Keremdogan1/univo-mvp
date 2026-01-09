@@ -458,25 +458,25 @@ export default function OfficialView() {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8 min-w-0">
             
-            {/* Pinned Announcement */}
+            {/* Pinned Announcement - Newspaper Theme */}
             {news[0] && (
-                <div className="border-2 border-black dark:border-white p-4 sm:p-6 bg-neutral-50 dark:bg-white/5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10 rounded-none">
+                <div className="border-4 border-black dark:border-neutral-600 p-4 sm:p-6 bg-neutral-50 dark:bg-[#0a0a0a] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative mt-4 z-10 rounded-none transition-colors group">
                      <div 
-                        className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20"
+                        className="absolute -top-3 left-6 text-white px-3 py-1 text-xs font-black uppercase tracking-wider -rotate-1 shadow-sm z-20 border-2 border-black dark:border-white"
                         style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                       >
                         Önemli Duyuru
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 dark:text-white mt-2 break-words">
-                        <Megaphone size={20} className="text-primary" />
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white mt-2 break-words font-serif uppercase tracking-tight">
+                        <Megaphone size={20} className="text-black dark:text-white" />
                         {news[0].title}
                     </h3>
-                    <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4 leading-relaxed">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed font-serif">
                         {news[0].summary}
                     </p>
                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
                         <span>{news[0].source} · {news[0].date}</span>
-                        <a href={news[0].link} className="flex items-center gap-1 hover:underline decoration-2 underline-offset-2 text-black dark:text-white">
+                        <a href={news[0].link} className="flex items-center gap-1 hover:underline decoration-2 underline-offset-2 text-black dark:text-white group-hover:translate-x-1 transition-transform">
                             Detaylar <ArrowRight size={12}/>
                         </a>
                     </div>
@@ -852,13 +852,25 @@ export default function OfficialView() {
                       <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">E-postalarınıza erişmek için ODTÜ kullanıcı kodunuzu kullanın.</p>
                   </div>
                   <form onSubmit={handleImapLogin} className="space-y-6">
-                      <div>
-                          <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Kullanıcı Kodu</label>
-                          <div className="relative group">
-                              <input type="text" required placeholder="e123456 (Sadece kod)" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} />
-                              <span className="absolute right-3 top-3.5 text-neutral-500 font-bold pointer-events-none bg-white dark:bg-neutral-900 px-1 text-xs">@metu.edu.tr</span>
-                          </div>
-                      </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-neutral-500 dark:text-neutral-500 mb-1.5 ml-1">Kullanıcı Adı</label>
+                                <div className="relative">
+                                    <input 
+                                        type="text"
+                                        placeholder="e123456"
+                                        className="w-full p-3 pl-4 pr-32 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:outline-none focus:border-black dark:focus:border-white transition-colors font-mono dark:text-white"
+                                        value={loginForm.username}
+                                        onChange={e => {
+                                            // Auto-strip domain if user pastes it
+                                            let val = e.target.value;
+                                            if (val.includes('@')) val = val.split('@')[0];
+                                            setLoginForm({...loginForm, username: val});
+                                        }}
+                                        disabled={loadingEmails}
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold select-none pointer-events-none text-sm">@metu.edu.tr</span>
+                                </div>
+                            </div>
                       <div>
                           <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Şifre</label>
                           <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} />
