@@ -525,9 +525,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             // Refresh router to update Header/Nav Bar
             router.refresh();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error uploading avatar:', error);
-            toast.error('Fotoğraf yüklenirken bir hata oluştu');
+            toast.error(`Hata: ${error.message || 'Bilinmeyen hata'}`);
         } finally {
             setIsUploading(false);
         }
