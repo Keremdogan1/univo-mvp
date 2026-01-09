@@ -163,7 +163,7 @@ function HeaderContent() {
                         src="/logo_black.png"
                         alt="Univo Logo"
                         fill
-                        className="object-contain dark:invert"
+                        className="object-contain dark:invert mix-blend-multiply dark:mix-blend-screen"
                       />
                   </div>
                   <h1 className="text-2xl font-bold text-foreground dark:text-white font-serif tracking-tight hover:text-primary transition-colors">
