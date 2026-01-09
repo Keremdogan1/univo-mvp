@@ -27,7 +27,7 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
 
     // Optimization: Don't fetch headers for ALL messages in the last 14 days.
     // 1. Just find the messages first (lightweight)
-    const delay = 24 * 3600 * 1000 * 30; // Check last 30 days to be safe
+    const delay = 24 * 3600 * 1000 * 7; // User Request: Last 1 week (7 days)
     const since = new Date(Date.now() - delay);
     const searchCriteria = [['SINCE', since]];
     
@@ -38,7 +38,7 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
     };
 
     // Get all messages in range (Lightweight)
-    const searchRes = await connection.search(searchCriteria, searchOptions);
+    let searchRes = await connection.search(searchCriteria, searchOptions);
 
     // 2. Sort by UID descending (Newest first)
     searchRes.sort((a, b) => b.attributes.uid - a.attributes.uid);
@@ -51,8 +51,10 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
 
     // 4. Add Extra UIDs (Starred) if provided
     if (extraUids && extraUids.length > 0) {
+        // Ensure uids are numbers
+        const numericExtras = extraUids.map(u => Number(u)).filter(n => !isNaN(n));
         // Filter out UIDs we already have in top15 to avoid duplicates
-        const newUids = extraUids.filter(uid => !uidsToFetch.includes(uid));
+        const newUids = numericExtras.filter(uid => !uidsToFetch.includes(uid));
         uidsToFetch = [...uidsToFetch, ...newUids];
     }
 
