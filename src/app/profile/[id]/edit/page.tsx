@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram, Camera, Upload } from 'lucide-react';
+import { ArrowLeft, Save, User, BookOpen, Heart, Quote, Globe, Lock, Eye, EyeOff, Linkedin, Github, Twitter, Instagram, Camera, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { METU_DEPARTMENTS } from '@/lib/constants';
 import Image from 'next/image';
@@ -210,10 +210,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    console.log('Starting profile update...', formData);
 
     try {
       let avatarUrl = formData.avatar_url;
       
+      // Handle Avatar Upload
       if (avatarFile) {
           try {
               const uploadedUrl = await uploadAvatar();
@@ -226,11 +228,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
           }
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
+      // Convert empty string to null for DB if needed, though Supabase handles text columns fine.
+      // But for avatar_url, we want NULL if removed.
+      const updates = {
           full_name: formData.full_name,
-          avatar_url: avatarUrl,
+          nickname: formData.nickname, // Ensure nickname is sent
+          avatar_url: avatarUrl || null, // Convert empty string to null
           department: formData.department,
           class_year: formData.class_year,
           bio: formData.bio,
@@ -238,20 +241,34 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
           social_links: formData.social_links,
           privacy_settings: formData.privacy_settings,
           updated_at: new Date().toISOString()
-        })
+      };
+
+      console.log('Sending updates to Supabase:', updates);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
         .eq('id', id);
 
       if (error) throw error;
 
+      toast.success('Profil başarıyla güncellendi.');
       router.push(`/profile/${id}`);
       router.refresh();
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      // Show explicit error to user (e.g. "Column nickname does not exist")
       toast.error(`Hata: ${error.message || error.details || 'Güncelleme başarısız'}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRemoveAvatar = () => {
+      if(confirm('Profil fotoğrafını kaldırmak istediğinize emin misiniz?')) {
+          setAvatarFile(null);
+          setAvatarPreview(null);
+          setFormData(prev => ({ ...prev, avatar_url: '' }));
+      }
   };
 
   if (loading) return (
@@ -304,7 +321,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
               </div>
               
               {/* Avatar Upload */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center items-center gap-6 mb-6">
                 <div className="relative group cursor-pointer">
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-md relative bg-neutral-100 dark:bg-neutral-800">
                     {(avatarPreview || formData.avatar_url) ? (
@@ -336,6 +353,17 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
                     <Upload size={16} />
                   </div>
                 </div>
+
+                {(avatarPreview || formData.avatar_url) && (
+                    <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-full text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border border-neutral-200 dark:border-neutral-700"
+                        title="Fotoğrafı Kaldır"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
