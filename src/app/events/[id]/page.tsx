@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { mockEvents } from '@/data/mockEvents';
-import { Calendar, MapPin, Users, ArrowLeft, Star } from 'lucide-react';
+import { Users, ArrowLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import RSVPButton from '@/components/RSVPButton';
 import AttendeesList from '@/components/AttendeesList';
