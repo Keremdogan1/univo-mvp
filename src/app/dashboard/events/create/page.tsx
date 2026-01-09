@@ -155,7 +155,7 @@ export default function CreateEventPage() {
                             const query = formData.location || 'ODTÜ Ankara';
                             window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
                         }}
-                        className="absolute right-2 top-2 bottom-2 bg-neutral-100 hover:bg-[#C8102E] hover:text-white border border-neutral-200 text-neutral-600 text-xs font-bold uppercase px-4 rounded transition-colors flex items-center gap-1"
+                        className="absolute right-2 top-2 bottom-2 bg-neutral-100 hover:bg-[var(--primary-color)] hover:text-white border border-neutral-200 text-neutral-600 text-xs font-bold uppercase px-4 rounded transition-colors flex items-center gap-1"
                     >
                         <MapPin size={14} />
                         Haritada Bul
@@ -254,7 +254,7 @@ export default function CreateEventPage() {
             <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#C8102E] text-white font-bold uppercase py-4 hover:bg-[#a60d26] transition-colors disabled:opacity-50"
+                className="w-full bg-[var(--primary-color)] text-white font-bold uppercase py-4 hover:bg-[var(--primary-color-hover)] transition-colors disabled:opacity-50"
             >
                 {loading ? 'Oluşturuluyor...' : 'Etkinliği Yayınla'}
             </button>

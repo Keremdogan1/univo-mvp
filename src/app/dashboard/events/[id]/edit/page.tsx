@@ -117,7 +117,7 @@ export default function EditEventPage() {
                         name="title" 
                         required 
                         value={formData.title}
-                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors font-bold placeholder:font-normal transition-colors"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors font-bold placeholder:font-normal transition-colors"
                         onChange={handleChange}
                     />
                 </div>
@@ -131,7 +131,7 @@ export default function EditEventPage() {
                         name="date" 
                         required 
                         value={formData.date}
-                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         onChange={handleChange}
                    />
                 </div>
@@ -142,7 +142,7 @@ export default function EditEventPage() {
                         name="time" 
                         required 
                         value={formData.time}
-                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         onChange={handleChange}
                    />
                 </div>
@@ -157,7 +157,7 @@ export default function EditEventPage() {
                         name="location" 
                         required 
                         value={formData.location}
-                        className="w-full pl-10 pr-32 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full pl-10 pr-32 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         onChange={handleChange}
                     />
                     <button 
@@ -166,7 +166,7 @@ export default function EditEventPage() {
                             const query = formData.location || 'ODTÜ Ankara';
                             window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
                         }}
-                        className="absolute right-2 top-2 bottom-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-[#C8102E] hover:text-white border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase px-4 rounded transition-colors flex items-center gap-1"
+                        className="absolute right-2 top-2 bottom-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-[var(--primary-color)] hover:text-white border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase px-4 rounded transition-colors flex items-center gap-1"
                     >
                         <MapPin size={14} />
                         Haritada Bul
@@ -176,7 +176,7 @@ export default function EditEventPage() {
                     type="text" 
                     name="maps_url" 
                     value={formData.maps_url}
-                    className="w-full px-4 py-2 border-2 border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-sm focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none dark:text-white transition-colors placeholder:italic"
+                    className="w-full px-4 py-2 border-2 border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-sm focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none dark:text-white transition-colors placeholder:italic"
                     placeholder="Google Maps Linki (Opsiyonel) - Eğer 'Haritada Bul' butonu yanlış yer gösteriyorsa buraya doğrusunu yapıştırın."
                     onChange={handleChange}
                 />
@@ -187,7 +187,7 @@ export default function EditEventPage() {
                 <select 
                     name="category" 
                     value={formData.category}
-                    className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors bg-white"
+                    className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors bg-white"
                     onChange={handleChange}
                 >
                     <option value="event">Etkinlik</option>
@@ -207,7 +207,7 @@ export default function EditEventPage() {
                         type="text" 
                         name="image_url" 
                         value={formData.image_url}
-                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         placeholder="https://..."
                         onChange={handleChange}
                     />
@@ -222,7 +222,7 @@ export default function EditEventPage() {
                         name="quota" 
                         min="0" 
                         value={formData.quota}
-                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         placeholder="Sınırsız için boş bırakın"
                         onChange={handleChange}
                    />
@@ -233,7 +233,7 @@ export default function EditEventPage() {
                         type="text" 
                         name="registration_link" 
                         value={formData.registration_link}
-                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         placeholder="Örn: Google Forms..."
                         onChange={handleChange}
                    />
@@ -247,7 +247,7 @@ export default function EditEventPage() {
                     required 
                     rows={2}
                     value={formData.excerpt}
-                    className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors resize-none"
                     onChange={handleChange}
                 />
             </div>
@@ -261,7 +261,7 @@ export default function EditEventPage() {
                         required 
                         rows={6}
                         value={formData.description}
-                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[#C8102E] dark:focus:border-[#C8102E] hover:border-[#C8102E] dark:hover:border-[#C8102E] focus:outline-none transition-colors"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black text-black dark:text-white focus:border-[var(--primary-color)] dark:focus:border-[var(--primary-color)] hover:border-[var(--primary-color)] dark:hover:border-[var(--primary-color)] focus:outline-none transition-colors"
                         onChange={handleChange}
                     />
                 </div>
@@ -270,7 +270,7 @@ export default function EditEventPage() {
             <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#C8102E] text-white font-bold uppercase py-4 hover:bg-[#a60d26] transition-colors disabled:opacity-50"
+                className="w-full bg-[var(--primary-color)] text-white font-bold uppercase py-4 hover:bg-[var(--primary-color-hover)] transition-colors disabled:opacity-50"
             >
                 {loading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
             </button>

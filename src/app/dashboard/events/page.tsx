@@ -53,7 +53,7 @@ export default function EventsPage() {
                 <h1 className="text-3xl font-black font-serif">Geçmiş Etkinlikler</h1>
                 <Link 
                     href="/dashboard/events/create" 
-                    className="flex items-center gap-2 bg-[#C8102E] !text-white px-4 py-2 font-bold uppercase hover:bg-[#a60d26] transition-colors"
+                    className="flex items-center gap-2 bg-[var(--primary-color)] !text-white px-4 py-2 font-bold uppercase hover:bg-[var(--primary-color-hover)] transition-colors"
                 >
                     <Plus size={20} />
                     Yeni Etkinlik

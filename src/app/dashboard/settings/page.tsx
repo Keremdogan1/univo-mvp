@@ -63,7 +63,7 @@ export default function SettingsPage() {
     if (loading) {
        return (
             <div className="min-h-screen flex items-center justify-center">
-                 <div className="w-8 h-8 border-4 border-[#C8102E] border-t-transparent rounded-full animate-spin"></div>
+                 <div className="w-8 h-8 border-4 border-[var(--primary-color)] border-t-transparent rounded-full animate-spin"></div>
             </div>
        )
     }
@@ -77,7 +77,7 @@ export default function SettingsPage() {
                     {/* Manual Creation */}
                     <div className="bg-white dark:bg-neutral-900 p-8 border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.3)]">
                         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 dark:text-white">
-                             <div className="w-10 h-10 rounded-full border-2 border-[#C8102E] flex items-center justify-center text-neutral-900 dark:text-white bg-transparent">
+                             <div className="w-10 h-10 rounded-full border-2 border-[var(--primary-color)] flex items-center justify-center text-neutral-900 dark:text-white bg-transparent">
                                 <Rocket size={20} />
                              </div>
                              {isAdmin ? 'Yeni Topluluk Oluştur' : 'Erişim Kısıtlı'}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
                             name="name"
                             type="text" 
                             defaultValue={community?.name}
-                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[#C8102E] focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
+                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[var(--primary-color)] focus:border-[var(--primary-color)] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
                         />
                     </div>
 
@@ -147,7 +147,7 @@ export default function SettingsPage() {
                             name="description"
                             rows={4}
                             defaultValue={community?.description}
-                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[#C8102E] focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
+                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[var(--primary-color)] focus:border-[var(--primary-color)] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
                         />
                     </div>
 
@@ -157,7 +157,7 @@ export default function SettingsPage() {
                             name="logo_url"
                             type="text" 
                             defaultValue={community?.logo_url}
-                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[#C8102E] focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
+                            className="w-full border-2 border-neutral-300 dark:border-neutral-700 p-3 font-serif hover:border-[var(--primary-color)] focus:border-[var(--primary-color)] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors"
                         />
                     </div>
 
@@ -165,7 +165,7 @@ export default function SettingsPage() {
                         <button 
                             type="submit" 
                             disabled={saving}
-                            className="bg-[#C8102E] text-white px-6 py-3 font-bold uppercase hover:bg-[#a60d26] transition-colors disabled:opacity-50"
+                            className="bg-[var(--primary-color)] text-white px-6 py-3 font-bold uppercase hover:bg-[var(--primary-color-hover)] transition-colors disabled:opacity-50"
                         >
                             {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                         </button>
@@ -216,11 +216,11 @@ function CustomSelect({ name, defaultValue, options }: { name: string, defaultVa
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`w-full text-left p-3 border-2 flex items-center justify-between transition-colors outline-none bg-white dark:bg-neutral-800 dark:text-white
-                    ${isOpen ? 'border-[#C8102E]' : 'border-neutral-300 dark:border-neutral-700 hover:border-[#C8102E]'}
+                    ${isOpen ? 'border-[var(--primary-color)]' : 'border-neutral-300 dark:border-neutral-700 hover:border-[var(--primary-color)]'}
                 `}
             >
                 <span>{selected}</span>
-                <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#C8102E]' : 'text-neutral-400'}`} />
+                <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[var(--primary-color)]' : 'text-neutral-400'}`} />
             </button>
 
             {isOpen && (
@@ -231,12 +231,12 @@ function CustomSelect({ name, defaultValue, options }: { name: string, defaultVa
                             type="button"
                             onClick={() => handleSelect(option)}
                             className="w-full text-left px-4 py-3 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 last:border-0
-                                hover:border-l-4 hover:border-l-[#C8102E] hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group"
+                                hover:border-l-4 hover:border-l-[var(--primary-color)] hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group"
                         >
-                            <span className={`group-hover:text-[#C8102E] group-hover:font-bold dark:text-white transition-colors ${selected === option ? 'font-bold text-[#C8102E]' : 'text-neutral-600'}`}>
+                            <span className={`group-hover:text-[var(--primary-color)] group-hover:font-bold dark:text-white transition-colors ${selected === option ? 'font-bold text-[var(--primary-color)]' : 'text-neutral-600'}`}>
                                 {option}
                             </span>
-                            {selected === option && <Check size={16} className="text-[#C8102E]" />}
+                            {selected === option && <Check size={16} className="text-[var(--primary-color)]" />}
                         </button>
                     ))}
                 </div>
@@ -277,7 +277,7 @@ function CreateCommunityForm({ userId, onComplete }: { userId: string, onComplet
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <label className="block font-bold text-sm mb-1">Topluluk Adı</label>
-                <input required name="name" type="text" placeholder="Örn: Dağcılık Kulübü" className="w-full border-2 border-neutral-200 dark:border-neutral-700 p-2 hover:border-[#C8102E] focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors" />
+                <input required name="name" type="text" placeholder="Örn: Dağcılık Kulübü" className="w-full border-2 border-neutral-200 dark:border-neutral-700 p-2 hover:border-[var(--primary-color)] focus:border-[var(--primary-color)] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors" />
             </div>
              <div>
                 <label className="block font-bold text-sm mb-1">Kategori</label>
@@ -289,9 +289,9 @@ function CreateCommunityForm({ userId, onComplete }: { userId: string, onComplet
             </div>
              <div>
                 <label className="block font-bold text-sm mb-1">Kısa Açıklama</label>
-                <textarea required name="description" rows={2} placeholder="Topluluğunuzu anlatan kısa bir yazı..." className="w-full border-2 border-neutral-200 dark:border-neutral-700 p-2 hover:border-[#C8102E] focus:border-[#C8102E] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors" />
+                <textarea required name="description" rows={2} placeholder="Topluluğunuzu anlatan kısa bir yazı..." className="w-full border-2 border-neutral-200 dark:border-neutral-700 p-2 hover:border-[var(--primary-color)] focus:border-[var(--primary-color)] bg-white dark:bg-neutral-800 dark:text-white outline-none transition-colors" />
             </div>
-            <button disabled={loading} type="submit" className="w-full bg-[#C8102E] text-white font-bold uppercase py-3 hover:bg-[#a60d26] transition-colors shadow-lg">
+            <button disabled={loading} type="submit" className="w-full bg-[var(--primary-color)] text-white font-bold uppercase py-3 hover:bg-[var(--primary-color-hover)] transition-colors shadow-lg">
                 {loading ? 'Oluşturuluyor...' : 'Topluluğu Kur'}
             </button>
         </form>
@@ -334,7 +334,7 @@ function InitializeDemoButton({ userId, onComplete }: { userId: string, onComple
             type="button"
             onClick={handleInit}
             disabled={loading}
-            className="w-full bg-[#C8102E] !text-white py-3 font-bold uppercase hover:bg-[#a60d26] transition-colors"
+            className="w-full bg-[var(--primary-color)] !text-white py-3 font-bold uppercase hover:bg-[var(--primary-color-hover)] transition-colors"
         >
             {loading ? 'Oluşturuluyor...' : 'Topluluğu Oluştur ve Başla'}
         </button>
