@@ -892,53 +892,78 @@ export default function VoiceView() {
                                 issueNumber={issueNumber}
                             />
 
-                            {/* Desktop Sidebar Content (Hidden on Mobile) */}
                             <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:pr-2">
-                                {/* Desktop Poll & Trending duplicated for layout */}
-                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
-                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3">
-                                        Haftanın Anketi
-                                    </h3>
+                                {/* Desktop Poll - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-sm">
+                                    <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-4">
+                                        <h3 className="text-lg font-black font-serif uppercase tracking-tight dark:text-white">
+                                            Haftanın Anketi
+                                        </h3>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
+                                            <span
+                                                className="w-2 h-2 rounded-full animate-pulse"
+                                                style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
+                                            ></span>
+                                            Canlı
+                                        </span>
+                                    </div>
+
                                     {activePoll && (
                                         <>
-                                            <h4 className="font-bold text-sm mb-3 font-serif leading-tight dark:text-white">"{activePoll.question}"</h4>
-                                            <div className="space-y-2">
+                                            <h4 className="font-bold text-sm mb-4 font-serif leading-tight dark:text-white">"{activePoll.question}"</h4>
+                                            <div className="space-y-3">
                                                 {activePoll.options.map((option, idx) => {
                                                     const percentage = totalVotes === 0 ? 0 : Math.round((pollResults[idx] / totalVotes) * 100);
                                                     const isSelected = userVote === idx;
+                                                    const showResults = userVote !== null;
+
                                                     return (
-                                                        <div key={idx} className={`text-xs p-2 rounded border ${isSelected ? 'border-primary bg-primary/5' : 'border-neutral-200 dark:border-neutral-800'}`}>
-                                                            <div className="flex justify-between font-bold">
-                                                                <span>{option}</span>
-                                                                <span>{percentage}%</span>
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => handlePollVote(idx)}
+                                                            className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden rounded-md ${isSelected
+                                                                ? 'border-black dark:border-neutral-300 bg-white dark:bg-neutral-800'
+                                                                : 'border-neutral-200 dark:border-neutral-700 hover:border-black dark:hover:border-neutral-200'
+                                                                }`}
+                                                        >
+                                                            {showResults && (
+                                                                <div
+                                                                    className="absolute top-0 left-0 h-full bg-neutral-200 dark:bg-neutral-700 transition-all duration-500 ease-out"
+                                                                    style={{ width: `${percentage}%` }}
+                                                                />
+                                                            )}
+
+                                                            <div className="relative p-3 flex justify-between items-center z-10">
+                                                                <span className={isSelected ? 'text-black dark:text-white' : 'text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors'}>
+                                                                    {option}
+                                                                </span>
+                                                                {showResults && <span className="text-sm font-black dark:text-white">{percentage}%</span>}
                                                             </div>
-                                                            <div className="h-1 bg-neutral-100 dark:bg-neutral-800 mt-1 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-primary" style={{ width: `${percentage}%` }}></div>
-                                                            </div>
-                                                        </div>
-                                                    )
+                                                        </button>
+                                                    );
                                                 })}
                                             </div>
+                                            {userVote !== null && <div className="text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium font-serif">{totalVotes} oy kullanıldı</div>}
                                         </>
                                     )}
                                 </div>
 
-                                {/* Trending Topics (Desktop) */}
-                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
-                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3 flex items-center gap-2">
-                                        <TrendingUp size={18} style={{ color: 'var(--primary-color, #C8102E)' }} />
+                                {/* Trending Topics (Desktop) - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-sm">
+                                    <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white flex items-center gap-2">
+                                        <TrendingUp size={20} style={{ color: 'var(--primary-color, #C8102E)' }} />
                                         Kampüste Gündem
                                     </h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         {allTags.length > 0 ? (
                                             allTags.slice(0, 5).map((topic, index) => (
                                                 <div 
                                                     key={topic.tag} 
                                                     onClick={() => setActiveTagFilter(topic.tag === activeTagFilter ? null : topic.tag)} 
-                                                    className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-neutral-50 dark:bg-neutral-800' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                                                    className={`flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-lg transition-colors border-b border-neutral-200 dark:border-neutral-800 last:border-0 ${activeTagFilter === topic.tag ? 'bg-white dark:bg-neutral-900 shadow-sm' : 'hover:bg-white dark:hover:bg-neutral-900'}`}
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-serif font-black text-neutral-400 dark:text-neutral-600 w-4">{index + 1}</span>
+                                                        <span className="text-lg font-serif font-black text-neutral-400 dark:text-neutral-600 w-5">{index + 1}</span>
                                                         <div className="flex flex-col">
                                                             <span className={`font-bold text-sm transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
                                                                 {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
@@ -950,27 +975,27 @@ export default function VoiceView() {
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="text-center py-4 text-neutral-400 text-xs italic">
+                                            <div className="text-center py-4 text-neutral-400 text-xs italic font-serif">
                                                 Henüz gündem oluşmadı.
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Campus Pulse (Desktop) */}
-                                <div className="border border-neutral-200 dark:border-neutral-800 p-4 bg-white dark:bg-neutral-900 shadow-sm dark:shadow-[0_0_15px_rgba(255,255,255,0.02)] transition-colors rounded-xl">
-                                    <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white mb-3">
+                                {/* Campus Pulse (Desktop) - Newspaper Theme */}
+                                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-xl shadow-sm">
+                                    <h3 className="text-lg font-black border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight dark:text-white text-center">
                                         Kampüs Nabzı
                                     </h3>
                                     <div className="grid grid-cols-2 gap-3 text-center">
                                         <div
-                                            className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg"
+                                            className="p-3 bg-white dark:bg-neutral-900 rounded border-2 border-[var(--primary-color)]"
                                             style={{
-                                                border: '1px solid var(--primary-color, #C8102E)'
+                                                borderColor: 'var(--primary-color, #C8102E)'
                                             }}
                                         >
                                             <span
-                                                className="block text-2xl font-black font-serif animate-pulse"
+                                                className="block text-3xl font-black font-serif animate-pulse"
                                                 style={{ color: 'var(--primary-color, #C8102E)' }}
                                             >
                                                 {activeUsers}
@@ -979,8 +1004,8 @@ export default function VoiceView() {
                                                 Aktif Öğrenci
                                             </span>
                                         </div>
-                                        <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
-                                            <span className="block text-2xl font-black font-serif text-black dark:text-white">
+                                        <div className="p-3 bg-white dark:bg-neutral-900 rounded border-2 border-neutral-200 dark:border-neutral-700">
+                                            <span className="block text-3xl font-black font-serif text-black dark:text-white">
                                                 {issueNumber}
                                             </span>
                                             <span className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-400">

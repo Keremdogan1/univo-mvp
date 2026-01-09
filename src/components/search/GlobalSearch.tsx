@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, X, Calendar, MessageSquare, Building2, Loader2, ChevronRight, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { searchContent, SearchResults } from '@/app/actions/search';
+import { toTitleCase } from '@/lib/utils';
 
 export default function GlobalSearch() {
   const [isVisible, setIsVisible] = useState(false);
@@ -189,7 +190,7 @@ export default function GlobalSearch() {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-neutral-900 dark:text-white truncate">{user.full_name}</h4>
+                                        <h4 className="font-bold text-neutral-900 dark:text-white truncate">{toTitleCase(user.full_name)}</h4>
                                         <p className="text-xs text-neutral-500 truncate">
                                             {user.department || user.class_year || 'Öğrenci'}
                                         </p>
