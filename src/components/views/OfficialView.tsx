@@ -760,12 +760,12 @@ export default function OfficialView() {
         {/* Sidebar */}
         <div className="space-y-6">
             {news[1] && (
-                <article className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] relative transition-colors group cursor-pointer hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] rounded-none">
-                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2 text-neutral-900 dark:text-white uppercase font-serif tracking-tight">
+                <article className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] group cursor-pointer hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                     <h3 className="text-lg font-black font-serif uppercase tracking-tight mb-4 flex items-center gap-2 border-b-2 border-black dark:border-neutral-600 pb-2 text-neutral-900 dark:text-white">
                         <Briefcase size={20} className="text-neutral-900 dark:text-white" />
                         Kariyer & Staj
                     </h3>
-                    <h4 className="font-bold text-lg mb-2 group-hover:underline decoration-2 underline-offset-2 dark:text-white">{news[1].title}</h4>
+                    <h4 className="font-bold text-lg mb-2 group-hover:underline decoration-2 underline-offset-2 dark:text-white font-serif">{news[1].title}</h4>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
                         {news[1].summary}
                     </p>
@@ -778,8 +778,8 @@ export default function OfficialView() {
                 </article>
             )}
 
-            <div className="border-2 border-black dark:border-white p-6 bg-white dark:bg-neutral-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-colors rounded-none hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
-                <h4 className="font-bold text-xl mb-4 flex items-center gap-2 font-serif uppercase tracking-tight text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-2">
+            <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-[#0a0a0a] transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                <h4 className="text-lg font-black font-serif uppercase tracking-tight mb-4 flex items-center gap-2 border-b-2 border-black dark:border-neutral-600 pb-2 text-neutral-900 dark:text-white">
                     Günün Menüsü
                 </h4>
                 {loadingMenu ? (
@@ -788,11 +788,11 @@ export default function OfficialView() {
                     <div className="space-y-6">
                         {menu.breakfast?.length > 0 && (
                              <div>
-                                <h5 className="font-bold text-neutral-900 dark:text-white text-sm uppercase mb-2 flex items-center gap-2">
+                                <h5 className="font-bold text-neutral-900 dark:text-white text-sm uppercase mb-2 flex items-center gap-2 font-serif">
                                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}></span>
                                     Kahvaltı
                                 </h5>
-                                <div className="text-sm text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800 p-3 rounded border border-neutral-100 dark:border-neutral-700 transition-colors">
+                                <div className="text-sm text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-800 p-3 rounded border border-neutral-200 dark:border-neutral-700 transition-colors">
                                     {menu.breakfast.map((i: any) => i.name).join(', ')}
                                 </div>
                             </div>

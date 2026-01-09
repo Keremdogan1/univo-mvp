@@ -146,23 +146,22 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            {/* Content Area */}
-            <div className="flex-1 max-w-2xl bg-white dark:bg-neutral-900 rounded-none border-2 border-black dark:border-white p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] h-fit">
+                <div className="flex-1 max-w-2xl bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-8 shadow-sm h-fit">
                 {activeTab === 'account' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <section>
                             <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">Hesap Bilgileri</h2>
                             <p className="text-sm text-neutral-500 mb-6">Kişisel bilgilerinizi ve hesap detaylarınızı buradan yönetin.</p>
                             
-                            <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-none border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
+                            <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 flex items-center gap-4">
                                 <div 
-                                    className="h-12 w-12 rounded-full flex items-center justify-center text-xl font-bold font-serif text-white border-2 border-black dark:border-white shadow-sm"
+                                    className="h-12 w-12 rounded-full flex items-center justify-center text-xl font-bold font-serif text-white shadow-sm"
                                     style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                                 >
                                     {(user?.user_metadata?.first_name?.[0] || user?.email?.[0] || 'Ö').toUpperCase()}
                                 </div>
                                 <div>
-                                    <div className="font-bold font-serif text-lg text-neutral-900 dark:text-white">E-posta Adresi</div>
+                                    <div className="font-bold text-lg text-neutral-900 dark:text-white">E-posta Adresi</div>
                                     <div className="text-sm font-medium text-neutral-600 dark:text-neutral-400 font-mono">{user?.email}</div>
                                 </div>
                             </div>
@@ -177,26 +176,26 @@ export default function SettingsPage() {
                             <p className="text-sm text-neutral-500 mb-6">Uygulamanın görünümünü tercihlerinize göre özelleştirin.</p>
                             
                             {/* Mode Switch */}
-                            <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-none border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] mb-6">
+                            <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 mb-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white dark:bg-neutral-800 rounded-none border-2 border-black dark:border-white shadow-sm">
+                                    <div className="p-3 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm">
                                         {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
                                     </div>
                                     <div>
-                                        <div className="font-bold font-serif text-neutral-900 dark:text-white">Karanlık Mod</div>
+                                        <div className="font-bold text-neutral-900 dark:text-white">Karanlık Mod</div>
                                         <div className="text-sm font-medium text-neutral-500">Göz yormayan koyu tema deneyimi</div>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                                     className={cn(
-                                        "relative w-14 h-7 rounded-none transition-colors duration-300 ease-in-out border-2 border-black dark:border-white",
+                                        "relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out",
                                         theme === 'dark' ? "bg-[var(--primary-color)]" : "bg-neutral-300"
                                     )}
                                 >
                                     <span 
                                         className={cn(
-                                            "absolute left-1 top-0.5 w-5 h-5 bg-white rounded-none transition-transform duration-300 shadow-sm border border-black",
+                                            "absolute left-1 top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-sm",
                                             theme === 'dark' ? "translate-x-7" : "translate-x-0"
                                         )} 
                                     />
@@ -214,14 +213,14 @@ export default function SettingsPage() {
                                             key={t.id}
                                             onClick={() => setColorTheme(t.id)}
                                             className={cn(
-                                                "group relative aspect-square rounded-none flex flex-col items-center justify-center gap-2 transition-all border-2",
+                                                "group relative aspect-square rounded-xl flex flex-col items-center justify-center gap-2 transition-all border",
                                                 colorTheme === t.id 
-                                                    ? "border-black dark:border-white bg-neutral-50 dark:bg-neutral-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]" 
-                                                    : "border-transparent hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:border-black/10 dark:hover:border-white/10"
+                                                    ? "border-[var(--primary-color)] bg-[var(--primary-color)]/5" 
+                                                    : "border-transparent hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:border-neutral-200 dark:hover:border-neutral-700"
                                             )}
                                         >
                                             <div 
-                                                className="w-8 h-8 rounded-full border-2 border-black dark:border-white shadow-sm flex items-center justify-center transition-transform group-hover:scale-110"
+                                                className="w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-transform group-hover:scale-110"
                                                 style={{ backgroundColor: t.color }}
                                             >
                                                 {colorTheme === t.id && <Check size={16} className="text-white bg-black/20 rounded-full p-0.5" strokeWidth={3} />}
@@ -250,28 +249,28 @@ export default function SettingsPage() {
                                     { id: 'show_interests', label: 'İlgi Alanları', desc: 'İlgi alanlarını profilinde göster', icon: Heart, color: 'text-pink-600 bg-pink-100' },
                                     { id: 'show_polls', label: 'Anket Katılımları', desc: 'Anket katılımlarını profilinde göster', icon: BarChart2, color: 'text-indigo-600 bg-indigo-100' },
                                 ].map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-none border-2 border-black dark:border-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-[2px] hover:-translate-x-[2px] transition-all">
+                                    <div key={item.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 transition-all">
                                         <div className="flex items-center gap-4">
-                                            <div className={cn("p-3 rounded-none border-2 border-black dark:border-white shadow-sm", item.color)}>
+                                            <div className={cn("p-3 rounded-lg shadow-sm", item.color)}>
                                                 <item.icon size={20} />
                                             </div>
                                             <div>
-                                                <div className="font-bold font-serif text-neutral-900 dark:text-white">{item.label}</div>
+                                                <div className="font-bold text-neutral-900 dark:text-white">{item.label}</div>
                                                 <div className="text-sm font-medium text-neutral-500">{item.desc}</div>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => updatePrivacy(item.id, !privacySettings[item.id as keyof typeof privacySettings])}
                                             className={cn(
-                                                "relative w-12 h-6 rounded-none transition-colors duration-300 ease-in-out border-2 border-black dark:border-white",
+                                                "relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out",
                                                 privacySettings[item.id as keyof typeof privacySettings] 
                                                     ? "bg-[var(--primary-color)]" 
-                                                    : "bg-neutral-300 dark:bg-neutral-700"
+                                                    : "bg-neutral-300 dark:bg-neutral-600"
                                             )}
                                         >
                                             <span 
                                                 className={cn(
-                                                    "absolute left-1 top-0.5 w-4 h-4 bg-white rounded-none transition-transform duration-300 shadow-sm border border-black",
+                                                    "absolute left-1 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 shadow-sm",
                                                     privacySettings[item.id as keyof typeof privacySettings] 
                                                         ? "translate-x-6" 
                                                         : "translate-x-0"

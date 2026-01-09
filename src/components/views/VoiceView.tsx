@@ -544,20 +544,33 @@ export default function VoiceView() {
         <div className="container mx-auto px-4 py-8 relative">
             {/* Newspaper Header - Static on mobile */}
             <div className="border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 relative">
-                <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-2 text-black dark:text-white flex items-center justify-center gap-4">
-                    Kampüsün Sesi
-                    {/* Badge for Mode */}
-                    <span className={`hidden md:inline-block text-xs uppercase px-2 py-0.5 rounded border ${isGlobalMode ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-red-100 text-red-700 border-red-200'} align-top translate-y-1`}>
-                        {isGlobalMode ? 'GLOBAL' : 'ODTÜ'}
-                    </span>
-                </h2>
-                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+                <div className="flex flex-col items-center justify-center gap-4">
+                    <h2 className="text-3xl md:text-6xl font-black font-serif uppercase tracking-tight mb-0 text-black dark:text-white flex items-center justify-center gap-4">
+                        Kampüsün Sesi
+                    </h2>
+                    
+                    {/* Global Mode Switch - Moved Here */}
+                    <div className="flex items-center gap-3">
+                         <div
+                            className="flex items-center cursor-pointer select-none group bg-white dark:bg-black px-2 py-1 rounded-full border-2 border-black dark:border-neutral-600 shadow-sm"
+                            onClick={() => setIsGlobalMode(!isGlobalMode)}
+                            title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
+                        >
+                            <span className={`text-xs font-black uppercase mr-2 ${!isGlobalMode ? 'text-primary' : 'text-neutral-400'}`}>ODTÜ</span>
+                            <div className={`w-8 h-4 rounded-full p-0.5 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
+                                {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
+                                <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-4' : 'translate-x-0'}`} />
+                            </div>
+                            <span className={`text-xs font-black uppercase ml-2 ${isGlobalMode ? 'text-blue-600' : 'text-neutral-400'}`}>Global</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 mt-4">
                     <span>SAYI: {issueNumber}</span>
                     <span>{isGlobalMode ? 'DÜNYA GÜNDEMİ' : 'SERBEST KÜRSÜ'}</span>
                     <span>{formattedDate.toUpperCase()}</span>
                 </div>
-
-
             </div>
 
             {isGlobalMode ? (
@@ -599,21 +612,6 @@ export default function VoiceView() {
                                 </h3>
                                 
                                 <div className="flex items-center gap-4">
-                                     {/* Switch Moved Here */}
-                                    <div
-                                        className="hidden md:flex items-center cursor-pointer select-none group"
-                                        onClick={() => setIsGlobalMode(!isGlobalMode)}
-                                        title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
-                                    >
-                                        <div className="mr-2 font-bold font-serif text-xs transition-colors text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300">
-                                            {isGlobalMode ? 'ODTÜ' : 'GLOBAL'}
-                                        </div>
-                                        <div className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shadow-inner ${isGlobalMode ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
-                                            {!isGlobalMode && <div className="absolute inset-0 bg-[var(--primary-color,#C8102E)] rounded-full opacity-100" />}
-                                            <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 relative z-10 ${isGlobalMode ? 'translate-x-5' : 'translate-x-0'}`} />
-                                        </div>
-                                    </div>
-
                                     {activeTagFilter && (
                                         <button
                                             onClick={() => setActiveTagFilter(null)}

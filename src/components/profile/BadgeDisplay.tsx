@@ -68,17 +68,18 @@ export default function BadgeDisplay({ badges, showTitle = true }: BadgeDisplayP
                 {badge.name}
               </span>
               
-              {/* Tooltip */}
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-white dark:bg-black text-black dark:text-white text-xs rounded-none py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] border-2 border-black dark:border-white">
-                <p className="font-bold mb-1 font-serif uppercase tracking-tight">{badge.name}</p>
-                <p className="text-neutral-600 dark:text-neutral-300 font-medium">{badge.description}</p>
+              {/* Tooltip - Modern Theme */}
+              <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-48 bg-white dark:bg-neutral-800 text-black dark:text-white text-xs rounded-xl py-3 px-4 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 shadow-xl border border-neutral-200 dark:border-neutral-700 transform group-hover:translate-y-0 translate-y-2">
+                <p className="font-bold mb-1 font-sans text-sm">{badge.name}</p>
+                <p className="text-neutral-600 dark:text-neutral-300 font-medium leading-relaxed">{badge.description}</p>
                 {badge.awarded_at && (
-                  <p className="text-neutral-400 dark:text-neutral-500 mt-2 text-[10px] uppercase font-bold border-t border-neutral-200 dark:border-neutral-800 pt-1">
-                    Kazanıldı: {new Date(badge.awarded_at).toLocaleDateString('tr-TR')}
+                  <p className="text-neutral-400 dark:text-neutral-500 mt-2 text-[10px] font-bold border-t border-neutral-100 dark:border-neutral-700 pt-2 flex items-center gap-1">
+                    <Calendar size={10} />
+                    {new Date(badge.awarded_at).toLocaleDateString('tr-TR')}
                   </p>
                 )}
                 {/* Arrow */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black dark:border-t-white w-0 h-0"></div>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white dark:border-t-neutral-800 w-0 h-0 drop-shadow-sm"></div>
               </div>
             </div>
           );
