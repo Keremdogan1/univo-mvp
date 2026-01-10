@@ -113,13 +113,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    const startTime = Date.now();
+    const MIN_LOADING_TIME = 500; // Minimum time to show skeleton (ms)
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
       }
-      setLoading(false);
+      
+      // Ensure minimum loading time for skeleton visibility
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, MIN_LOADING_TIME - elapsed);
+      setTimeout(() => setLoading(false), remainingTime);
     });
 
     // Listen for auth changes
