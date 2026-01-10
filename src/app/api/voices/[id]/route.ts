@@ -142,15 +142,20 @@ export async function PUT(
             tags: tags || []
         })
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
     if (updateError) {
         console.error('Update: Supabase error:', updateError);
         return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, voice: updatedVoice });
+    const voiceData = updatedVoice && updatedVoice.length > 0 ? updatedVoice[0] : null;
+
+    if (!voiceData) {
+         return NextResponse.json({ error: 'Update successful but no data returned' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, voice: voiceData });
 
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
