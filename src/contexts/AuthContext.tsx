@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const MIN_LOADING_TIME = 500; // Minimum time to show skeleton (ms)
+    const MIN_LOADING_TIME = 300; // Minimum time to show skeleton (ms)
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
