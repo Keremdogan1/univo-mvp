@@ -17,14 +17,14 @@ import SkeletonLoader from '../ui/SkeletonLoader';
 const VoiceViewSkeleton = () => {
   return (
     <div className="container mx-auto px-4 pt-8 pb-32 relative animate-in fade-in duration-500 min-h-screen">
-      <div className="border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center md:static pt-4 -mt-4 -mx-4 px-4 relative min-h-[180px]">
+      <div className="border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center md:static pt-4 -mt-4 -mx-4 px-4 relative min-h-[240px] bg-neutral-50 dark:bg-[#0a0a0a]">
         <div className="flex flex-col items-center justify-center gap-4">
           <SkeletonLoader width={300} height={60} className="mb-2" />
           <div className="flex items-center gap-3 mb-2">
              <SkeletonLoader width={56} height={56} className="rounded-full" />
           </div>
         </div>
-        <div className="flex justify-between items-center border-t-2 border-neutral-200 dark:border-neutral-800 pt-2 mt-4 max-w-2xl mx-auto">
+        <div className="flex justify-between items-center border-t-2 border-neutral-200 dark:border-neutral-800 pt-2 mt-4 max-w-2xl mx-auto h-8">
            <SkeletonLoader width={80} height={20} />
            <SkeletonLoader width={120} height={20} />
            <SkeletonLoader width={80} height={20} />
@@ -641,7 +641,7 @@ export default function VoiceView() {
     return (
         <div className="container mx-auto px-4 pt-8 pb-32 relative min-h-screen">
             {/* Newspaper Header - Static on mobile */}
-            <div className="border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 relative min-h-[180px]">
+            <div className="border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 relative min-h-[240px]">
                 <div className="flex flex-col items-center justify-center gap-4">
                     <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight mb-0 text-black dark:text-white flex items-center justify-center gap-4">
                         Kampüsün Sesi
@@ -675,7 +675,7 @@ export default function VoiceView() {
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-4 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400">
+                <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-4 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 h-8">
                     <span>SAYI: {issueNumber}</span>
                     <span>{isGlobalMode ? 'DÜNYA GÜNDEMİ' : 'SERBEST KÜRSÜ'}</span>
                     <span>{formattedDate.toUpperCase()}</span>
