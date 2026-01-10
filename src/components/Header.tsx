@@ -20,12 +20,22 @@ const ALLOWED_DASHBOARD_USERS = [
   'Salih KIZILER'
 ];
 
+// Inline Skeleton for Header
+const SkeletonLoader = ({ className = '', width, height }: { className?: string, width?: string | number, height?: string | number }) => (
+    <div
+      className={`relative overflow-hidden bg-neutral-200 dark:bg-neutral-800 rounded-md ${className}`}
+      style={{ width, height }}
+    >
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/50 dark:via-white/10 to-transparent"></div>
+    </div>
+);
+
 function HeaderContent() {
   const [isCommunityAdmin, setIsCommunityAdmin] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading } = useAuth();
   const router = useRouter();
   const currentView = searchParams?.get('view') || 'community';
 
@@ -174,74 +184,91 @@ function HeaderContent() {
             </div>
 
             {/* Center: Desktop Navigation - Only show on large screens to avoid overlap */}
-            <nav className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-black dark:border-white">
-              <ul className="flex items-center gap-0.5">
-                {navItems.map((item) => {
-                  const isActive = pathname === '/' && currentView === item.id;
-                  return (
-                    <li key={item.id}>
-                      <Link
-                        href={item.href}
-                        onClick={(e) => item.href === '#' && e.preventDefault()}
-                        className={`flex items-center gap-1.5 px-3 py-2 transition-all duration-200 relative group ${isActive
-                          ? 'text-[var(--primary-color)] font-bold'
-                          : 'text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary-color)] font-medium'
-                          }`}
-                      >
-                        <item.icon size={16} className={`relative z-10 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                        <span className="text-xs relative z-10">{item.label}</span>
+            {loading ? (
+                 <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-4 py-3 rounded-full border border-neutral-100 dark:border-neutral-800">
+                     <div className="flex items-center gap-4">
+                        <SkeletonLoader width={80} height={16} />
+                        <SkeletonLoader width={80} height={16} />
+                        <SkeletonLoader width={80} height={16} />
+                     </div>
+                 </div>
+            ) : (
+                <nav className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-black dark:border-white">
+                  <ul className="flex items-center gap-0.5">
+                    {navItems.map((item) => {
+                      const isActive = pathname === '/' && currentView === item.id;
+                      return (
+                        <li key={item.id}>
+                          <Link
+                            href={item.href}
+                            onClick={(e) => item.href === '#' && e.preventDefault()}
+                            className={`flex items-center gap-1.5 px-3 py-2 transition-all duration-200 relative group ${isActive
+                              ? 'text-[var(--primary-color)] font-bold'
+                              : 'text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary-color)] font-medium'
+                              }`}
+                          >
+                            <item.icon size={16} className={`relative z-10 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                            <span className="text-xs relative z-10">{item.label}</span>
 
-                        {/* Active Underline */}
-                        {isActive && (
-                          <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full animate-in fade-in zoom-in duration-200"></span>
-                        )}
+                            {/* Active Underline */}
+                            {isActive && (
+                              <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full animate-in fade-in zoom-in duration-200"></span>
+                            )}
 
-                        {/* Hover Underline */}
-                        <span className={`absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full transition-all duration-200 ${isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-75'}`}></span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+                            {/* Hover Underline */}
+                            <span className={`absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--primary-color)] rounded-full transition-all duration-200 ${isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-50 group-hover:scale-x-75'}`}></span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+            )}
 
             {/* Right: Tools (Search, Auth, DarkMode, Menu) */}
             <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
+               {loading ? (
+                   <div className="hidden lg:flex items-center gap-3">
+                       <SkeletonLoader width={32} height={32} className="rounded-full" />
+                       <SkeletonLoader width={200} height={32} className="rounded-full" />
+                       <SkeletonLoader width={90} height={32} className="rounded-md" />
+                   </div>
+               ) : (
+                   <>
+                      {/* Dashboard Link (Desktop) - Subtle */}
+                      {user && canAccessDashboard && (
+                        <Link
+                          href="/dashboard"
+                          className={`hidden lg:flex items-center justify-center p-2 rounded-full transition-all ${pathname?.startsWith('/dashboard')
+                            ? 'bg-neutral-100 text-black dark:bg-neutral-800 dark:text-white shadow-sm font-bold'
+                            : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white'
+                            }`}
+                          title="Kontrol Paneli"
+                        >
+                          <LayoutDashboard size={18} />
+                        </Link>
+                      )}
 
-              {/* Dashboard Link (Desktop) - Subtle */}
-              {user && canAccessDashboard && (
-                <Link
-                  href="/dashboard"
-                  className={`hidden lg:flex items-center justify-center p-2 rounded-full transition-all ${pathname?.startsWith('/dashboard')
-                    ? 'bg-neutral-100 text-black dark:bg-neutral-800 dark:text-white shadow-sm font-bold'
-                    : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white'
-                    }`}
-                  title="Kontrol Paneli"
-                >
-                  <LayoutDashboard size={18} />
-                </Link>
-              )}
+                      {/* Search (Desktop) - Prominent */}
+                      <button
+                        onClick={() => window.dispatchEvent(new CustomEvent('univo-search-toggle'))}
+                        className="hidden lg:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
+                        aria-label="Search"
+                      >
+                        <SearchIcon size={18} />
+                      </button>
 
+                      {/* Notification Center (Desktop) - Prominent */}
+                      <div className="hidden lg:block">
+                        <NotificationCenter />
+                      </div>
 
-
-              {/* Search (Desktop) - Prominent */}
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('univo-search-toggle'))}
-                className="hidden lg:block p-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all hover:scale-105"
-                aria-label="Search"
-              >
-                <SearchIcon size={18} />
-              </button>
-
-              {/* Notification Center (Desktop) - Prominent */}
-              <div className="hidden lg:block">
-                <NotificationCenter />
-              </div>
-
-              {/* Auth Button (Desktop) */}
-              <div className="hidden lg:block pl-1">
-                <AuthButton />
-              </div>
+                      {/* Auth Button (Desktop) */}
+                      <div className="hidden lg:block pl-1">
+                        <AuthButton />
+                      </div>
+                   </>
+               )}
 
               {/* Mobile Header Actions (Search) */}
               <div className="flex lg:hidden items-center gap-2">
