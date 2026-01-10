@@ -2,7 +2,7 @@ import React from 'react';
 
 const SkeletonLoader = ({ className = '', width, height }: { className?: string, width?: string | number, height?: string | number }) => (
     <div
-      className={`relative overflow-hidden bg-neutral-200/80 dark:bg-neutral-800/80 rounded-md ${className} animate-pulse`}
+      className={`relative overflow-hidden bg-neutral-200 dark:bg-neutral-800 rounded-md ${className} animate-pulse`}
       style={{ width, height }}
     >
         {/* Shimmer Beam Effect */ }
