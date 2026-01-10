@@ -10,7 +10,7 @@ import SkeletonLoader from '../ui/SkeletonLoader';
 
 const OfficialViewSkeleton = () => {
   return (
-    <div className="container mx-auto px-4 pt-8 pb-32 relative animate-in fade-in duration-500">
+    <div className="container mx-auto px-4 pt-8 pb-32 relative animate-in fade-in duration-500 min-h-screen">
        <div className="border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center md:static pt-4 -mt-4 -mx-4 px-4 relative min-h-[180px]">
         <div className="flex flex-col items-center justify-center gap-4">
           <SkeletonLoader width={450} height={60} className="mb-2" />
@@ -618,7 +618,7 @@ export default function OfficialView() {
     const hasMoreItems = displayedItems.length > displayLimit;
 
     return (
-        <div className="container mx-auto px-4 pt-8 pb-32 relative overflow-x-hidden">
+        <div className="container mx-auto px-4 pt-8 pb-32 relative overflow-x-hidden min-h-screen">
             {/* Newspaper Header - Static on mobile */}
             <div className="relative border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 min-h-[180px]">
                 <div className="flex flex-col items-center justify-center gap-4">
