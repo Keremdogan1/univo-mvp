@@ -12,10 +12,10 @@
 <!-- Language Switcher -->
 <p align="center">
   <a href="README.md">
-    <img src="https://img.shields.io/badge/English-Click-0056D2?style=for-the-badge&logo=google-translate&logoColor=white" alt="Read in English">
+    <img src="https://img.shields.io/badge/English-Switch_to_English-0056D2?style=for-the-badge&logo=google-translate&logoColor=white" alt="Switch to English">
   </a>
   <a href="README.TR.md">
-    <img src="https://img.shields.io/badge/Türkçe-Aktif-E30A17?style=for-the-badge&logo=google-translate&logoColor=white" alt="Türkçe">
+    <img src="https://img.shields.io/badge/Türkçe-Aktif-gray?style=for-the-badge&logo=google-translate&logoColor=white" alt="Türkçe">
   </a>
 </p>
 

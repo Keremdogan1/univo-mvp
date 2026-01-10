@@ -11,11 +11,11 @@
 
 <!-- Language Switcher -->
 <p align="center">
-  <a href="README.md">
-    <img src="https://img.shields.io/badge/English-Active-0056D2?style=for-the-badge&logo=google-translate&logoColor=white" alt="English">
-  </a>
   <a href="README.TR.md">
-    <img src="https://img.shields.io/badge/Türkçe-Tıkla-E30A17?style=for-the-badge&logo=google-translate&logoColor=white" alt="Türkçe Oku">
+    <img src="https://img.shields.io/badge/Türkçe-Switch_to_Turkish-E30A17?style=for-the-badge&logo=google-translate&logoColor=white" alt="Switch to Turkish">
+  </a>
+  <a href="README.md">
+    <img src="https://img.shields.io/badge/English-Active-gray?style=for-the-badge&logo=google-translate&logoColor=white" alt="English">
   </a>
 </p>
 
