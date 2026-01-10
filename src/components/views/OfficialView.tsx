@@ -627,7 +627,7 @@ export default function OfficialView() {
                     {/* Global Mode Switch - Custom Morphing Button (3D Flip) */}
                     <div className="flex items-center gap-3">
                         <div 
-                            className="relative w-14 h-14 rounded-full perspective-1000 cursor-pointer"
+                            className="relative w-14 h-14 rounded-full perspective-1000 cursor-pointer mb-2"
                             onClick={() => setIsGlobalMode(!isGlobalMode)}
                             title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
                         >
