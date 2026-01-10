@@ -19,7 +19,7 @@
 ## 🚀 Sürüm Notları: v1.0.0 → v1.0.1
 **📅 11 Ocak 2026**
 
-Bu sabahki majör güncelleme ile **Univo** çok daha stabil, hızlı ve kullanıcı dostu hale geldi. İşte **v1.0.1** ile gelen yenilikler:
+Bugünkü güncellemeyle **Univo** çok daha stabil, hızlı ve kullanıcı dostu hale geldi. İşte **v1.0.1** ile gelen yenilikler:
 
 ### ✨ Öne Çıkan Değişiklikler
 - **🎨 Kristal Netliğinde UI (Header Sync):**
@@ -40,6 +40,34 @@ Bu sabahki majör güncelleme ile **Univo** çok daha stabil, hızlı ve kullan�
 > * `fix(api)`: `PUT /api/voices/[id]` endpoint'inden `.single()` kaldırılarak "Cannot coerce..." hatası çözüldü.
 > * `fix(frontend)`: `VoiceView` içinde edit sonrası anlık state güncellemesi (Optimistic Update -> Server Confirmation).
 > * `chore`: Proje dosya yapısı temizlendi, gereksiz `.sql` ve loglar ayrıştırıldı.
+
+---
+
+## 🎉 İlk Sürüm: v1.0.0 (MVP)
+**📅 10 Ocak 2026**
+
+Univo'nun doğuşu. Kampüs deneyimini dijitalleştiren ilk kararlı sürüm.
+
+### 🏛️ Çekirdek Özellikler (Initial Release)
+- **Kimlik Doğrulama:**
+    - Google ile Tek Tıkla Giriş (Supabase Auth).
+    - `@metu.edu.tr` e-posta doğrulama desteği.
+    - Profil oluşturma (Takma ad, Bölüm, Avatar).
+- **Kampüsün Sesi (Beta):**
+    - Anonim veya açık kimlikle gönderi paylaşımı.
+    - Beğeni (Like/Dislike) ve Yorum sistemi.
+    - "Editörün Seçimi" ve "Sıcak Gündem" filtreleri.
+- **Topluluk Meydanı:**
+    - Etkinlik listeleme ve detay görüntüleme.
+    - "Katıl" butonu ile etkinliklere kayıt (RSVP).
+    - Etkinlik kategorileri (Seminer, Parti, Kariyer).
+- **Resmi Gündem:**
+    - Yemekhane menüsü entegrasyonu (Anlık Veri).
+    - Üniversite duyuruları ve akademik takvim.
+- **Arayüz:**
+    - Modern, duyarlı (Responsive) tasarım.
+    - Karanlık/Aydınlık Mod desteği.
+    - Alt navigasyon çubuğu ile kolay erişim (Mobil).
 
 ---
 
@@ -110,7 +138,4 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
 
 ---
 
-<p align="center">
-  <i>Developed with ❤️ by Antigravity Team for METU Students.</i>
-</p>
 </div>
