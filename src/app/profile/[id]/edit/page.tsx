@@ -66,7 +66,7 @@ const cleanDept = (dept?: string) => {
 
 export default function EditProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const router = useRouter();
   
   const [loading, setLoading] = useState(true);
@@ -266,6 +266,10 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
       }
 
       toast.success('Profil başarıyla güncellendi.');
+      
+      // Update global context
+      await refreshProfile();
+      
       router.push(`/profile/${id}`);
       router.refresh();
     } catch (error: any) {
