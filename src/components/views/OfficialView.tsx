@@ -10,7 +10,7 @@ import SkeletonLoader from '../ui/SkeletonLoader';
 
 const OfficialViewSkeleton = () => {
   return (
-    <div className="container mx-auto px-4 py-8 relative animate-in fade-in duration-500">
+    <div className="container mx-auto px-4 pt-8 pb-32 relative animate-in fade-in duration-500">
        <div className="border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center md:static pt-4 -mt-4 -mx-4 px-4 relative">
         <div className="flex flex-col items-center justify-center gap-4">
           <SkeletonLoader width={450} height={60} className="mb-2" />

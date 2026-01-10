@@ -44,7 +44,7 @@ export default function VoiceStatsWidget({
         >
             <div className="flex flex-row flex-nowrap items-start gap-4 overflow-x-auto p-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
                 {/* Weekly Poll */}
-                <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl">
+                <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-3">
                         <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white">
                             Haftanın Anketi
@@ -111,7 +111,7 @@ export default function VoiceStatsWidget({
                 </div>
 
                 {/* Trending Topics */}
-                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl">
+                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
                         <TrendingUp size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
                         Kampüste Gündem
@@ -141,7 +141,7 @@ export default function VoiceStatsWidget({
                 </div>
 
                 {/* Campus Pulse */}
-                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl">
+                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
                         Kampüs Nabzı
                     </h3>
