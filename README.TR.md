@@ -7,9 +7,17 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Styling-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=context-dependent)](https://github.com/)
+[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
 
-[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+<!-- Language Switcher -->
+<p align="center">
+  <a href="README.md">
+    <img src="https://img.shields.io/badge/English-Click-0056D2?style=for-the-badge&logo=google-translate&logoColor=white" alt="Read in English">
+  </a>
+  <a href="README.TR.md">
+    <img src="https://img.shields.io/badge/Türkçe-Aktif-E30A17?style=for-the-badge&logo=google-translate&logoColor=white" alt="Türkçe">
+  </a>
+</p>
 
 <p align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmV3bWY3cW55cnZ5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z/xTiTnxpQ3ghPiB2Hp6/giphy.gif" width="100%" alt="Univo Banner Animation">

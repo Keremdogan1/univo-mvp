@@ -7,9 +7,17 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Styling-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=context-dependent)](https://github.com/)
+[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
 
-[![Türkçe](https://img.shields.io/badge/lang-Türkçe-red)](README.TR.md)
+<!-- Language Switcher -->
+<p align="center">
+  <a href="README.md">
+    <img src="https://img.shields.io/badge/English-Active-0056D2?style=for-the-badge&logo=google-translate&logoColor=white" alt="English">
+  </a>
+  <a href="README.TR.md">
+    <img src="https://img.shields.io/badge/Türkçe-Tıkla-E30A17?style=for-the-badge&logo=google-translate&logoColor=white" alt="Türkçe Oku">
+  </a>
+</p>
 
 <p align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmV3bWY3cW55cnZ5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z5b3Z/xTiTnxpQ3ghPiB2Hp6/giphy.gif" width="100%" alt="Univo Banner Animation">
