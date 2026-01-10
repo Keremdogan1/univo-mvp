@@ -181,7 +181,7 @@ function HeaderContent() {
 
             {/* Center: Desktop Navigation - Only show on large screens to avoid overlap */}
             {loading ? (
-                 <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100/50 dark:bg-neutral-800/50 backdrop-blur-sm px-4 py-3 rounded-full border border-neutral-100 dark:border-neutral-800">
+                 <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 bg-neutral-100 dark:bg-neutral-800 backdrop-blur-sm px-4 py-3 rounded-full border border-neutral-200 dark:border-neutral-700">
                      <div className="flex items-center gap-4">
                         <SkeletonLoader width={80} height={16} />
                         <SkeletonLoader width={80} height={16} />
