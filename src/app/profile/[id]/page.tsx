@@ -998,7 +998,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
                     {/* 2. Badges Section */}
                     {badges.length > 0 && (
-                        <BadgeDisplay badges={badges} />
+                        <BadgeDisplay badges={badges} totalCount={7} />
                     )}
 
                     {/* 3. Activity Timeline */}

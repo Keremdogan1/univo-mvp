@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import FriendButton from '../FriendButton';
 import VoiceStatsWidget from './VoiceStatsWidget';
 import { motion, AnimatePresence } from 'framer-motion';
+import VoiceViewSkeleton from '../skeletons/VoiceViewSkeleton';
 
 // Interfaces
 interface Voice {
@@ -87,6 +88,10 @@ export default function VoiceView() {
     useEffect(() => {
         fetchVoices();
     }, [activeTagFilter]);
+
+    if (isLoading) {
+        return <VoiceViewSkeleton />;
+    }
 
     const fetchVoices = async () => {
         setIsLoading(true);

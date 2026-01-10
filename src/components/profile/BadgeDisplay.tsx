@@ -35,9 +35,10 @@ interface Badge {
 interface BadgeDisplayProps {
   badges: Badge[];
   showTitle?: boolean;
+  totalCount?: number;
 }
 
-export default function BadgeDisplay({ badges, showTitle = true }: BadgeDisplayProps) {
+export default function BadgeDisplay({ badges, showTitle = true, totalCount }: BadgeDisplayProps) {
   if (!badges || badges.length === 0) return null;
 
   return (
@@ -45,7 +46,7 @@ export default function BadgeDisplay({ badges, showTitle = true }: BadgeDisplayP
       {showTitle && (
         <h3 className="text-lg font-bold font-serif mb-4 flex items-center gap-2 text-neutral-800 dark:text-white">
           <Trophy size={20} className="text-amber-500" />
-          Rozetler ve Başarılar
+          Rozetler ve Başarılar {totalCount !== undefined && <span className="text-sm font-sans text-neutral-500 font-medium">({badges.length}/{totalCount})</span>}
         </h3>
       )}
       

@@ -10,6 +10,7 @@ import { Calendar, ArrowRight, Globe, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import CommunityViewSkeleton from '../skeletons/CommunityViewSkeleton';
 
 export default function CommunityView() {
   const router = useRouter();
@@ -66,6 +67,10 @@ export default function CommunityView() {
     };
     fetchAllEvents();
   }, []);
+
+  if (loading) {
+    return <CommunityViewSkeleton />;
+  }
 
   const filteredEvents =
     selectedCategory === 'all'

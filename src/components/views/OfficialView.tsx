@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import NotificationCenter from '../NotificationCenter';
+import OfficialViewSkeleton from '../skeletons/OfficialViewSkeleton';
 
 export default function OfficialView() {
     const { user } = useAuth();
@@ -256,6 +257,10 @@ export default function OfficialView() {
         }
         fetchData();
     }, [user]);
+
+    if (loadingMenu) {
+        return <OfficialViewSkeleton />;
+    }
 
     const handleMarkRead = async (id: string, e?: React.MouseEvent) => {
         if (e) {
