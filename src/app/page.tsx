@@ -37,7 +37,7 @@ export default function HomePage() {
              <div className="relative border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4">
                  <div className="flex flex-col items-center justify-center gap-4">
                      <div className="h-10 md:h-14 w-64 md:w-96 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse"></div>
-                     <div className="h-14 w-14 rounded-full bg-neutral-200 dark:bg-neutral-800 animate-pulse"></div>
+                     <div className="h-14 w-14 rounded-full bg-neutral-200 dark:bg-neutral-800 animate-pulse mb-2"></div>
                  </div>
                  <div className="flex justify-between items-center border-t-2 border-neutral-200 dark:border-neutral-800 pt-2 mt-4 max-w-2xl mx-auto">
                      <div className="h-4 w-20 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse"></div>

@@ -19,7 +19,7 @@ const CommunityViewSkeleton = () => {
       <div className="border-b-4 border-neutral-200 dark:border-neutral-800 pb-4 mb-8 text-center md:static pt-4 -mt-4 -mx-4 px-4 relative">
         <div className="flex flex-col items-center justify-center gap-4">
           <SkeletonLoader width={400} height={60} className="mb-2" />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-2">
              <SkeletonLoader width={56} height={56} className="rounded-full" />
           </div>
         </div>
