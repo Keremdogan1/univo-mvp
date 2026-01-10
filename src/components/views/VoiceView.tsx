@@ -1008,6 +1008,13 @@ export default function VoiceView() {
 
                                                                     {(activeCommentBox === voice.id || (voice.comments.length > 0 && activeCommentBox === voice.id)) && (
                                                                         <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-neutral-900 w-full animate-in slide-in-from-top-2">
+                                                                            {!user ? (
+                                                                                <div className="bg-neutral-50 dark:bg-neutral-900 border border-dashed border-neutral-300 dark:border-neutral-700 rounded p-4 text-center">
+                                                                                    <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-2">Yorumları görmek için giriş yapmalısınız.</p>
+                                                                                    <Link href="/login" className="text-sm font-bold hover:underline uppercase" style={{ color: 'var(--primary-color)' }}>Giriş Yap</Link>
+                                                                                </div>
+                                                                            ) : (
+                                                                            <>
                                                                             <div className="space-y-4 mb-4">
                                                                                 {voice.comments.map(comment => (
                                                                                     <div key={comment.id} className="flex gap-3">
@@ -1053,6 +1060,8 @@ export default function VoiceView() {
                                                                                         {isCommenting ? '...' : <Send size={14} />}
                                                                                     </button>
                                                                                 </form>
+                                                                            )}
+                                                                            </>
                                                                             )}
                                                                         </div>
                                                                     )}
