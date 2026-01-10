@@ -4,13 +4,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X, MessageCircle, Users, Building2, LayoutDashboard, User, Settings, LogOut, Globe, Radio } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
-import AuthButton from './AuthButton';
+import dynamic from 'next/dynamic';
 import { Search as SearchIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
-import NotificationCenter from './NotificationCenter';
+const NotificationCenter = dynamic(() => import('./NotificationCenter'), { ssr: false });
+const AuthButton = dynamic(() => import('./AuthButton'), { ssr: false });
 
 
 const ALLOWED_DASHBOARD_USERS = [
