@@ -2,7 +2,7 @@
 <div align="center">
 
 # 🏛️ UNIVO
-### *Kampüsün Dijital Kalbi | The Digital Heart of Campus*
+### *Kampüsün Dijital Kalbi*
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
