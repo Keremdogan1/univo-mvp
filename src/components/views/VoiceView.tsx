@@ -213,9 +213,7 @@ export default function VoiceView() {
         }
     };
 
-    if (isLoading) {
-        return <VoiceViewSkeleton />;
-    }
+
 
     const renderContentWithTags = (content: string) => {
         const parts = content.split(/(#[\wçğıöşüÇĞİÖŞÜ]+)/g);
@@ -642,6 +640,10 @@ export default function VoiceView() {
             setIsLoadingVoters(false);
         }
     };
+
+    if (isLoading) {
+        return <VoiceViewSkeleton />;
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 relative">
