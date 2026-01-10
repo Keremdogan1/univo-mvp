@@ -20,18 +20,18 @@ const ALLOWED_DASHBOARD_USERS = [
   'Salih KIZILER'
 ];
 
-// Shimmer Beam Skeleton for Header
+// Shimmer Beam Skeleton for Header (High Contrast)
 const SkeletonLoader = ({ className = '', width, height }: { className?: string, width?: string | number, height?: string | number }) => (
     <div
       className={`relative overflow-hidden bg-neutral-200/80 dark:bg-neutral-800/80 rounded-md ${className}`}
       style={{ width, height }}
     >
-        {/* Shimmer Beam Effect */}
+        {/* Shimmer Beam Effect - High Contrast */}
       <div 
         className="absolute inset-0 animate-shimmer"
         style={{
-            backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-            backgroundSize: '200% 100%', // Make beam wide enough
+            backgroundImage: 'linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.8) 50%, transparent 80%)',
+            backgroundSize: '50% 100%', // Moving beam
             backgroundRepeat: 'no-repeat'
         }}
       ></div>

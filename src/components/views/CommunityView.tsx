@@ -19,8 +19,8 @@ const SkeletonLoader = ({ className = '', width, height }: { className?: string,
       <div 
         className="absolute inset-0 animate-shimmer"
         style={{
-            backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-            backgroundSize: '200% 100%',
+            backgroundImage: 'linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.8) 50%, transparent 80%)',
+            backgroundSize: '50% 100%',
             backgroundRepeat: 'no-repeat'
         }}
       ></div>
