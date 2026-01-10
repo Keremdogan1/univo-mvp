@@ -846,7 +846,7 @@ export default function OfficialView() {
                                     <article
                                                                     key={index}
                                                                     onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                                                                    className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-3 sm:p-4 transition-all duration-300 border-l-4 cursor-pointer relative box-border bg-white dark:bg-neutral-900 shadow-sm group w-full overflow-hidden rounded-xl
+                                                                    className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-3 sm:p-4 transition-all duration-300 border-l-4 cursor-pointer relative box-border bg-white dark:bg-neutral-900 shadow-sm group w-auto mx-1 sm:w-full sm:mx-0 overflow-hidden rounded-xl
                                 ${isExpanded ? 'bg-neutral-50 dark:bg-neutral-800 ring-1 ring-black/5 dark:ring-white' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'}
                                 ${isRead && (activeTab !== 'history' && activeTab !== 'starred') ? 'hidden' : ''} 
                                 ${isRead ? 'opacity-75 grayscale' : ''}
@@ -903,7 +903,7 @@ export default function OfficialView() {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="flex-1 pr-12 sm:pr-32">
+                                                                    <div className="flex-1 pr-2 sm:pr-32 w-full min-w-0">
                                                                         <div className="flex items-center gap-2 mb-1">
                                                                             <div className={`transition-colors duration-300 flex items-center justify-center ${item.type === 'event' ? 'text-blue-600' :
                                                                                 item.type === 'email' ? 'text-amber-600' :
