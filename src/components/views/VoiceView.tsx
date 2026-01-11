@@ -1282,7 +1282,7 @@ export default function VoiceView() {
                                                                                                         {/* Reply Form */}
                                                                                                            {isReplying && (
                                                                                 <div className="mt-3 ml-2 relative">
-                                                                                    <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-8 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                    <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                     <form onSubmit={(e) => {
                                                                                         e.preventDefault();
                                                                                         handleCommentSubmit(e, voice.id, comment.id, replyContent);
@@ -1318,7 +1318,7 @@ export default function VoiceView() {
                                                                                                                             (Gap 0.75rem + AvatarHalf 1rem = 1.75rem)
                                                                                                                             We use border-l-2 and border-b-2.
                                                                                                                         */}
-                                                                                                                        <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-8 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                                        <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                                                         
                                                                                                                         <CommentItem comment={child} depth={depth + 1} />
                                                                                                                     </div>
