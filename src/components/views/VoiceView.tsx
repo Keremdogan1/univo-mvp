@@ -1177,7 +1177,7 @@ export default function VoiceView() {
                                                                             ) : (
                                                                             <>
                                                                             {expandedVoices[voice.id] && (
-                                                                                <div className="space-y-4 mb-4 pl-1">
+                                                                                <div className="space-y-0 mb-4 pl-0">
                                                                                     {(() => {
                                                                                     // 1. Prepare comments with user reaction state
                                                                                     const preparedComments = voice.comments.map(c => ({
@@ -1333,7 +1333,13 @@ export default function VoiceView() {
 
                                                                                     return (
                                                                                         <>
-                                                                                            {roots.slice(0, visibleCommentsCount[voice.id] || 10).map(root => <CommentItem key={root.id} comment={root} />)}
+                                                                                            {roots.slice(0, visibleCommentsCount[voice.id] || 10).map(root => (
+                                                                                                <div key={root.id} className="relative mt-4 first:mt-4">
+                                                                                                    {/* Curve Connector for Root Comments - Connects to Post Owner Line */}
+                                                                                                    <div className="absolute top-0 -left-[calc(2.15rem+1px)] w-10 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                    <CommentItem comment={root} />
+                                                                                                </div>
+                                                                                            ))}
                                                                                             {roots.length > (visibleCommentsCount[voice.id] || 10) && (
                                                                                                     <button 
                                                                                                     onClick={() => loadMoreComments(voice.id)}
