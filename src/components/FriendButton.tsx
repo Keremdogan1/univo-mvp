@@ -243,8 +243,7 @@ export default function FriendButton({
              <button
                 onClick={(e) => respondToRequest('accept', e)}
                 disabled={isActionLoading}
-                className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors"
-                style={{ color: 'var(--primary-color, #C8102E)' }}
+                className="w-full text-left px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors"
              >
                 {isActionLoading ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
                 İsteği Kabul Et
@@ -257,7 +256,7 @@ export default function FriendButton({
           <button
             onClick={(e) => respondToRequest('accept', e)}
             disabled={isActionLoading}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm text-white hover:opacity-90 transition-all shadow-sm active:scale-95 disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
           >
             {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
@@ -282,7 +281,7 @@ export default function FriendButton({
       onClick={sendRequest}
       disabled={isActionLoading}
       className={`${variant === 'menu-item' ? 
-        "w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200 flex items-center gap-2 transition-colors" : 
+        "w-full text-left px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors" : 
         getButtonStyles('action')} ${className}`}
       style={variant !== 'menu-item' ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
     >
