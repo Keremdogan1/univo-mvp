@@ -180,9 +180,9 @@ export default function VoiceView() {
                 .sort((a, b) => b.count - a.count);
             setAllTags(sortedTags);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching voices:', error);
-            toast.error('Sesler yüklenirken bir hata oluştu');
+            toast.error(`Hata: ${error.message || error.details || 'Bilinmeyen hata'}`);
         } finally {
             setViewLoading(false);
         }
