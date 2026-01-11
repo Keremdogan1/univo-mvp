@@ -203,10 +203,8 @@ function VoiceItem({
                             voice.user?.full_name?.charAt(0) || '?'
                         )}
                     </div>
-                    {/* Post Owner Connector - h-56 bridges to first comment */}
-                    {voice.comments?.length > 0 && expandedVoices[voice.id] && (
-                        <div className="w-[2px] h-56 bg-neutral-200 dark:bg-neutral-800 z-0" />
-                    )}
+                    {/* Post Owner Connector - Handled dynamically by CommentThread */}
+
                 </div>
 
                 {/* Content Column */}
@@ -262,7 +260,7 @@ function VoiceItem({
                                         <>
                                             <Link 
                                                 href={`/profile/${voice.user_id}`}
-                                                className="w-full text-left px-4 py-2 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-center gap-2"
+                                                className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-2 transition-colors"
                                             >
                                                 <User size={14} /> Profili Gör
                                             </Link>
