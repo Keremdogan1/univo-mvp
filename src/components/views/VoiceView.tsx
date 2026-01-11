@@ -1006,7 +1006,10 @@ export default function VoiceView() {
                                                                             voice.user.full_name?.charAt(0)
                                                                         )}
                                                                     </div>
-                                                                    {/* No Post Owner Spine - each Root Comment has isolated curve */}
+                                                                    {/* Post Owner Spine - Connects to all root comments */}
+                                                                    {voice.comments.length > 0 && expandedVoices[voice.id] && (
+                                                                        <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 z-0" />
+                                                                    )}
 
                                                                 </div>
 
@@ -1232,7 +1235,7 @@ export default function VoiceView() {
                                                                                                             Removed hover effect as requested.
                                                                                                         */}
                                                                                                         {hasChildren && (
-                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 transition-colors" />
+                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 transition-colors" />
                                                                                                         )}
                                                                                                     </div>
 
@@ -1353,8 +1356,14 @@ export default function VoiceView() {
                                                                                         <>
                                                                                             {roots.slice(0, visibleCommentsCount[voice.id] || 10).map((root, idx) => (
                                                                                                 <div key={root.id} className="relative pb-4 first:pt-4">
-                                                                                                    {/* Curve Connector ONLY - No vertical rail between roots */}
-                                                                                                    <div className="absolute top-4 -left-[2.25rem] w-[2.25rem] h-[18px] border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                    {/* Rail - Vertical Line connecting roots */}
+                                                                                                    <div 
+                                                                                                        className="absolute top-0 -left-[2.25rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
+                                                                                                        style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '20px' : '100%' }}
+                                                                                                    />
+
+                                                                                                    {/* Curve Connector - Connects to avatar center (top-4 = 16px, curve height 18px, ends at avatar center ~16px) */}
+                                                                                                    <div className="absolute top-4 -left-[2.25rem] w-[2.25rem] h-[16px] border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                                     
                                                                                                     <CommentItem comment={root} />
                                                                                                 </div>
