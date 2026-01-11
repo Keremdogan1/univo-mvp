@@ -7,7 +7,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Styling-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
+[![Status](https://img.shields.io/badge/Status-v1.0.2_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
 
 <!-- Language Switcher -->
 <p align="center">
@@ -25,6 +25,33 @@
 </p>
 
 ---
+
+## 🚀 Release Notes: v1.0.1 → v1.0.2
+**📅 January 11, 2026 (Evening)**
+
+This update focuses on deep stability, social features, and pixel-perfect UI refinements.
+
+### ✨ Highlights
+- **🔍 Manual Encoding Audit (100% Clean):**
+    - A line-by-line manual audit was performed across all critical files (`VoiceView.tsx`, `CommentSystem.tsx`, `VoiceStatsWidget.tsx`).
+    - All lingering "Minecraft language" artifacts (encoding errors) have been purged.
+- **👥 Social & Profile Integration:**
+    - 3-dot menus in posts and comments now feature **"Add Friend"** and **"View Profile"** buttons for non-owners.
+    - Standardized Social UI: The profile visit button now matches the aesthetic of our friendship action buttons.
+- **🛡️ Ownership Hardening:**
+    - "Edit" and "Delete" options are now strictly conditional, appearing only for content owners to prevent UI clutter and accidental interaction triggers.
+- **🎨 Threading & Layout Fixes:**
+    - **Dynamic Connectors**: Fixed the vertical line over-extension bug in comment threads. The rail now scales perfectly with content.
+    - **Hashtag Resilience**: Regex patterns updated with Unicode escapes (`\uXXXX`) for permanent encoding stability.
+
+### 🛠️ Technical Changelog
+> **v1.0.2**
+> * `feat(social)`: Integrated `FriendButton` and Profile links into common 3-dot menus.
+> * `fix(ui)`: Resolved vertical line bleeding in `VoiceView` avatar column by removing hardcoded `h-56` constraints.
+> * `fix(encoding)`: Conducted full manual audit; replaced all corrupted characters with clear UTF-8 equivalents.
+> * `refactor`: Unified button styles and casing across `CommentItem` and `VoiceItem`.
+
+
 
 ## 🚀 Release Notes: v1.0.0 → v1.0.1
 **📅 January 11, 2026**

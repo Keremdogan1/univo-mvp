@@ -7,7 +7,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Styling-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Status](https://img.shields.io/badge/Status-v1.0.1_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
+[![Status](https://img.shields.io/badge/Sürüm-v1.0.2_Release-blue?style=for-the-badge&logo=github)](https://github.com/)
 
 <!-- Language Switcher -->
 <p align="center">
@@ -25,6 +25,33 @@
 </p>
 
 ---
+
+## 🚀 Sürüm Notları: v1.0.1 → v1.0.2
+**📅 11 Ocak 2026 (Gece)**
+
+Bu güncelleme; tam kararlılık, sosyal özellikler ve görsel mükemmeliyet üzerine odaklanmaktadır.
+
+### ✨ Öne Çıkan Değişiklikler
+- **🔍 Kapsamlı Encoding Denetimi (%100 Temiz):**
+    - Kritik tüm dosyalarda (`VoiceView.tsx`, `CommentSystem.tsx`, `VoiceStatsWidget.tsx`) satır satır manuel denetim uygulandı.
+    - Tüm "Minecraft dili" (karakter bozulması) kalıntıları tamamen temizlendi.
+- **👥 Sosyal Entegrasyon & Profil Erişimi:**
+    - Paylaşımların ve yorumların 3 nokta menüsüne **"Arkadaş Ekle"** ve **"Profili Gör"** butonları eklendi.
+    - Standart Sosyal UI: Profil ziyaret butonu, uygulama genelindeki sosyal aksiyon butonlarıyla estetik olarak eşitlendi.
+- **🛡️ Güçlendirilmiş Sahiplik Kontrolü:**
+    - "Düzenle" ve "Sil" seçenekleri, karmaşayı önlemek ve yanlış tetiklemeleri engellemek için sadece içerik sahiplerine görünür kılındı.
+- **🎨 Threading ve Arayüz Düzeltmeleri:**
+    - **Dinamik Bağlantılar**: Yorum dallarındaki dikey çizgi uzama sorunu (rail bleeding) giderildi; çizgi artık içeriğe göre dinamik ölçekleniyor.
+    - **Dayanıklı Hashtagler**: Regex yapıları Unicode kaçış dizileriyle (`\uXXXX`) güncellenerek kalıcı encoding kararlılığı sağlandı.
+
+### 🛠️ Teknik İyileştirmeler (Changelog)
+> **v1.0.2**
+> * `feat(social)`: `FriendButton` ve Profil linkleri ortak 3 nokta menülerine entegre edildi.
+> * `fix(ui)`: `VoiceView` avatar sütunundaki `h-56` kısıtı kaldırılarak dikey çizgi taşma sorunu çözüldü.
+> * `fix(encoding)`: Kapsamlı manuel audit tamamlandı; tüm bozuk karakterler UTF-8 karşılıklarıyla güncellendi.
+> * `refactor`: `CommentItem` ve `VoiceItem` arasındaki buton stilleri ve isimlendirmeleri (casing) tek tipleştirildi.
+
+
 
 ## 🚀 Sürüm Notları: v1.0.0 → v1.0.1
 **📅 11 Ocak 2026**
