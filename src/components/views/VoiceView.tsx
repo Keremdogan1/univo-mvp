@@ -1330,10 +1330,10 @@ export default function VoiceView() {
                                                                                                             <div className="mt-4">
                                                                                                                 {comment.children.map((child: any, idx: number) => (
                                                                                                                     <div key={child.id} className="relative pb-4 last:pb-0">
-                                                                                                                        {/* Rail - Vertical Line from Parent */}
+                                                                                                                        {/* Rail - Vertical Line from Parent (14px for last to not overshoot curve) */}
                                                                                                                         <div 
                                                                                                                             className="absolute top-0 -left-[1.75rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
-                                                                                                                            style={{ height: idx === comment.children.length - 1 ? '16px' : '100%' }}
+                                                                                                                            style={{ height: idx === comment.children.length - 1 ? '14px' : '100%' }}
                                                                                                                         />
                                                                                                                         
                                                                                                                         {/* Curve Connector - Connects Rail to Avatar (16px = 32px avatar / 2) */}
@@ -1354,14 +1354,14 @@ export default function VoiceView() {
                                                                                         <>
                                                                                             {roots.slice(0, visibleCommentsCount[voice.id] || 10).map((root, idx) => (
                                                                                                 <div key={root.id} className="relative pb-4 first:pt-4">
-                                                                                                    {/* Rail - Vertical Line connecting roots */}
+                                                                                                    {/* Rail - Vertical Line connecting roots (aligned with Post Owner avatar center) */}
                                                                                                     <div 
-                                                                                                        className="absolute top-0 -left-[3.25rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
-                                                                                                        style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '20px' : '100%' }}
+                                                                                                        className="absolute top-0 -left-[2.25rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
+                                                                                                        style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '18px' : '100%' }}
                                                                                                     />
 
-                                                                                                    {/* Curve Connector - wider w-[3.25rem] to reach avatar center */}
-                                                                                                    <div className="absolute top-4 -left-[3.25rem] w-[3.25rem] h-[16px] border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                    {/* Curve Connector - starts at rail (-2.25rem) and extends 2.25rem to avatar */}
+                                                                                                    <div className="absolute top-4 -left-[2.25rem] w-[2.25rem] h-[16px] border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                                     
                                                                                                     <CommentItem comment={root} />
                                                                                                 </div>
