@@ -581,9 +581,9 @@ export default function VoiceView() {
 
 
     const renderContentWithTags = (content: string) => {
-        const parts = content.split(/(#[\wğğıöşüç─ŞİÖŞÜ]+)/g);
+        const parts = content.split(/(#[\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]+)/g);
         return parts.map((part, index) => {
-            if (part.match(/^#[\wğğıöşüç─ŞİÖŞÜ]+$/)) {
+            if (part.match(/^#[\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]+$/)) {
                 return (
                     <button
                         key={index}
@@ -612,7 +612,7 @@ export default function VoiceView() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return toast.error('Oturum hatası');
 
-            const extractedTags = newStatus.match(/#[\wğğıöşüç─ŞİÖŞÜ]+/g) || [];
+            const extractedTags = newStatus.match(/#[\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]+/g) || [];
 
             const res = await fetch('/api/voices', {
                 method: 'POST',
@@ -864,7 +864,7 @@ export default function VoiceView() {
         setCursorPos(pos);
 
         const textBeforeCursor = val.slice(0, pos);
-        const matches = textBeforeCursor.match(/#([\wğğıöşüç─ŞİÖŞÜ]*)$/);
+        const matches = textBeforeCursor.match(/#([\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]*)$/);
 
         if (matches) {
             const query = matches[1].toLowerCase();
@@ -891,7 +891,7 @@ export default function VoiceView() {
     const insertTag = (tag: string) => {
         const textBeforeCursor = newStatus.slice(0, cursorPos);
         const textAfterCursor = newStatus.slice(cursorPos);
-        const matches = textBeforeCursor.match(/#([\wğğıöşüç─ŞİÖŞÜ]*)$/);
+        const matches = textBeforeCursor.match(/#([\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]*)$/);
         if (matches) {
             const prefix = textBeforeCursor.slice(0, matches.index);
             const newValue = prefix + tag + ' ' + textAfterCursor;
@@ -934,7 +934,7 @@ export default function VoiceView() {
         const vId = editingId;
         
         // Extract hashtags
-        const extractedTags = Array.from(new Set(editContent.match(/#[a-zA-Zğğıöşüç─ŞİÖŞÜ0-9]+/g) || [])).map(t => t.toLowerCase());
+        const extractedTags = Array.from(new Set(editContent.match(/#[a-zA-Z\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c70-9]+/g) || [])).map(t => t.toLowerCase());
 
         setVoices(prev => prev.map(v => v.id === vId ? { ...v, content: editContent, tags: extractedTags } : v));
         setEditingId(null);
@@ -1190,7 +1190,7 @@ export default function VoiceView() {
                         <div 
                             className="relative w-14 h-14 rounded-full perspective-1000 cursor-pointer mb-2"
                             onClick={() => setIsGlobalMode(!isGlobalMode)}
-                            title={isGlobalMode ? "ODTÜ Moduna Geğ" : "Global Moda Geğ"}
+                            title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
                         >
                                 <div 
                                     className="w-full h-full relative preserve-3d transition-transform duration-700 ease-in-out"
@@ -1330,7 +1330,7 @@ export default function VoiceView() {
                                             <div className="flex justify-between items-center border-t border-neutral-200 dark:border-neutral-800 pt-3">
                                                 <label className="flex items-center gap-2 cursor-pointer group">
                                                     <div className={`w-4 h-4 border transition-colors flex items-center justify-center ${isAnonymous ? 'bg-neutral-900 dark:bg-white border-neutral-900 dark:border-white' : 'border-neutral-300 dark:border-neutral-700 group-hover:border-neutral-900 dark:group-hover:border-white'}`}>
-                                                        {isAnonymous && <span className="text-white dark:text-black text-[10px] choice">Ô£ô</span>}
+                                                        {isAnonymous && <span className="text-white dark:text-black text-[10px] choice">✓</span>}
                                                     </div>
                                                     <input
                                                         type="checkbox"
