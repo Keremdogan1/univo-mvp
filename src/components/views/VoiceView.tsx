@@ -1046,7 +1046,7 @@ export default function VoiceView() {
 
     const handlePollVote = async (index: number) => {
         if (!user) {
-            toast.error('Oy kullanmak iğin giriş yapmalısınız.');
+            toast.error('Oy kullanmak için giriş yapmalısınız.');
             router.push('/login');
             return;
         }
@@ -1357,7 +1357,7 @@ export default function VoiceView() {
                                     </div>
                                 ) : (
                                     <div className="bg-neutral-100 dark:bg-neutral-900 p-6 text-center border border-neutral-200 dark:border-neutral-800 mb-8">
-                                        <p className="text-neutral-600 dark:text-neutral-400">Paylaşım yapmak iğin <Link href="/login" className="underline font-bold text-black dark:text-white">giriş yapmalısın</Link>.</p>
+                                        <p className="text-neutral-600 dark:text-neutral-400">Paylaşım yapmak için <Link href="/login" className="underline font-bold text-black dark:text-white">giriş yapmalısın</Link>.</p>
                                     </div>
                                 )}
 

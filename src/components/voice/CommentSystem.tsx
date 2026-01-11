@@ -228,8 +228,8 @@ export const CommentItem = ({
                                 {comment.user}
                             </Link>
                             
-                             {/* 3-Dot Menu */}
-                             {user && user.id === comment.user_id && (
+                             {/* 3-Dot Menu - Always visible */}
+                             {user && (
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowMenu(!showMenu)}
@@ -242,26 +242,42 @@ export const CommentItem = ({
                                         <>
                                             <div className="fixed inset-0 z-[90]" onClick={() => setShowMenu(false)} />
                                             <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded shadow-lg overflow-hidden z-[100] animate-in slide-in-from-top-2 fade-in duration-200">
+                                                {/* Owner-only actions */}
+                                                {user.id === comment.user_id && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                setIsEditing(true);
+                                                                setEditContentState(comment.content);
+                                                                setShowMenu(false);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2"
+                                                        >
+                                                            <Edit2 size={12} /> DÜZENLE
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+                                                                    handleCommentDelete(comment.id);
+                                                                }
+                                                                setShowMenu(false);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                                        >
+                                                            <Trash2 size={12} /> SİL
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* Actions for all users */}
                                                 <button
                                                     onClick={() => {
-                                                        setIsEditing(true);
-                                                        setEditContentState(comment.content);
+                                                        navigator.clipboard.writeText(`${window.location.origin}/voice/${voice.id}#comment-${comment.id}`);
+                                                        toast.success('Yorum linki kopyalandı!');
                                                         setShowMenu(false);
                                                     }}
                                                     className="w-full text-left px-4 py-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2"
                                                 >
-                                                    <Edit2 size={12} /> DÜZENLE
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
-                                                            handleCommentDelete(comment.id);
-                                                        }
-                                                        setShowMenu(false);
-                                                    }}
-                                                    className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                                                >
-                                                    <Trash2 size={12} /> SİL
+                                                    <Share2 size={12} /> PAYLAŞ
                                                 </button>
                                             </div>
                                         </>
