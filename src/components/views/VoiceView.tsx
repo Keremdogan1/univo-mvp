@@ -1270,7 +1270,7 @@ export default function VoiceView() {
 
                                                                                                                 <button 
                                                                                                                     onClick={() => setReplyingTo(isReplying ? null : comment.id)}
-                                                                                                                    className={`flex items-center gap-1 text-xs font-bold transition-colors uppercase tracking-wide px-2 py-1 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900 ${isReplying ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'text-neutral-500 hover:text-blue-600'}`}
+                                                                                                                    className={`flex items-center gap-1 text-xs font-bold transition-colors uppercase tracking-wide px-2 py-1 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900 ${isReplying ? 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}`}
                                                                                                                 >
                                                                                                                     YANITLA
                                                                                                                 </button>
