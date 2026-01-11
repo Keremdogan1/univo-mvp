@@ -1146,7 +1146,7 @@ export default function VoiceView() {
                                                                         <div className="mt-2">
                                                                              <button 
                                                                                 onClick={(e) => { e.stopPropagation(); toggleVoiceComments(voice.id); }}
-                                                                                className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-full transition-colors w-full sm:w-auto justify-start uppercase"
+                                                                                className={`flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full transition-colors w-full sm:w-auto justify-start uppercase ${expandedVoices[voice.id] ? 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}`}
                                                                             >
                                                                                 {expandedVoices[voice.id] ? (
                                                                                     <>
@@ -1203,7 +1203,6 @@ export default function VoiceView() {
 
                                                                                     // 3. Recursive Component
                                                                                     const CommentItem = ({ comment, depth = 0 }: { comment: any, depth?: number }) => {
-                                                                                        const [isOpen, setIsOpen] = useState(false); // Collapsible state
                                                                                         const isReplying = replyingTo === comment.id;
                                                                                         const hasChildren = comment.children && comment.children.length > 0;
                                                                                         
@@ -1225,11 +1224,11 @@ export default function VoiceView() {
                                                                                                             )}
                                                                                                         </div>
                                                                                                         
-                                                                                                        {/* Vertical Thread Line - Only visible if children exist AND are open 
+                                                                                                        {/* Vertical Thread Line - Only visible if children exist 
                                                                                                             Removed hover effect as requested.
                                                                                                         */}
-                                                                                                        {hasChildren && isOpen && (
-                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 mt-2 transition-colors" />
+                                                                                                        {hasChildren && (
+                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 transition-colors" />
                                                                                                         )}
                                                                                                     </div>
 
@@ -1277,31 +1276,7 @@ export default function VoiceView() {
                                                                                                                 </button>
                                                                                                             </div>
                                                                                                             
-                                                                                                            {/* YouTube Style Expand Button - Moved Below Action Bar */}
-                                                                                                            {hasChildren && (
-                                                                                                                <div className="pt-2"> 
-                                                                                                                    <button 
-                                                                                                                        onClick={() => setIsOpen(!isOpen)}
-                                                                                                                        className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-full transition-colors w-full sm:w-auto justify-start uppercase"
-                                                                                                                    >
-                                                                                                                        {isOpen ? (
-                                                                                                                            <>
-                                                                                                                                <div className="flex items-center justify-center w-4 h-4 mr-1">
-                                                                                                                                    <ChevronUp size={14} />
-                                                                                                                                </div>
-                                                                                                                                YANITLARI GİZLE
-                                                                                                                            </>
-                                                                                                                        ) : (
-                                                                                                                            <>
-                                                                                                                                <div className="flex items-center justify-center w-4 h-4 mr-1">
-                                                                                                                                    <ChevronDown size={14} />
-                                                                                                                                </div>
-                                                                                                                                {comment.children.length} YANIT
-                                                                                                                            </>
-                                                                                                                        )}
-                                                                                                                    </button>
-                                                                                                                </div>
-                                                                                                            )}
+
                                                                                                         </div>
                                                                                                         
                                                                                                         {/* Reply Form */}
@@ -1313,7 +1288,6 @@ export default function VoiceView() {
                                                                                                                     handleCommentSubmit(e, voice.id, comment.id, replyContent);
                                                                                                                     setReplyContent(''); 
                                                                                                                     setReplyingTo(null);
-                                                                                                                    if (!isOpen) setIsOpen(true); // Auto-expand on reply
                                                                                                                 }} className="flex gap-2 animate-in fade-in slide-in-from-top-1 relative z-10">
                                                                                                                     <input
                                                                                                                         autoFocus
@@ -1334,7 +1308,7 @@ export default function VoiceView() {
                                                                                                         )}
 
                                                                                                         {/* Recursion - Children Render */}
-                                                                                                        {hasChildren && isOpen && (
+                                                                                                        {hasChildren && (
                                                                                                             <div className="mt-4">
                                                                                                                 {comment.children.map((child: any) => (
                                                                                                                     <div key={child.id} className="relative">
