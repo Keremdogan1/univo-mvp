@@ -1011,7 +1011,7 @@ export default function VoiceView() {
                                                                         Left centered at 1.25rem - 1px.
                                                                     */}
                                                                     {voice.comments.length > 0 && expandedVoices[voice.id] && (
-                                                                        <div className="absolute top-10 left-[1.25rem] w-[2px] h-8 bg-neutral-200 dark:bg-neutral-800 z-0 content-['']" />
+                                                                        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[2px] h-8 bg-neutral-200 dark:bg-neutral-800 z-0 content-['']" />
                                                                     )}
 
                                                                 </div>
@@ -1359,7 +1359,7 @@ export default function VoiceView() {
                                                                                         <>
                                                                                             {roots.slice(0, visibleCommentsCount[voice.id] || 10).map((root, idx) => (
                                                                                                 <div key={root.id} className="relative pb-4 first:pt-4">
-                                                                                                    {/* Rail - Vertical Line from Post Owner */}
+                                                                                                    {/* Rail - Vertical Line from Prior Sibling / Post Owner */}
                                                                                                     <div 
                                                                                                         className="absolute top-0 -left-[2.25rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
                                                                                                         style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '17px' : '100%' }}
