@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { MessageSquare, Send, User, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { MessageSquare, Send, User, ArrowBigUp, ArrowBigDown, Share2 } from 'lucide-react';
 
 interface Comment {
     id: string;
@@ -223,34 +223,58 @@ export default function AnnouncementComments({ announcementId }: { announcementI
                         </div>
 
                         {/* Actions: Reply & Like/Dislike */}
-                        <div className="flex items-center gap-4 mt-2 ml-1">
-                            {/* Reactions */}
-                            <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-2 py-1">
+{/* Actions: Reply & Like/Dislike */}
+                        <div className="flex items-center justify-between pt-2 mt-2">
+                            <div className="flex items-center gap-4">
+                                {/* Reactions */}
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => handleReaction(comment.id, 'like')}
+                                        className={`p-1 rounded-full transition-all ${comment.user_reaction === 'like' ? 'text-green-600 bg-green-50' : 'text-neutral-400 hover:bg-green-50 hover:text-green-500'}`}
+                                        title="Yükselt"
+                                    >
+                                        <ArrowBigUp size={20} className={comment.user_reaction === 'like' ? 'fill-current' : ''} />
+                                    </button>
+                                    <span className={`text-sm font-bold min-w-[1.5rem] text-center ${
+                                        (comment.reactions?.count || 0) > 0 ? 'text-green-600' : 
+                                        (comment.reactions?.count || 0) < 0 ? 'text-red-600' : 'text-neutral-500'
+                                    }`}>
+                                        {comment.reactions?.count || 0}
+                                    </span>
+                                    <button
+                                        onClick={() => handleReaction(comment.id, 'dislike')}
+                                        className={`p-1 rounded-full transition-all ${comment.user_reaction === 'dislike' ? 'text-red-600 bg-red-50' : 'text-neutral-400 hover:bg-red-50 hover:text-red-500'}`}
+                                        title="Düşür"
+                                    >
+                                        <ArrowBigUp size={20} className={`rotate-180 ${comment.user_reaction === 'dislike' ? 'fill-current' : ''}`} />
+                                    </button>
+                                </div>
+
+                                {user && (
+                                    <button 
+                                        onClick={() => setReplyingTo(isReplying ? null : comment.id)}
+                                        className={`flex items-center gap-2 group transition-colors ${isReplying ? 'text-blue-500' : 'text-neutral-400 hover:text-blue-500'}`}
+                                    >
+                                        <div className="p-1 rounded-full group-hover:bg-blue-50">
+                                            <MessageSquare size={18} />
+                                        </div>
+                                    </button>
+                                )}
+                                
                                 <button
-                                    onClick={() => handleReaction(comment.id, 'like')}
-                                    className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${comment.user_reaction === 'like' ? 'text-green-600' : 'text-neutral-500 hover:text-green-600'}`}
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${window.location.origin}/announcement/${announcementId}#comment-${comment.id}`);
+                                        // toast.success('Link kopyalandı!') // If toast was available in this component context, otherwise just rely on browser or add local state
+                                        alert('Link kopyalandı!');
+                                    }}
+                                    className="flex items-center gap-2 group text-neutral-400 hover:text-green-500 transition-colors"
+                                    title="Paylaş"
                                 >
-                                    <ThumbsUp size={12} className={comment.user_reaction === 'like' ? 'fill-current' : ''} />
-                                    <span>{comment.reactions?.count && comment.reactions.count > 0 ? comment.reactions.count : ''}</span>
-                                </button>
-                                <div className="w-[1px] h-3 bg-neutral-300"></div>
-                                <button
-                                    onClick={() => handleReaction(comment.id, 'dislike')}
-                                    className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${comment.user_reaction === 'dislike' ? 'text-red-600' : 'text-neutral-500 hover:text-red-600'}`}
-                                >
-                                    <ThumbsDown size={12} className={comment.user_reaction === 'dislike' ? 'fill-current' : ''} />
+                                    <div className="p-1 rounded-full group-hover:bg-green-50">
+                                        <Share2 size={18} />
+                                    </div>
                                 </button>
                             </div>
-
-                            {user && (
-                                <button 
-                                    onClick={() => setReplyingTo(isReplying ? null : comment.id)}
-                                    className="text-[10px] font-bold text-neutral-500 hover:text-black flex items-center gap-1 cursor-pointer transition-colors"
-                                >
-                                    <MessageSquare size={10} />
-                                    YANITLA
-                                </button>
-                            )}
                         </div>
 
                         {/* Reply Form */}
