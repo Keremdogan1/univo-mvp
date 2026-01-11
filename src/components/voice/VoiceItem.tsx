@@ -37,6 +37,8 @@ interface VoiceItemProps {
     // Comment Handling Props
     handleCommentSubmit: (e: React.FormEvent, voiceId: string, parentId?: string | null, content?: string | null) => void;
     handleCommentReaction: (e: React.MouseEvent, voiceId: string, commentId: string, type: 'like' | 'dislike') => void;
+    handleCommentDelete: (commentId: string) => void;
+    handleCommentUpdate: (commentId: string, newContent: string) => void;
     
     // Reply State (global or local? In VoiceView it seemed global 'replyingTo').
     replyingTo: string | null;
@@ -74,6 +76,8 @@ export default function VoiceItem({
     containerRefs,
     handleCommentSubmit,
     handleCommentReaction,
+    handleCommentDelete,
+    handleCommentUpdate,
     replyingTo,
     setReplyingTo,
     replyContent,
@@ -319,6 +323,8 @@ export default function VoiceItem({
                                                 isCommenting={isCommenting}
                                                 handleCommentReaction={handleCommentReaction}
                                                 handleCommentSubmit={handleCommentSubmit}
+                                                handleCommentDelete={handleCommentDelete}
+                                                handleCommentUpdate={handleCommentUpdate}
                                                 formatRelativeTime={formatRelativeTime}
                                                 visibleCommentsCount={visibleCommentsCount[voice.id]}
                                                 loadMoreComments={loadMoreComments}

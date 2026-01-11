@@ -456,6 +456,38 @@ export default function VoiceView() {
         }
     };
 
+    const handleCommentDelete = async (commentId: string) => {
+        try {
+            const { error } = await supabase
+                .from('comments')
+                .delete() // Or update is_archived if comments have it? Assuming delete for now based on simplicity
+                .eq('id', commentId);
+
+            if (error) throw error;
+            toast.success('Yorum silindi');
+            fetchVoices();
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            toast.error('Yorum silinirken bir hata oluştu');
+        }
+    };
+
+    const handleCommentUpdate = async (commentId: string, newContent: string) => {
+        try {
+            const { error } = await supabase
+                .from('comments')
+                .update({ content: newContent })
+                .eq('id', commentId);
+
+            if (error) throw error;
+            toast.success('Yorum güncellendi');
+            fetchVoices();
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            toast.error('Yorum güncellenirken bir hata oluştu');
+        }
+    };
+
     function formatRelativeTime(dateString: string) {
         const date = new Date(dateString);
         const now = new Date();
@@ -624,6 +656,8 @@ export default function VoiceView() {
                                                         containerRefs={containerRefs}
                                                         handleCommentSubmit={handleCommentSubmit}
                                                         handleCommentReaction={handleCommentReaction}
+                                                        handleCommentDelete={handleCommentDelete}
+                                                        handleCommentUpdate={handleCommentUpdate}
                                                         replyingTo={replyingTo}
                                                         setReplyingTo={setReplyingTo}
                                                         replyContent={replyContent}

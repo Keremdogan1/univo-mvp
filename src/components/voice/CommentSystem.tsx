@@ -151,6 +151,8 @@ export const CommentItem = ({
     isCommenting,
     handleCommentReaction,
     handleCommentSubmit,
+    handleCommentDelete,
+    handleCommentUpdate,
     formatRelativeTime
 }: { 
     comment: any;
@@ -167,6 +169,8 @@ export const CommentItem = ({
     isCommenting: boolean;
     handleCommentReaction: any;
     handleCommentSubmit: any;
+    handleCommentDelete: (id: string) => void;
+    handleCommentUpdate: (id: string, content: string) => void;
     formatRelativeTime: (d: string) => string;
 }) => {
     const isReplying = replyingTo === comment.id;
@@ -174,6 +178,11 @@ export const CommentItem = ({
     const avatarRef = useRef<HTMLDivElement>(null);
     const childContainerRef = useRef<HTMLDivElement>(null);
     const childAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    // Edit state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContentState] = useState(comment.content);
+    const [showMenu, setShowMenu] = useState(false);
 
     // Report avatar ref to parent for geometry calculation
     useEffect(() => {
@@ -212,17 +221,94 @@ export const CommentItem = ({
                 {/* Content Column */}
                 <div className="flex-1 min-w-0">
                     {/* Comment Card */}
-                    <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm relative z-20">
+                    <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm relative z-20 hover:shadow-md transition-all">
                         
-                        <div className="flex justify-between items-baseline mb-1">
+                        <div className="flex justify-between items-start mb-1">
                             <Link href={`/profile/${comment.user_id}`} className="font-bold text-sm text-neutral-900 dark:text-neutral-200 hover:underline">
                                 {comment.user}
                             </Link>
-                            <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{formatRelativeTime(comment.created_at)}</span>
+                            
+                             {/* 3-Dot Menu */}
+                             {user && user.id === comment.user_id && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowMenu(!showMenu)}
+                                        className="p-1 text-neutral-400 hover:text-black dark:hover:text-white rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+                                    
+                                    {showMenu && (
+                                        <>
+                                            <div className="fixed inset-0 z-[90]" onClick={() => setShowMenu(false)} />
+                                            <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded shadow-lg overflow-hidden z-[100] animate-in slide-in-from-top-2 fade-in duration-200">
+                                                <button
+                                                    onClick={() => {
+                                                        setIsEditing(true);
+                                                        setEditContentState(comment.content);
+                                                        setShowMenu(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2"
+                                                >
+                                                    <Edit2 size={12} /> DÜZENLE
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+                                                            handleCommentDelete(comment.id);
+                                                        }
+                                                        setShowMenu(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                                >
+                                                    <Trash2 size={12} /> SİL
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
-                        <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+
+                        {/* Content or Edit Form */}
+                        {isEditing ? (
+                            <div className="mb-2">
+                                <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContentState(e.target.value)}
+                                    className="w-full p-2 border border-neutral-300 dark:border-neutral-700 rounded text-sm bg-white dark:bg-neutral-800 dark:text-white font-serif focus:ring-2 focus:ring-black dark:focus:ring-white focus:outline-none resize-none"
+                                    rows={2}
+                                    autoFocus
+                                />
+                                <div className="flex justify-end gap-2 mt-2">
+                                    <button
+                                        onClick={() => setIsEditing(false)}
+                                        className="px-3 py-1 text-xs font-bold text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
+                                    >
+                                        İPTAL
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleCommentUpdate(comment.id, editContent);
+                                            setIsEditing(false);
+                                        }}
+                                        disabled={!editContent.trim()}
+                                        className="px-3 py-1 text-xs font-bold bg-black dark:bg-white text-white dark:text-black rounded disabled:opacity-50"
+                                    >
+                                        KAYDET
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                        )}
                         
                         <div className="flex items-center gap-4 mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800/50">
+                             {/* Timestamp moved to bottom */}
+                             <span className="text-[10px] text-neutral-400 dark:text-neutral-500 font-serif">
+                                {formatRelativeTime(comment.created_at)}
+                            </span>
+
                             {/* Reactions */}
                             <div className="flex items-center gap-0.5 bg-neutral-50 dark:bg-neutral-900 rounded-full px-1 py-0.5 border border-neutral-100 dark:border-neutral-800">
                                 <button
@@ -258,7 +344,7 @@ export const CommentItem = ({
                                     navigator.clipboard.writeText(`${window.location.origin}/voice/${voice.id}`);
                                     toast.success('Link kopyalandı!');
                                 }}
-                                className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                                className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900 ml-auto"
                                 title="Paylaş"
                             >
                                 <Share2 size={16} />
@@ -324,6 +410,8 @@ export const CommentItem = ({
                                 isCommenting={isCommenting}
                                 handleCommentReaction={handleCommentReaction}
                                 handleCommentSubmit={handleCommentSubmit}
+                                handleCommentDelete={handleCommentDelete}
+                                handleCommentUpdate={handleCommentUpdate}
                                 formatRelativeTime={formatRelativeTime}
                             />
                         </div>
@@ -345,6 +433,8 @@ export default function CommentThread({
     isCommenting,
     handleCommentReaction,
     handleCommentSubmit,
+    handleCommentDelete,
+    handleCommentUpdate,
     formatRelativeTime,
     visibleCommentsCount,
     loadMoreComments,
@@ -359,6 +449,8 @@ export default function CommentThread({
     isCommenting: boolean;
     handleCommentReaction: any;
     handleCommentSubmit: any;
+    handleCommentDelete: (id: string) => void;
+    handleCommentUpdate: (id: string, content: string) => void;
     formatRelativeTime: any;
     visibleCommentsCount: number;
     loadMoreComments: (id: string) => void;
@@ -416,6 +508,8 @@ export default function CommentThread({
                         isCommenting={isCommenting}
                         handleCommentReaction={handleCommentReaction}
                         handleCommentSubmit={handleCommentSubmit}
+                        handleCommentDelete={handleCommentDelete}
+                        handleCommentUpdate={handleCommentUpdate}
                         formatRelativeTime={formatRelativeTime}
                     />
                 </div>
