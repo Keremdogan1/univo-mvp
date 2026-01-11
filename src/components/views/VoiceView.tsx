@@ -1006,6 +1006,13 @@ export default function VoiceView() {
                                                                             voice.user.full_name?.charAt(0)
                                                                         )}
                                                                     </div>
+                                                                    {/* Post Owner Tail - Connects to first root comment. 
+                                                                        Height 32px (h-8) bridges the gap: 16px mt-4 + 16px pt-4 = 32px.
+                                                                        Left centered at 1.25rem - 1px.
+                                                                    */}
+                                                                    {voice.comments.length > 0 && expandedVoices[voice.id] && (
+                                                                        <div className="absolute top-10 left-[calc(1.25rem-1px)] w-[2px] h-8 bg-neutral-200 dark:bg-neutral-800 z-0 content-['']" />
+                                                                    )}
 
                                                                 </div>
 
@@ -1180,7 +1187,7 @@ export default function VoiceView() {
                                                                             ) : (
                                                                             <>
                                                                             {expandedVoices[voice.id] && (
-                                                                                <div className="space-y-0 mb-4 pl-0">
+                                                                                <div className="space-y-0 mb-4 pl-[3.5rem]">
                                                                                     {(() => {
                                                                                     // 1. Prepare comments with user reaction state
                                                                                     const preparedComments = voice.comments.map(c => ({
@@ -1325,13 +1332,13 @@ export default function VoiceView() {
 
                                                                                                         {/* Recursion - Children Render */}
                                                                                                         {hasChildren && (
-                                                                                                            <div className="mt-4">
+                                                                                                            <div className="mt-4 ml-6">
                                                                                                                 {comment.children.map((child: any, idx: number) => (
                                                                                                                     <div key={child.id} className="relative pb-4 last:pb-0">
                                                                                                                         {/* Rail - Vertical Line from Parent */}
                                                                                                                         <div 
                                                                                                                             className="absolute top-0 -left-[1.75rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
-                                                                                                                            style={{ height: idx === comment.children.length - 1 ? '18px' : '100%' }}
+                                                                                                                            style={{ height: idx === comment.children.length - 1 ? '17px' : '100%' }}
                                                                                                                         />
                                                                                                                         
                                                                                                                         {/* Curve Connector - Connects Rail to Avatar */}
@@ -1355,7 +1362,7 @@ export default function VoiceView() {
                                                                                                     {/* Rail - Vertical Line from Post Owner */}
                                                                                                     <div 
                                                                                                         className="absolute top-0 -left-[2.25rem] w-[2px] bg-neutral-200 dark:bg-neutral-800 transition-colors z-0"
-                                                                                                        style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '18px' : '100%' }}
+                                                                                                        style={{ height: idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) ? '17px' : '100%' }}
                                                                                                     />
 
                                                                                                     {/* Curve Connector - Connects Rail to Avatar */}
