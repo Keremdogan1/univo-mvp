@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import NotificationCenter from '../NotificationCenter';
-import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, BadgeCheck, Globe, Lock, Sparkles } from 'lucide-react';
+import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, BadgeCheck, Globe, Lock, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -1161,6 +1161,7 @@ export default function VoiceView() {
 
                                                                                     // 3. Recursive Component
                                                                                     const CommentItem = ({ comment, depth = 0 }: { comment: any, depth?: number }) => {
+                                                                                        const [isOpen, setIsOpen] = useState(false); // Collapsible state
                                                                                         const isReplying = replyingTo === comment.id;
                                                                                         const hasChildren = comment.children && comment.children.length > 0;
                                                                                         
@@ -1182,8 +1183,8 @@ export default function VoiceView() {
                                                                                                             )}
                                                                                                         </div>
                                                                                                         
-                                                                                                        {/* Vertical Thread Line - Only visible if there are children */}
-                                                                                                        {hasChildren && (
+                                                                                                        {/* Vertical Thread Line - Only visible if children exist AND are open */}
+                                                                                                        {hasChildren && isOpen && (
                                                                                                             <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 mt-2 group-hover/comment:bg-neutral-300 dark:group-hover/comment:bg-neutral-700 transition-colors" />
                                                                                                         )}
                                                                                                     </div>
@@ -1193,7 +1194,7 @@ export default function VoiceView() {
                                                                                                         {/* Comment Card */}
                                                                                                         <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative">
                                                                                                             
-                                                                                                            {/* Mobile/Tight visual connector (optional small arrow pointing to avatar) */}
+                                                                                                            {/* Mobile/Tight visual connector */}
                                                                                                             <div className="absolute top-4 -left-[7px] w-2 h-2 bg-white dark:bg-[#0a0a0a] border-l border-b border-neutral-200 dark:border-neutral-800 transform rotate-45" />
 
                                                                                                             <div className="flex justify-between items-baseline mb-1">
@@ -1238,7 +1239,6 @@ export default function VoiceView() {
                                                                                                         {/* Reply Form */}
                                                                                                         {isReplying && (
                                                                                                             <div className="mt-3 ml-2 relative">
-                                                                                                                {/* Connector for reply form */}
                                                                                                                 <div className="absolute top-0 -left-6 w-4 h-8 border-l-2 border-b-2 border-neutral-200 dark:border-neutral-800 rounded-bl-xl" />
                                                                                                                 <form onSubmit={(e) => {
                                                                                                                     e.preventDefault();
@@ -1264,16 +1264,33 @@ export default function VoiceView() {
                                                                                                             </div>
                                                                                                         )}
 
-                                                                                                        {/* Recursion - Children Render */}
+                                                                                                        {/* YouTube Style Expand Button */}
                                                                                                         {hasChildren && (
+                                                                                                            <div className="mt-2">
+                                                                                                                <button 
+                                                                                                                    onClick={() => setIsOpen(!isOpen)}
+                                                                                                                    className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-full transition-colors"
+                                                                                                                >
+                                                                                                                    {isOpen ? (
+                                                                                                                        <>
+                                                                                                                            <ChevronUp size={14} />
+                                                                                                                            Yanıtları gizle
+                                                                                                                        </>
+                                                                                                                    ) : (
+                                                                                                                        <>
+                                                                                                                            <ChevronDown size={14} />
+                                                                                                                            {comment.children.length} yanıt
+                                                                                                                        </>
+                                                                                                                    )}
+                                                                                                                </button>
+                                                                                                            </div>
+                                                                                                        )}
+
+                                                                                                        {/* Recursion - Children Render */}
+                                                                                                        {hasChildren && isOpen && (
                                                                                                             <div className="mt-4">
                                                                                                                 {comment.children.map((child: any) => (
                                                                                                                     <div key={child.id} className="relative">
-                                                                                                                        {/* 
-                                                                                                                          VISUAL CONNECTOR LOGIC 
-                                                                                                                          We need a line curving from the parent's vertical line (which is on the LEFT, under the avatar)
-                                                                                                                          to this child.
-                                                                                                                        */}
                                                                                                                         {/* Curve Connector */}
                                                                                                                         <div className="absolute top-0 -left-[2.15rem] w-6 h-8 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                                                         
