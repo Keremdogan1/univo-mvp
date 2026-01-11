@@ -988,21 +988,27 @@ export default function VoiceView() {
                                                                 </div>
                                                             )}
 
-                                                            <div className="flex gap-4 items-start">
-                                                                <div
-                                                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold font-serif shrink-0 border border-neutral-200 dark:border-neutral-800 ${voice.is_anonymous ? 'bg-neutral-800 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300' : 'text-white'}`}
-                                                                    style={(!voice.is_anonymous && !voice.user.avatar_url && !(voice.user_id === user?.id && user?.user_metadata?.avatar_url)) ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
-                                                                >
-                                                                    {voice.is_anonymous ? (
-                                                                        <Ghost size={20} />
-                                                                    ) : (voice.user.avatar_url || (voice.user_id === user?.id && user?.user_metadata?.avatar_url)) ? (
-                                                                        <img 
-                                                                            src={voice.user.avatar_url || user?.user_metadata?.avatar_url} 
-                                                                            alt={voice.user.full_name} 
-                                                                            className="w-full h-full rounded-full object-cover"
-                                                                        />
-                                                                    ) : (
-                                                                        voice.user.full_name?.charAt(0)
+                                                            <div className="flex gap-4 items-stretch">
+                                                                <div className="flex flex-col items-center shrink-0">
+                                                                    <div
+                                                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold font-serif shrink-0 border border-neutral-200 dark:border-neutral-800 ${voice.is_anonymous ? 'bg-neutral-800 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300' : 'text-white'}`}
+                                                                        style={(!voice.is_anonymous && !voice.user.avatar_url && !(voice.user_id === user?.id && user?.user_metadata?.avatar_url)) ? { backgroundColor: 'var(--primary-color, #C8102E)' } : undefined}
+                                                                    >
+                                                                        {voice.is_anonymous ? (
+                                                                            <Ghost size={20} />
+                                                                        ) : (voice.user.avatar_url || (voice.user_id === user?.id && user?.user_metadata?.avatar_url)) ? (
+                                                                            <img 
+                                                                                src={voice.user.avatar_url || user?.user_metadata?.avatar_url} 
+                                                                                alt={voice.user.full_name} 
+                                                                                className="w-full h-full rounded-full object-cover"
+                                                                            />
+                                                                        ) : (
+                                                                            voice.user.full_name?.charAt(0)
+                                                                        )}
+                                                                    </div>
+                                                                    {/* Vertical Thread Line from Post Owner - connects to root comments */}
+                                                                    {(expandedVoices[voice.id] && voice.comments.length > 0) && (
+                                                                        <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 transition-colors relative z-0" />
                                                                     )}
                                                                 </div>
 
