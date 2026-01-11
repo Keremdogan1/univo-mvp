@@ -1340,7 +1340,7 @@ export default function VoiceView() {
                                                                                                                         
                                                                                                                         {/* Mask to hide excess thread line for the last nested child */}
                                                                                                                         {idx === comment.children.length - 1 && (
-                                                                                                                            <div className="absolute top-[17px] -left-[calc(1.85rem+1px)] w-4 h-[9999px] bg-white dark:bg-[#0a0a0a] z-[5]" />
+                                                                                                                            <div className="absolute top-[17px] bottom-0 -left-[calc(1.85rem+1px)] w-4 bg-white dark:bg-[#0a0a0a] z-[5]" />
                                                                                                                         )}
 
                                                                                                                         <CommentItem comment={child} depth={depth + 1} />
@@ -1363,7 +1363,7 @@ export default function VoiceView() {
                                                                                                     
                                                                                                     {/* Mask to hide excess thread line for the last item */}
                                                                                                     {idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) && (
-                                                                                                        <div className="absolute top-[17px] -left-[2.35rem] w-4 h-[9999px] bg-white dark:bg-[#0a0a0a] z-[5]" />
+                                                                                                        <div className="absolute top-[17px] bottom-0 -left-[2.35rem] w-4 bg-white dark:bg-[#0a0a0a] z-[5]" />
                                                                                                     )}
                                                                                                     
                                                                                                     <CommentItem comment={root} />
