@@ -217,13 +217,6 @@ const BranchConnector = ({
             const avatarCenterY = avatarRect.top + avatarRect.height / 2 - containerRect.top;
             const avatarCenterX = avatarRect.left + avatarRect.width / 2 - containerRect.left;
             
-            setGeometry({
-                y: avatarCenterY - 16, 
-                width: avatarCenterX - (containerRect.left + offsetX) + containerRect.left - containerRect.left, // Normalized
-                visible: true
-            });
-            
-            // Re-calculate based on relative offset
             const railX = offsetX;
             const branchWidth = avatarCenterX - (containerRect.left + railX);
             
@@ -256,6 +249,307 @@ const BranchConnector = ({
                 height: 16
             }}
         />
+    );
+};
+
+// CommentItem: Recursive component for single comment
+const CommentItem = ({ 
+    comment, 
+    voice,
+    user,
+    depth = 0,
+    containerRef,
+    offsetX = 0,
+    onAvatarRef,
+    replyingTo,
+    setReplyingTo,
+    replyContent,
+    setReplyContent,
+    isCommenting,
+    handleCommentReaction,
+    handleCommentSubmit,
+    formatRelativeTime
+}: { 
+    comment: any;
+    voice: any;
+    user: any;
+    depth?: number;
+    containerRef?: React.RefObject<HTMLDivElement | null>;
+    offsetX?: number;
+    onAvatarRef?: (el: HTMLDivElement | null) => void;
+    replyingTo: string | null;
+    setReplyingTo: (id: string | null) => void;
+    replyContent: string;
+    setReplyContent: (val: string) => void;
+    isCommenting: boolean;
+    handleCommentReaction: any;
+    handleCommentSubmit: any;
+    formatRelativeTime: (d: string) => string;
+}) => {
+    const isReplying = replyingTo === comment.id;
+    const hasChildren = comment.children && comment.children.length > 0;
+    const avatarRef = useRef<HTMLDivElement>(null);
+    const childContainerRef = useRef<HTMLDivElement>(null);
+    const childAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    // Report avatar ref to parent for geometry calculation
+    useEffect(() => {
+        if (onAvatarRef) onAvatarRef(avatarRef.current);
+    }, [onAvatarRef]);
+    
+    return (
+        <div className="flex flex-col relative">
+            <div className="flex gap-3 relative group/comment">
+                {/* Branch line to this avatar (if within a thread) */}
+                {containerRef && (
+                    <BranchConnector 
+                        containerRef={containerRef}
+                        avatarRef={avatarRef}
+                        offsetX={offsetX}
+                    />
+                )}
+
+                {/* Avatar Column */}
+                <div className="flex flex-col items-center shrink-0">
+                    <div 
+                        ref={avatarRef}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-neutral-200 dark:border-neutral-700 z-20 shrink-0 bg-white dark:bg-[#0a0a0a]"
+                        style={!comment.user_avatar ? { 
+                            backgroundColor: 'var(--primary-color)'
+                        } : undefined}
+                    >
+                        {comment.user_avatar ? (
+                            <img src={comment.user_avatar} alt={comment.user} className="w-full h-full object-cover" />
+                        ) : (
+                            comment.user?.charAt(0) || '?'
+                        )}
+                    </div>
+                </div>
+
+                {/* Content Column */}
+                <div className="flex-1 min-w-0">
+                    {/* Comment Card */}
+                    <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm relative z-20">
+                        
+                        <div className="flex justify-between items-baseline mb-1">
+                            <Link href={`/profile/${comment.user_id}`} className="font-bold text-sm text-neutral-900 dark:text-neutral-200 hover:underline">
+                                {comment.user}
+                            </Link>
+                            <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{formatRelativeTime(comment.created_at)}</span>
+                        </div>
+                        <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                        
+                        <div className="flex items-center gap-4 mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800/50">
+                            {/* Reactions */}
+                            <div className="flex items-center gap-0.5 bg-neutral-50 dark:bg-neutral-900 rounded-full px-1 py-0.5 border border-neutral-100 dark:border-neutral-800">
+                                <button
+                                    onClick={(e) => handleCommentReaction(e, voice.id, comment.id, 'like')}
+                                    className={`p-1 rounded-full transition-all flex items-center justify-center w-6 h-6 hover:bg-white dark:hover:bg-black hover:shadow-sm ${comment.user_reaction === 'like' ? 'text-green-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-green-600'}`}
+                                >
+                                    <ArrowBigUp size={16} className={comment.user_reaction === 'like' ? 'fill-current' : ''} />
+                                </button>
+                                <span className={`text-[10px] font-bold min-w-[0.5rem] text-center ${
+                                    (comment.reactions?.count || 0) > 0 ? 'text-green-600' : 
+                                    (comment.reactions?.count || 0) < 0 ? 'text-red-600' : 'text-neutral-500 dark:text-neutral-500'
+                                }`}>
+                                    {comment.reactions?.count || 0}
+                                </span>
+                                <button
+                                    onClick={(e) => handleCommentReaction(e, voice.id, comment.id, 'dislike')}
+                                    className={`p-1 rounded-full transition-all flex items-center justify-center w-6 h-6 hover:bg-white dark:hover:bg-black hover:shadow-sm ${comment.user_reaction === 'dislike' ? 'text-red-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-red-600'}`}
+                                >
+                                    <ArrowBigUp size={16} className={`rotate-180 ${comment.user_reaction === 'dislike' ? 'fill-current' : ''}`} />
+                                </button>
+                            </div>
+
+                            <button 
+                                onClick={() => setReplyingTo(isReplying ? null : comment.id)}
+                                className={`flex items-center gap-1 text-xs font-bold transition-colors uppercase tracking-wide px-2 py-1 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900 ${isReplying ? 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}`}
+                            >
+                                YANITLA
+                            </button>
+                            
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(`${window.location.origin}/voice/${voice.id}`);
+                                    toast.success('Link kopyalandı!');
+                                }}
+                                className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                                title="Paylaş"
+                            >
+                                <Share2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Reply Form */}
+            {isReplying && (
+                <div className="mt-3 ml-2 relative">
+                    <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleCommentSubmit(e, voice.id, comment.id, replyContent);
+                        setReplyContent(''); 
+                        setReplyingTo(null);
+                    }} className="flex gap-2 animate-in fade-in slide-in-from-top-1 relative z-10 pt-2">
+                        <input
+                            type="text"
+                            autoFocus
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            placeholder={`@${comment.user} yanıt ver...`}
+                            className="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-sm focus:outline-none focus:border-black dark:focus:border-white font-serif dark:text-white transition-colors"
+                        />
+                        <button 
+                            type="submit"
+                            disabled={isCommenting || !replyContent.trim()}
+                            className="p-2 bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 transition-colors"
+                        >
+                            <Send size={14} />
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* Children Render */}
+            {hasChildren && (
+                <div ref={childContainerRef} className="relative mt-4 ml-7">
+                    <ThreadConnector 
+                        containerRef={childContainerRef}
+                        startRef={avatarRef}
+                        endRefs={childAvatarRefs}
+                        offsetX={16 - 28}
+                    />
+                    
+                    {comment.children.map((child: any, idx: number) => (
+                        <div key={child.id} className="relative mb-4 last:pb-0">
+                            <CommentItem 
+                                comment={child} 
+                                voice={voice}
+                                user={user}
+                                depth={depth + 1}
+                                containerRef={childContainerRef}
+                                offsetX={16 - 28}
+                                onAvatarRef={el => { childAvatarRefs.current[idx] = el; }}
+                                replyingTo={replyingTo}
+                                setReplyingTo={setReplyingTo}
+                                replyContent={replyContent}
+                                setReplyContent={setReplyContent}
+                                isCommenting={isCommenting}
+                                handleCommentReaction={handleCommentReaction}
+                                handleCommentSubmit={handleCommentSubmit}
+                                formatRelativeTime={formatRelativeTime}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// CommentThread: Main container for voice comments
+const CommentThread = ({
+    voice,
+    user,
+    replyingTo,
+    setReplyingTo,
+    replyContent,
+    setReplyContent,
+    isCommenting,
+    handleCommentReaction,
+    handleCommentSubmit,
+    formatRelativeTime,
+    visibleCommentsCount,
+    loadMoreComments,
+    postOwnerAvatarRef
+}: {
+    voice: any;
+    user: any;
+    replyingTo: string | null;
+    setReplyingTo: (id: string | null) => void;
+    replyContent: string;
+    setReplyContent: (val: string) => void;
+    isCommenting: boolean;
+    handleCommentReaction: any;
+    handleCommentSubmit: any;
+    formatRelativeTime: any;
+    visibleCommentsCount: number;
+    loadMoreComments: (id: string) => void;
+    postOwnerAvatarRef: HTMLDivElement | null;
+}) => {
+    // 1. Prepare comments with user reaction state
+    const preparedComments = voice.comments.map((c: any) => ({
+        ...c,
+        children: [] as any[],
+        user_reaction: user ? (c.reactions as any)?.data?.find((r: any) => r.user_id === user.id)?.reaction_type : null
+    }));
+
+    // 2. Build Tree
+    const commentMap: any = {};
+    const roots: any[] = [];
+    preparedComments.forEach((c: any) => commentMap[c.id] = c);
+    preparedComments.forEach((c: any) => {
+        if (c.parent_id && commentMap[c.parent_id]) {
+            commentMap[c.parent_id].children.push(commentMap[c.id]);
+        } else {
+            roots.push(commentMap[c.id]);
+        }
+    });
+    
+    // Sort by newest
+    roots.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    const visibleRoots = roots.slice(0, visibleCommentsCount || 10);
+    const rootContainerRef = useRef<HTMLDivElement>(null);
+    const rootAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
+    
+    return (
+        <div ref={rootContainerRef} className="relative">
+            {/* Main Rail from Post Owner to last root comment */}
+            <ThreadConnector 
+                containerRef={rootContainerRef}
+                startRef={{ current: postOwnerAvatarRef }}
+                endRefs={rootAvatarRefs}
+                offsetX={-36}
+            />
+
+            {visibleRoots.map((root, idx) => (
+                <div key={root.id} className="relative mb-4 first:mt-4">
+                    <CommentItem 
+                        comment={root} 
+                        voice={voice}
+                        user={user}
+                        containerRef={rootContainerRef}
+                        offsetX={-36}
+                        onAvatarRef={el => { rootAvatarRefs.current[idx] = el; }}
+                        replyingTo={replyingTo}
+                        setReplyingTo={setReplyingTo}
+                        replyContent={replyContent}
+                        setReplyContent={setReplyContent}
+                        isCommenting={isCommenting}
+                        handleCommentReaction={handleCommentReaction}
+                        handleCommentSubmit={handleCommentSubmit}
+                        formatRelativeTime={formatRelativeTime}
+                    />
+                </div>
+            ))}
+
+            {roots.length > (visibleCommentsCount || 10) && (
+                <button 
+                    onClick={() => loadMoreComments(voice.id)}
+                    className="flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 px-3 py-1.5 rounded-full transition-colors mt-4 mx-auto uppercase"
+                >
+                    <div className="flex items-center justify-center w-4 h-4">
+                        <ChevronDown size={14} />
+                    </div>
+                    DAHA FAZLA YÜKLE ({roots.length - (visibleCommentsCount || 10)})
+                </button>
+            )}
+        </div>
     );
 };
 
@@ -1315,244 +1609,25 @@ export default function VoiceView() {
                                                                             <>
                                                                             {expandedVoices[voice.id] && (
                                                                                 <div className="space-y-0 mb-4 pl-0">
-                                                                                                                                                                        {(() => {
-                                                                                    // 1. Prepare comments with user reaction state
-                                                                                    const preparedComments = voice.comments.map(c => ({
-                                                                                        ...c,
-                                                                                        children: [] as any[],
-                                                                                        user_reaction: user ? (c.reactions as any)?.data?.find((r: any) => r.user_id === user.id)?.reaction_type : null
-                                                                                    }));
-
-                                                                                    // 2. Build Tree
-                                                                                    const commentMap: any = {};
-                                                                                    const roots: any[] = [];
-                                                                                    preparedComments.forEach(c => commentMap[c.id] = c);
-                                                                                    preparedComments.forEach(c => {
-                                                                                        if (c.parent_id && commentMap[c.parent_id]) {
-                                                                                            commentMap[c.parent_id].children.push(commentMap[c.id]);
-                                                                                        } else {
-                                                                                            roots.push(commentMap[c.id]);
-                                                                                        }
-                                                                                    });
-                                                                                    
-                                                                                    // Sort by newest
-                                                                                    roots.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-
-                                                                                    // 3. Recursive Component
-                                                                                    const CommentItem = ({ 
-                                                                                        comment, 
-                                                                                        depth = 0,
-                                                                                        containerRef,
-                                                                                        offsetX = 0,
-                                                                                        onAvatarRef
-                                                                                    }: { 
-                                                                                        comment: any;
-                                                                                        depth?: number;
-                                                                                        containerRef?: React.RefObject<HTMLDivElement | null>;
-                                                                                        offsetX?: number;
-                                                                                        onAvatarRef?: (el: HTMLDivElement | null) => void;
-                                                                                    }) => {
-                                                                                        const isReplying = replyingTo === comment.id;
-                                                                                        const hasChildren = comment.children && comment.children.length > 0;
-                                                                                        const avatarRef = useRef<HTMLDivElement>(null);
-                                                                                        const childContainerRef = useRef<HTMLDivElement>(null);
-                                                                                        const childAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-                                                                                        // Report avatar ref to parent for geometry calculation
-                                                                                        useEffect(() => {
-                                                                                            if (onAvatarRef) onAvatarRef(avatarRef.current);
-                                                                                        }, [onAvatarRef]);
-                                                                                        
-                                                                                        return (
-                                                                                            <div className="flex flex-col relative">
-                                                                                                <div className="flex gap-3 relative group/comment">
-                                                                                                    {/* Branch line to this avatar (if within a thread) */}
-                                                                                                    {containerRef && (
-                                                                                                        <BranchConnector 
-                                                                                                            containerRef={containerRef}
-                                                                                                            avatarRef={avatarRef}
-                                                                                                            offsetX={offsetX}
-                                                                                                        />
-                                                                                                    )}
-
-                                                                                                    {/* Avatar Column */}
-                                                                                                    <div className="flex flex-col items-center shrink-0">
-                                                                                                        <div 
-                                                                                                            ref={avatarRef}
-                                                                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-neutral-200 dark:border-neutral-700 z-20 shrink-0 bg-white dark:bg-[#0a0a0a]"
-                                                                                                            style={!comment.user_avatar ? { 
-                                                                                                                backgroundColor: 'var(--primary-color)'
-                                                                                                            } : undefined}
-                                                                                                        >
-                                                                                                            {comment.user_avatar ? (
-                                                                                                                <img src={comment.user_avatar} alt={comment.user} className="w-full h-full object-cover" />
-                                                                                                            ) : (
-                                                                                                                comment.user.charAt(0)
-                                                                                                            )}
-                                                                                                        </div>
-                                                                                                    </div>
-
-                                                                                                    {/* Content Column */}
-                                                                                                    <div className="flex-1 min-w-0">
-                                                                                                        {/* Comment Card */}
-                                                                                                        <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm relative z-20">
-                                                                                                            
-                                                                                                            <div className="flex justify-between items-baseline mb-1">
-                                                                                                                <Link href={`/profile/${comment.user_id}`} className="font-bold text-sm text-neutral-900 dark:text-neutral-200 hover:underline">
-                                                                                                                    {comment.user}
-                                                                                                                </Link>
-                                                                                                                <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{formatRelativeTime(comment.created_at)}</span>
-                                                                                                            </div>
-                                                                                                            <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
-                                                                                                            
-                                                                                                            <div className="flex items-center gap-4 mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800/50">
-                                                                                                                {/* Reactions */}
-                                                                                                                <div className="flex items-center gap-0.5 bg-neutral-50 dark:bg-neutral-900 rounded-full px-1 py-0.5 border border-neutral-100 dark:border-neutral-800">
-                                                                                                                    <button
-                                                                                                                        onClick={(e) => handleCommentReaction(e, voice.id, comment.id, 'like')}
-                                                                                                                        className={`p-1 rounded-full transition-all flex items-center justify-center w-6 h-6 hover:bg-white dark:hover:bg-black hover:shadow-sm ${comment.user_reaction === 'like' ? 'text-green-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-green-600'}`}
-                                                                                                                    >
-                                                                                                                        <ArrowBigUp size={16} className={comment.user_reaction === 'like' ? 'fill-current' : ''} />
-                                                                                                                    </button>
-                                                                                                                    <span className={`text-[10px] font-bold min-w-[0.5rem] text-center ${
-                                                                                                                        (comment.reactions?.count || 0) > 0 ? 'text-green-600' : 
-                                                                                                                        (comment.reactions?.count || 0) < 0 ? 'text-red-600' : 'text-neutral-500 dark:text-neutral-500'
-                                                                                                                    }`}>
-                                                                                                                        {comment.reactions?.count || 0}
-                                                                                                                    </span>
-                                                                                                                    <button
-                                                                                                                        onClick={(e) => handleCommentReaction(e, voice.id, comment.id, 'dislike')}
-                                                                                                                        className={`p-1 rounded-full transition-all flex items-center justify-center w-6 h-6 hover:bg-white dark:hover:bg-black hover:shadow-sm ${comment.user_reaction === 'dislike' ? 'text-red-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-red-600'}`}
-                                                                                                                    >
-                                                                                                                        <ArrowBigUp size={16} className={`rotate-180 ${comment.user_reaction === 'dislike' ? 'fill-current' : ''}`} />
-                                                                                                                    </button>
-                                                                                                                </div>
-
-                                                                                                                <button 
-                                                                                                                    onClick={() => setReplyingTo(isReplying ? null : comment.id)}
-                                                                                                                    className={`flex items-center gap-1 text-xs font-bold transition-colors uppercase tracking-wide px-2 py-1 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900 ${isReplying ? 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}`}
-                                                                                                                >
-                                                                                                                    YANITLA
-                                                                                                                </button>
-                                                                                                                
-                                                                                                                <button
-                                                                                                                    onClick={(e) => {
-                                                                                                                        e.stopPropagation();
-                                                                                                                        navigator.clipboard.writeText(`${window.location.origin}/voice/${voice.id}`);
-                                                                                                                        toast.success('Link kopyalandı!');
-                                                                                                                    }}
-                                                                                                                    className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900"
-                                                                                                                    title="Paylaş"
-                                                                                                                >
-                                                                                                                    <Share2 size={16} />
-                                                                                                                </button>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-
-                                                                                                {/* Reply Form */}
-                                                                                                {isReplying && (
-                                                                                                    <div className="mt-3 ml-2 relative">
-                                                                                                        <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
-                                                                                                        <form onSubmit={(e) => {
-                                                                                                            e.preventDefault();
-                                                                                                            handleCommentSubmit(e, voice.id, comment.id, replyContent);
-                                                                                                            setReplyContent(''); 
-                                                                                                            setReplyingTo(null);
-                                                                                                        }} className="flex gap-2 animate-in fade-in slide-in-from-top-1 relative z-10 pt-2">
-                                                                                                            <input
-                                                                                                                type="text"
-                                                                                                                autoFocus
-                                                                                                                value={replyContent}
-                                                                                                                onChange={(e) => setReplyContent(e.target.value)}
-                                                                                                                placeholder={`@${comment.user} yanıt ver...`}
-                                                                                                                className="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-sm focus:outline-none focus:border-black dark:focus:border-white font-serif dark:text-white transition-colors"
-                                                                                                            />
-                                                                                                            <button 
-                                                                                                                type="submit"
-                                                                                                                disabled={isCommenting || !replyContent.trim()}
-                                                                                                                className="p-2 bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 transition-colors"
-                                                                                                            >
-                                                                                                                <Send size={14} />
-                                                                                                            </button>
-                                                                                                        </form>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Children Render */}
-                                                                                                {hasChildren && (
-                                                                                                    <div ref={childContainerRef} className="relative mt-4 ml-7">
-                                                                                                        {/* Vertical Line for this thread level */}
-                                                                                                        <ThreadConnector 
-                                                                                                            containerRef={childContainerRef}
-                                                                                                            startRef={avatarRef}
-                                                                                                            endRefs={childAvatarRefs}
-                                                                                                            offsetX={16 - 28}
-                                                                                                        />
-                                                                                                        
-                                                                                                        {comment.children.map((child: any, idx: number) => (
-                                                                                                            <div key={child.id} className="relative mb-4 last:pb-0">
-                                                                                                                <CommentItem 
-                                                                                                                    comment={child} 
-                                                                                                                    depth={depth + 1}
-                                                                                                                    containerRef={childContainerRef}
-                                                                                                                    offsetX={16 - 28}
-                                                                                                                    onAvatarRef={el => { childAvatarRefs.current[idx] = el; }}
-                                                                                                                />
-                                                                                                            </div>
-                                                                                                        ))}
-                                                                                                    </div>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        );
-                                                                                    };
-
-                                                                                    // Root Thread rendering
-                                                                                    const visibleRoots = roots.slice(0, visibleCommentsCount[voice.id] || 10);
-                                                                                    const rootContainerRef = useRef<HTMLDivElement>(null);
-                                                                                    const rootAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
-                                                                                    
-                                                                                    return (
-                                                                                        <div ref={rootContainerRef} className="relative">
-                                                                                            {/* Main Rail from Post Owner to last root comment */}
-                                                                                            <ThreadConnector 
-                                                                                                containerRef={rootContainerRef}
-                                                                                                startRef={{ current: postOwnerAvatarRefs.current[voice.id] }}
-                                                                                                endRefs={rootAvatarRefs}
-                                                                                                offsetX={-36}
-                                                                                            />
-
-                                                                                            {visibleRoots.map((root, idx) => (
-                                                                                                <div key={root.id} className="relative mb-4 first:mt-4">
-                                                                                                    <CommentItem 
-                                                                                                        comment={root} 
-                                                                                                        containerRef={rootContainerRef}
-                                                                                                        offsetX={-36}
-                                                                                                        onAvatarRef={el => { rootAvatarRefs.current[idx] = el; }}
-                                                                                                    />
-                                                                                                </div>
-                                                                                            ))}
-
-                                                                                            {roots.length > (visibleCommentsCount[voice.id] || 10) && (
-                                                                                                <button 
-                                                                                                    onClick={() => loadMoreComments(voice.id)}
-                                                                                                    className="flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 px-3 py-1.5 rounded-full transition-colors mt-4 mx-auto uppercase"
-                                                                                                >
-                                                                                                    <div className="flex items-center justify-center w-4 h-4">
-                                                                                                        <ChevronDown size={14} />
-                                                                                                    </div>
-                                                                                                    DAHA FAZLA YÜKLE ({roots.length - (visibleCommentsCount[voice.id] || 10)})
-                                                                                                </button>
-                                                                                            )}
-                                                                                        </div>
-                                                                                    );
-                                                                                })()}
-
-                                                                            </div>
+                                                                                    <CommentThread 
+                                                                                        voice={voice}
+                                                                                        user={user}
+                                                                                        replyingTo={replyingTo}
+                                                                                        setReplyingTo={setReplyingTo}
+                                                                                        replyContent={replyContent}
+                                                                                        setReplyContent={setReplyContent}
+                                                                                        isCommenting={isCommenting}
+                                                                                        handleCommentReaction={handleCommentReaction}
+                                                                                        handleCommentSubmit={handleCommentSubmit}
+                                                                                        formatRelativeTime={formatRelativeTime}
+                                                                                        visibleCommentsCount={visibleCommentsCount[voice.id]}
+                                                                                        loadMoreComments={loadMoreComments}
+                                                                                        postOwnerAvatarRef={postOwnerAvatarRefs.current[voice.id]}
+                                                                                    />
+                                                                                </div>
                                                                             )}
-
                                                                             </>
+
                                                                             )}
                                                                         </div>
                                                                     )}
