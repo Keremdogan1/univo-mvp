@@ -35,36 +35,19 @@ export default function VoiceStatsWidget({
     const { user } = useAuth(); // Needed for poll "Yapay Zeka" badge pulsing if we want, or simple rendering
 
     return (
-        <div className="w-full">
-             {/* Mobile Wrapper Style vs Desktop Transparent */}
-            <div
-                className="md:hidden mb-6 p-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] border-2 transition-colors duration-300"
-                style={{
-                    borderColor: 'var(--primary-color, #C8102E)',
-                    backgroundColor: 'rgba(var(--primary-rgb), 0.03)'
-                }}
-            >
-             {/* This wrapper was only for mobile styling. */}
-            </div>
-            
-            {/* Unified Container */}
-            <div className={`
-                flex flex-row md:flex-col 
-                flex-nowrap md:flex-nowrap 
-                items-start md:items-stretch 
-                gap-4 md:space-y-6 md:space-x-0 
-                overflow-x-auto md:overflow-visible 
-                p-4 md:p-0 
-                snap-x snap-mandatory md:snap-none
-                ${/* Mobile styling container if needed, or we just keep the content generic */ ''}
-            `} 
-            style={{ scrollbarWidth: 'none' }}>
-                
+        <div
+            className="md:hidden mb-6 p-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] border-2 transition-colors duration-300"
+            style={{
+                borderColor: 'var(--primary-color, #C8102E)',
+                backgroundColor: 'rgba(var(--primary-rgb), 0.03)'
+            }}
+        >
+            <div className="flex flex-row flex-nowrap items-start gap-4 overflow-x-auto p-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
                 {/* Weekly Poll */}
-                <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
+                <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-3">
                         <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white">
-                            Haftanın Anketi
+                            Haftan─▒n Anketi
                         </h3>
                         <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
                             <span
@@ -76,7 +59,7 @@ export default function VoiceStatsWidget({
                     </div>
 
                     {pollLoading ? (
-                        <div className="text-center py-4 text-xs text-neutral-400 animate-pulse">Yapay zeka anket hazırlıyor...</div>
+                        <div className="text-center py-4 text-xs text-neutral-400 animate-pulse">Yapay zeka anket haz─▒rl─▒yor...</div>
                     ) : (
                         <>
                             <h4 className="font-bold text-sm mb-3 font-serif leading-tight dark:text-white">
@@ -93,7 +76,7 @@ export default function VoiceStatsWidget({
                                         <button
                                             key={idx}
                                             onClick={() => onPollVote(idx)}
-                                            className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden rounded-md ${isSelected
+                                            className={`w-full text-left relative border-2 transition-all font-bold group overflow-hidden ${isSelected
                                                 ? 'border-black dark:border-neutral-300 bg-white dark:bg-neutral-800'
                                                 : 'border-neutral-200 dark:border-neutral-700 hover:border-black dark:hover:border-neutral-200'
                                                 }`}
@@ -120,19 +103,18 @@ export default function VoiceStatsWidget({
                                     onClick={onVotersClick}
                                     className="w-full text-center mt-3 text-xs text-neutral-500 dark:text-neutral-400 font-medium font-serif hover:text-primary hover:underline transition-colors"
                                 >
-                                    {totalVotes} oy kullanıldı
+                                    {totalVotes} oy kullan─▒ld─▒
                                 </button>
                             )}
-
                         </>
                     )}
                 </div>
 
                 {/* Trending Topics */}
-                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
+                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
                         <TrendingUp size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
-                        Kampüste Gündem
+                        Kamp├╝ste G├╝ndem
                     </h3>
                     <div className="space-y-3">
                         {allTags.length > 0 ? (
@@ -144,7 +126,7 @@ export default function VoiceStatsWidget({
                                             <span className={`font-bold transition-colors font-serif ${activeTagFilter === topic.tag ? 'text-primary' : 'text-neutral-900 dark:text-white group-hover:text-primary'}`}>
                                                 {topic.tag.startsWith('#') ? topic.tag : `#${topic.tag}`}
                                             </span>
-                                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} gönderi</span>
+                                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{topic.count} g├Ânderi</span>
                                         </div>
                                     </div>
                                     <ArrowRight size={16} className={`transition-transform ${activeTagFilter === topic.tag ? 'opacity-100 text-primary' : 'text-black dark:text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1'}`} />
@@ -152,16 +134,16 @@ export default function VoiceStatsWidget({
                             ))
                         ) : (
                             <div className="text-center py-6 text-neutral-400 text-sm italic">
-                                Henüz gündem oluşmadı.
+                                Hen├╝z g├╝ndem olu┼şmad─▒.
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Campus Pulse */}
-                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
+                <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] snap-center rounded-xl" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
-                        Kampüs Nabzı
+                        Kamp├╝s Nabz─▒
                     </h3>
                     <div className="grid grid-cols-2 gap-4 text-center">
                         <div
@@ -177,7 +159,7 @@ export default function VoiceStatsWidget({
                                 {activeUsers}
                             </span>
                             <span className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
-                                Aktif Öğrenci
+                                Aktif ├û─şrenci
                             </span>
                         </div>
                         <div className="p-3 bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-700">
@@ -185,14 +167,14 @@ export default function VoiceStatsWidget({
                                 {issueNumber}
                             </span>
                             <span className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
-                                Gündem Sayısı
+                                G├╝ndem Say─▒s─▒
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
             <div className="text-center pb-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                Gündem Özeti
+                G├╝ndem ├ûzeti
             </div>
         </div>
     );
