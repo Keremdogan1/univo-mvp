@@ -1280,6 +1280,18 @@ export default function VoiceView() {
                                                                                                                 >
                                                                                                                     YANITLA
                                                                                                                 </button>
+                                                                                                                
+                                                                                                                <button
+                                                                                                                    onClick={(e) => {
+                                                                                                                        e.stopPropagation();
+                                                                                                                        navigator.clipboard.writeText(`${window.location.origin}/voice/${voice.id}`);
+                                                                                                                        toast.success('Link kopyalandı!');
+                                                                                                                    }}
+                                                                                                                    className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                                                                                                                    title="Paylaş"
+                                                                                                                >
+                                                                                                                    <Share2 size={16} />
+                                                                                                                </button>
                                                                                                             </div>
                                                                                                             
 
