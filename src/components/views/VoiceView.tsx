@@ -1317,7 +1317,7 @@ export default function VoiceView() {
                                                                                                         {/* Recursion - Children Render */}
                                                                                                         {hasChildren && (
                                                                                                             <div className="mt-4">
-                                                                                                                {comment.children.map((child: any) => (
+                                                                                                                {comment.children.map((child: any, idx: number) => (
                                                                                                                     <div key={child.id} className="relative">
                                                                                                                         {/* Curve Connector - Revised Position for Overlap Fix 
                                                                                                                             Parent Center line is at -1.75rem relative to this container. 
@@ -1326,6 +1326,11 @@ export default function VoiceView() {
                                                                                                                         */}
                                                                                                                         <div className="absolute top-0 -left-[calc(1.75rem+1px)] w-8 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
                                                                                                                         
+                                                                                                                        {/* Mask to hide excess thread line for the last nested child */}
+                                                                                                                        {idx === comment.children.length - 1 && (
+                                                                                                                            <div className="absolute top-4 -left-[calc(1.85rem+1px)] w-4 h-[9999px] bg-white dark:bg-[#0a0a0a] z-[1]" />
+                                                                                                                        )}
+
                                                                                                                         <CommentItem comment={child} depth={depth + 1} />
                                                                                                                     </div>
                                                                                                                 ))}
@@ -1339,10 +1344,16 @@ export default function VoiceView() {
 
                                                                                     return (
                                                                                         <>
-                                                                                            {roots.slice(0, visibleCommentsCount[voice.id] || 10).map(root => (
+                                                                                            {roots.slice(0, visibleCommentsCount[voice.id] || 10).map((root, idx) => (
                                                                                                 <div key={root.id} className="relative mt-4 first:mt-4">
                                                                                                     {/* Curve Connector for Root Comments - Connects to Post Owner Line */}
                                                                                                     <div className="absolute top-0 -left-[2.25rem] w-10 h-4 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                    
+                                                                                                    {/* Mask to hide excess thread line for the last item */}
+                                                                                                    {idx === (Math.min(roots.length, visibleCommentsCount[voice.id] || 10) - 1) && (
+                                                                                                        <div className="absolute top-4 -left-[2.35rem] w-4 h-[9999px] bg-white dark:bg-[#0a0a0a] z-[1]" />
+                                                                                                    )}
+                                                                                                    
                                                                                                     <CommentItem comment={root} />
                                                                                                 </div>
                                                                                             ))}
