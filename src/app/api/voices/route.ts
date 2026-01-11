@@ -28,7 +28,11 @@ export async function GET(request: Request) {
         *,
         profiles:user_id (full_name, nickname, department, avatar_url, student_id, class_year),
         voice_reactions (user_id, reaction_type),
-        voice_comments (id, content, created_at, user_id, user:user_id (full_name, avatar_url))
+        voice_comments (
+          id, content, created_at, user_id, parent_id,
+          user:user_id (full_name, avatar_url),
+          voice_comment_reactions (user_id, reaction_type)
+        )
       `)
       .eq('moderation_status', 'approved');
 
@@ -50,7 +54,11 @@ export async function GET(request: Request) {
           *,
           profiles:user_id (full_name, department, avatar_url, student_id, class_year),
           voice_reactions (user_id, reaction_type),
-          voice_comments (id, content, created_at, user_id, user:user_id (full_name, avatar_url))
+          voice_comments (
+            id, content, created_at, user_id, parent_id,
+            user:user_id (full_name, avatar_url),
+            voice_comment_reactions (user_id, reaction_type)
+          )
         `)
         .eq('moderation_status', 'approved');
       
@@ -100,6 +108,14 @@ export async function GET(request: Request) {
       // Determine if user is verified (has student_id)
       const isVerified = !voice.is_anonymous && profile?.student_id && profile.student_id.length > 0;
 
+      // Get current user ID from request/session if needed, but since this is public/semi-public endpoint,
+      // we might not have the user context easily here unless we pass it.
+      // Actually, we do have the user session initialized above if it was a POST, but this is GET.
+      // Wait, GET relies on 'process.env' supabase client which is admin/anon. 
+      // To get 'user_reaction', we need to know WHO the user is.
+      // The client calls this endpoint. We can extract the user ID from the JWT token in the Authorization header.
+      // Let's try to get the user from the token.
+
       return {
         id: voice.id,
         user_id: voice.user_id,
@@ -115,14 +131,27 @@ export async function GET(request: Request) {
           comments: voice.voice_comments.length
         },
         reactions: voice.voice_reactions || [],
-        comments: (voice.voice_comments || []).map((c: any) => ({
-          id: c.id,
-          content: c.content,
-          created_at: c.created_at,
-          user: toTitleCase(c.user?.full_name || 'Kullanıcı'),
-          user_avatar: c.user?.avatar_url,
-          user_id: c.user_id
-        })),
+        comments: (voice.voice_comments || []).map((c: any) => {
+           const cLikes = (c.voice_comment_reactions || []).filter((r: any) => r.reaction_type === 'like').length;
+           const cDislikes = (c.voice_comment_reactions || []).filter((r: any) => r.reaction_type === 'dislike').length;
+           // note: user_reaction will be filled on client side by matching user.id, 
+           // OR we can parse the token here.
+           // Parsing token here is better for clean API but parsing it on client is easier if we just return all reactions.
+           // However, returning ALL reactions for ALL comments is heavier.
+           // But for MVP it's okay. We return 'reactions' array for simple mapping on client.
+           // Actually, let's just return the counts and the array of reactions so the client can find its own.
+           
+           return {
+            id: c.id,
+            content: c.content,
+            created_at: c.created_at,
+            user: toTitleCase(c.user?.full_name || 'Kullanıcı'),
+            user_avatar: c.user?.avatar_url,
+            user_id: c.user_id,
+            parent_id: c.parent_id,
+            reactions: { count: cLikes - cDislikes, data: c.voice_comment_reactions || []} // Send raw data to let client find user_reaction
+          };
+        }),
         created_at: voice.created_at
       };
     });

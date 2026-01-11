@@ -32,7 +32,7 @@ export async function POST(
 
   try {
     const json = await request.json();
-    const { content } = json;
+    const { content, parent_id } = json;
 
     if (!content || !content.trim()) {
          return NextResponse.json({ error: 'Content required' }, { status: 400 });
@@ -43,7 +43,8 @@ export async function POST(
       .insert({
         voice_id: id,
         user_id: user.id,
-        content: content.trim()
+        content: content.trim(),
+        parent_id: parent_id || null // Add parent_id
       })
       .select(`
         *,
