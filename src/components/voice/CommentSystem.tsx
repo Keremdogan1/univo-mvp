@@ -251,9 +251,9 @@ export const CommentItem = ({
                                                                 setEditContentState(comment.content);
                                                                 setShowMenu(false);
                                                             }}
-                                                            className="w-full text-left px-4 py-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-2 transition-colors"
                                                         >
-                                                            <Edit2 size={12} /> DÜZENLE
+                                                            <Edit2 size={14} /> Düzenle
                                                         </button>
                                                         <button
                                                             onClick={() => {
@@ -262,16 +262,16 @@ export const CommentItem = ({
                                                                 }
                                                                 setShowMenu(false);
                                                             }}
-                                                            className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2 transition-colors"
                                                         >
-                                                            <Trash2 size={12} /> SİL
+                                                            <Trash2 size={14} /> Sil
                                                         </button>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <Link 
                                                             href={`/profile/${comment.user_id}`}
-                                                            className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-2 transition-colors"
+                                                            className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200 flex items-center gap-2 transition-colors"
                                                         >
                                                             <User size={14} /> Profili Gör
                                                         </Link>
