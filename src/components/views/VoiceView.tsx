@@ -1165,13 +1165,12 @@ export default function VoiceView() {
                                                                                         const hasChildren = comment.children && comment.children.length > 0;
                                                                                         
                                                                                         return (
-                                                                                            <div className={`flex flex-col ${depth > 0 ? 'mt-4' : 'mt-4 first:mt-0'}`}>
+                                                                                            <div className={`flex flex-col ${depth > 0 ? 'mt-4' : 'mt-4 first:mt-0'} relative`}>
                                                                                                 <div className="flex gap-3 relative group/comment">
-                                                                                                    {/* Thread Line Extension for Children context */}
                                                                                                     {/* Avatar Column */}
                                                                                                     <div className="flex flex-col items-center shrink-0">
                                                                                                         <div 
-                                                                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-neutral-200 dark:border-neutral-700 z-10"
+                                                                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-neutral-200 dark:border-neutral-700 z-10 shrink-0"
                                                                                                             style={!comment.user_avatar ? { 
                                                                                                                 backgroundColor: 'var(--primary-color)'
                                                                                                             } : undefined}
@@ -1182,16 +1181,21 @@ export default function VoiceView() {
                                                                                                                 comment.user.charAt(0)
                                                                                                             )}
                                                                                                         </div>
-                                                                                                        {/* Vertical Line for immediate children */}
+                                                                                                        
+                                                                                                        {/* Vertical Thread Line - Only visible if there are children */}
                                                                                                         {hasChildren && (
-                                                                                                            <div className="w-0.5 grow bg-neutral-200 dark:bg-neutral-800 -mb-4 mt-2 group-hover/comment:bg-neutral-300 dark:group-hover/comment:bg-neutral-700 transition-colors" />
+                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 -mb-4 mt-2 group-hover/comment:bg-neutral-300 dark:group-hover/comment:bg-neutral-700 transition-colors" />
                                                                                                         )}
                                                                                                     </div>
 
                                                                                                     {/* Content Column */}
                                                                                                     <div className="flex-1 min-w-0">
-                                                                                                        {/* Comment Card - Post Style */}
-                                                                                                        <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                                                                                                        {/* Comment Card */}
+                                                                                                        <div className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative">
+                                                                                                            
+                                                                                                            {/* Mobile/Tight visual connector (optional small arrow pointing to avatar) */}
+                                                                                                            <div className="absolute top-4 -left-[7px] w-2 h-2 bg-white dark:bg-[#0a0a0a] border-l border-b border-neutral-200 dark:border-neutral-800 transform rotate-45" />
+
                                                                                                             <div className="flex justify-between items-baseline mb-1">
                                                                                                                 <Link href={`/profile/${comment.user_id}`} className="font-bold text-sm text-neutral-900 dark:text-neutral-200 hover:underline">
                                                                                                                     {comment.user}
@@ -1200,9 +1204,7 @@ export default function VoiceView() {
                                                                                                             </div>
                                                                                                             <p className="text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                                                                                                             
-                                                                                                            {/* Actions Bar */}
                                                                                                             <div className="flex items-center gap-4 mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800/50">
-                                                                                                                 {/* Reactions */}
                                                                                                                 <div className="flex items-center gap-0.5 bg-neutral-50 dark:bg-neutral-900 rounded-full px-1 py-0.5 border border-neutral-100 dark:border-neutral-800">
                                                                                                                     <button
                                                                                                                         onClick={(e) => handleCommentReaction(e, voice.id, comment.id, 'like')}
@@ -1235,7 +1237,9 @@ export default function VoiceView() {
                                                                                                         
                                                                                                         {/* Reply Form */}
                                                                                                         {isReplying && (
-                                                                                                            <div className="mt-3 ml-2 pl-4 border-l-2 border-neutral-200 dark:border-neutral-800">
+                                                                                                            <div className="mt-3 ml-2 relative">
+                                                                                                                {/* Connector for reply form */}
+                                                                                                                <div className="absolute top-0 -left-6 w-4 h-8 border-l-2 border-b-2 border-neutral-200 dark:border-neutral-800 rounded-bl-xl" />
                                                                                                                 <form onSubmit={(e) => {
                                                                                                                     e.preventDefault();
                                                                                                                     handleCommentSubmit(e, voice.id, comment.id, replyContent);
@@ -1262,23 +1266,19 @@ export default function VoiceView() {
 
                                                                                                         {/* Recursion - Children Render */}
                                                                                                         {hasChildren && (
-                                                                                                            <div className="mt-4 pl-0"> 
-                                                                                                                {/* Note: We used to have margin here, but now we use the Flex container of the parent. 
-                                                                                                                    Actually, to make the line continuous from the parent avatar, the children usually sit strict under the content OR deeply indented.
-                                                                                                                    
-                                                                                                                    Standard Thread Design:
-                                                                                                                    [Avatar] [Content]
-                                                                                                                     |
-                                                                                                                     |---- [Avatar] [Content]
-                                                                                                                     
-                                                                                                                    In my code:
-                                                                                                                    The vertical line is in the Avatar Column of the PARENT. 
-                                                                                                                    The children need to be INSIDE the Content Column? Or outside?
-                                                                                                                    If children are in Content Column, they are aligned with Content.
-                                                                                                                    If we want them indented, we just indent content column children.
-                                                                                                                */}
+                                                                                                            <div className="mt-4">
                                                                                                                 {comment.children.map((child: any) => (
-                                                                                                                    <CommentItem key={child.id} comment={child} depth={depth + 1} />
+                                                                                                                    <div key={child.id} className="relative">
+                                                                                                                        {/* 
+                                                                                                                          VISUAL CONNECTOR LOGIC 
+                                                                                                                          We need a line curving from the parent's vertical line (which is on the LEFT, under the avatar)
+                                                                                                                          to this child.
+                                                                                                                        */}
+                                                                                                                        {/* Curve Connector */}
+                                                                                                                        <div className="absolute top-0 -left-[2.15rem] w-6 h-8 border-l-[2px] border-b-[2px] border-neutral-200 dark:border-neutral-800 rounded-bl-xl z-0" />
+                                                                                                                        
+                                                                                                                        <CommentItem comment={child} depth={depth + 1} />
+                                                                                                                    </div>
                                                                                                                 ))}
                                                                                                             </div>
                                                                                                         )}

@@ -56,6 +56,58 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // --- Notification Logic ---
+    try {
+        const actorId = user.id;
+        
+        // 1. Fetch Voice Owner
+        const { data: voiceData } = await supabase
+            .from('campus_voices')
+            .select('user_id, content') // select content for potential preview
+            .eq('id', id)
+            .single();
+
+        if (voiceData) {
+            let targetUserId = voiceData.user_id;
+            let notificationType = 'voice_comment';
+            let message = 'Gönderinize yorum yaptı';
+
+            // 2. If Reply, Notify Parent Comment Owner instead (or also? usually just parent logic for replies)
+            if (parent_id) {
+                const { data: parentComment } = await supabase
+                    .from('voice_comments')
+                    .select('user_id')
+                    .eq('id', parent_id)
+                    .single();
+                
+                if (parentComment) {
+                    targetUserId = parentComment.user_id;
+                    notificationType = 'voice_reply';
+                    message = 'Yorumunuza yanıt verdi';
+                }
+            }
+
+            // 3. Insert Notification (if not self-action)
+            if (targetUserId !== actorId) {
+                await supabase.from('notifications').insert({
+                    user_id: targetUserId,
+                    actor_id: actorId,
+                    type: notificationType,
+                    message: message,
+                    metadata: {
+                        voice_id: id,
+                        comment_id: data.id, // the new comment id
+                        parent_id: parent_id
+                    }
+                });
+            }
+        }
+    } catch (notifyError) {
+        console.error('Notification trigger failed:', notifyError);
+        // Don't fail the request if notification fails
+    }
+    // --------------------------
+
     return NextResponse.json({ comment: data });
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
