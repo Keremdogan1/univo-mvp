@@ -1231,9 +1231,9 @@ export default function VoiceView() {
                                                                                                             )}
                                                                                                         </div>
                                                                                                         
-                                                                                                        {/* Vertical Thread Line - Bridges gap to children (h-8 covers mt-4 + first child top) */}
+                                                                                                        {/* Vertical Thread Line - grows to reach children container */}
                                                                                                         {hasChildren && (
-                                                                                                            <div className="w-[2px] h-8 bg-neutral-200 dark:bg-neutral-800 transition-colors" />
+                                                                                                            <div className="w-[2px] grow bg-neutral-200 dark:bg-neutral-800 transition-colors" />
                                                                                                         )}
                                                                                                     </div>
 
