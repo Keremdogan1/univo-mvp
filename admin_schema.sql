@@ -4,6 +4,8 @@
 
 -- 1. Extend PROFILES table with is_banned column
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS ban_reason TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS banned_by TEXT;
 
 -- 2. ADMIN IDENTITIES table
 -- This table stores specific admin users who have passed the initial shared login

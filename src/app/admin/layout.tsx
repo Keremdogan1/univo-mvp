@@ -1,13 +1,14 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Shield, Users, Settings, LogOut } from 'lucide-react';
+import { Shield, Users, Settings, LogOut, Activity, Ban } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // ... (cookie check) ...
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('univo_admin_session');
 
@@ -27,13 +28,21 @@ export default async function AdminLayout({
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
-                    <Link href="/admin" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white">
+                    <Link href="/admin" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white transition-colors">
                         <Users size={18} />
                         <span>Kullanıcılar</span>
                     </Link>
-                    <Link href="/admin" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <Link href="/admin/logs" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
+                        <Activity size={18} />
+                        <span>Admin Hareketleri</span>
+                    </Link>
+                    <Link href="/admin/banned" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
+                        <Ban size={18} />
+                        <span>Yasaklılar</span>
+                    </Link>
+                    <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                         <Settings size={18} />
-                        <span>Ayarlar (Yakında)</span>
+                        <span>Ayarlar</span>
                     </Link>
                 </nav>
 

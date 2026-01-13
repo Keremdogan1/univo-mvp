@@ -16,14 +16,31 @@ export async function POST(req: NextRequest) {
 
         // Action: Toggle Ban
         if (action === 'toggle_ban') {
-            const { userId, isBanned } = body;
+            const { userId, isBanned, reason } = body;
 
-            const { error } = await supabase
+            // 1. Update Profile
+            const { error: updateError } = await supabase
                 .from('profiles')
-                .update({ is_banned: isBanned })
+                .update({
+                    is_banned: isBanned,
+                    ban_reason: isBanned ? reason : null, // Clear reason if unbanning
+                    banned_by: isBanned ? session.adminName : null
+                })
                 .eq('id', userId);
 
-            if (error) throw error;
+            if (updateError) throw updateError;
+
+            // 2. Create Audit Log
+            const { error: logError } = await supabase
+                .from('admin_audit_logs')
+                .insert({
+                    admin_name: session.adminName,
+                    action: isBanned ? 'USER_BAN' : 'USER_UNBAN',
+                    target_user_id: userId,
+                    details: isBanned ? `Sebep: ${reason}` : 'Yasak kaldırıldı.'
+                });
+
+            if (logError) console.error('Audit log error:', logError);
 
             return NextResponse.json({ success: true, message: isBanned ? 'Kullanıcı yasaklandı.' : 'Kullanıcı yasağı kaldırıldı.' });
         }
