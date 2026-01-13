@@ -11,6 +11,7 @@ interface User {
     department: string;
     is_banned: boolean;
     created_at: string;
+    email?: string;
 }
 
 interface Stats {
@@ -40,6 +41,21 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const getDisplayId = (user: User) => {
+        // 1. If existing student_id/custom_id from DB, use it
+        if (user.student_id) return user.student_id;
+
+        // 2. Extract from email if available
+        if (user.email) {
+            const extracted = user.email.split('@')[0];
+            // Optional regex to ensure it's "e123456" format if strictly needed, but general extraction is safer
+            return extracted;
+        }
+
+        // 3. Fallback to UUID
+        return user.id.substring(0, 8) + '...';
+    };
 
     const handleToggleBan = async (userId: string, currentStatus: boolean) => {
         try {
@@ -111,7 +127,8 @@ export default function AdminPage() {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-neutral-50 dark:bg-neutral-900 text-neutral-500 font-medium border-b border-neutral-200 dark:border-neutral-700">
                             <tr>
-                                <th className="px-6 py-3">Öğrenci</th>
+                                <th className="px-6 py-3">E-Posta</th>
+                                <th className="px-6 py-3">Öğrenci No</th>
                                 <th className="px-6 py-3">Bölüm</th>
                                 <th className="px-6 py-3">Durum</th>
                                 <th className="px-6 py-3 text-right">İşlemler</th>
@@ -122,7 +139,12 @@ export default function AdminPage() {
                                 <tr key={user.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-neutral-900 dark:text-white">{user.full_name}</div>
-                                        <div className="text-xs text-neutral-500">{user.student_id}</div>
+                                        <div className="text-xs text-neutral-500">{user.email || '-'}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="font-mono text-sm text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded inline-block">
+                                            {getDisplayId(user)}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">
                                         {user.department || '-'}
@@ -142,8 +164,8 @@ export default function AdminPage() {
                                         <button
                                             onClick={() => handleToggleBan(user.id, user.is_banned)}
                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors ${user.is_banned
-                                                    ? 'border-neutral-200 text-neutral-600 hover:bg-neutral-100'
-                                                    : 'border-red-200 text-red-600 hover:bg-red-50'
+                                                ? 'border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                                                : 'border-red-200 text-red-600 hover:bg-red-50'
                                                 }`}
                                         >
                                             {user.is_banned ? 'Yasağı Kaldır' : 'Yasakla'}

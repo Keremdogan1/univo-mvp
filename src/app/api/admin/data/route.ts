@@ -11,22 +11,40 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseAdmin();
 
     try {
-        // 1. Fetch Users (Limit to 100 for MVP safety)
-        const { data: users, error: usersError } = await supabase
+        // 1. Fetch Users (From Profiles)
+        const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(100);
 
-        if (usersError) throw usersError;
+        if (profilesError) throw profilesError;
+
+        // 1.5 Fetch Emails from Auth (Admin only)
+        // We need this to get emails which are not in public profiles
+        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers({
+            page: 1,
+            perPage: 1000 // Covers enough for MVP
+        });
+
+        if (authError) throw authError;
+
+        // Merge email into profiles
+        const users = profiles.map(profile => {
+            const authUser = authUsers.find(u => u.id === profile.id);
+            return {
+                ...profile,
+                email: authUser?.email
+            };
+        });
 
         // 2. Fetch Settings
         const { data: settings, error: settingsError } = await supabase
             .from('system_settings')
             .select('*');
 
-        if (settingsError && settingsError.code !== '42P01') { // Ignore if table doesn't exist yet (though we created it)
-            // throw settingsError; 
+        if (settingsError && settingsError.code !== '42P01') {
+            // Ignore if table doesn't exist yet
         }
 
         // 3. Stats
