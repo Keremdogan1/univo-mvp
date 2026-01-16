@@ -165,8 +165,15 @@ export default function LoginPage() {
                     
                     toast.success(`Yönetici olarak hoş geldin, ${welcomeName}!`, { duration: 3000 });
                     router.push('/admin');
-                } else {
                     toast.success(`Hoş geldin, ${welcomeName}!`, { duration: 2000 });
+                    
+                    // PROACTIVE: Clear any lingering admin session if this is a normal login
+                    try {
+                        await fetch('/api/admin/logout', { method: 'POST' });
+                    } catch (e) {
+                        // ignore
+                    }
+                    
                     router.push('/');
                 }
                 router.refresh();

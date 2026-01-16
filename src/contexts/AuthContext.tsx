@@ -195,6 +195,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    try {
+      // Also clear admin session if it exists
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Admin logout failed during signout:', e);
+    }
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
