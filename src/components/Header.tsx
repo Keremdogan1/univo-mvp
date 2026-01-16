@@ -143,8 +143,8 @@ function HeaderContent() {
       }`;
   };
 
-  // Hide header on login/register pages
-  if (pathname === '/login' || pathname === '/register') {
+  // Hide header on login/register/admin pages
+  if (pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
     return null;
   }
 
@@ -442,10 +442,16 @@ function HeaderContent() {
 import HeaderSkeleton from './skeletons/HeaderSkeleton';
 
 export default function Header() {
+  const pathname = usePathname();
   const { profile, authLoading } = useAuth();
   
   // Predict if the user is a super admin based on names
   const isAdminPredict = !authLoading && profile?.full_name && SUPER_ADMIN_NAMES.includes(profile.full_name);
+
+  // CRITICAL: Prevent Suspense fallback (skeleton) on pages that shouldn't have a header
+  if (pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <Suspense fallback={<HeaderSkeleton isAdmin={!!isAdminPredict} />}>
