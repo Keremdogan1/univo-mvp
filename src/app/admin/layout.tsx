@@ -8,7 +8,7 @@ export default async function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const sessionCookie = (await cookies()).get('admin_session');
+    const sessionCookie = (await cookies()).get('univo_admin_session');
 
     if (!sessionCookie) {
         redirect('/login');

@@ -152,6 +152,17 @@ export default function LoginPage() {
                 
                 // Different message and redirect for admin flow
                 if (isAdminFlow) {
+                    try {
+                        // Promote to admin session before redirecting
+                        await fetch('/api/admin/promote', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ fullName: welcomeName })
+                        });
+                    } catch (promoteErr) {
+                        console.error('Session promotion failed:', promoteErr);
+                    }
+                    
                     toast.success(`Yönetici olarak hoş geldin, ${welcomeName}!`, { duration: 3000 });
                     router.push('/admin');
                 } else {
