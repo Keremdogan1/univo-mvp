@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-white dark:bg-neutral-900 text-black dark:text-white border-r border-neutral-200 dark:border-neutral-800 fixed top-16 bottom-0 flex flex-col overflow-y-auto z-40 transition-colors">
         <div className="p-6 border-b border-neutral-200 dark:border-neutral-800">
            <h1 className="text-xl font-bold font-serif tracking-wide text-black dark:text-white uppercase flex items-center gap-2">
-              YÖNETİM
+              TOPLULUK
            </h1>
            {community && (
                <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider block mt-1">

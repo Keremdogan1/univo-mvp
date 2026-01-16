@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Shield, Users, Settings, LogOut, Activity, Ban, Flag } from 'lucide-react';
+import { Users, Settings, LogOut, Activity, Ban, Flag } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
@@ -20,11 +20,10 @@ export default async function AdminLayout({
         <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex">
             {/* Sidebar */}
             <aside className="w-64 bg-white dark:bg-black border-r border-neutral-200 dark:border-neutral-800 hidden md:flex flex-col">
-                <div className="p-6 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black">
-                        <Shield size={18} />
-                    </div>
-                    <span className="font-bold text-lg">Admin Panel</span>
+                <div className="p-6 border-b border-neutral-100 dark:border-neutral-800">
+                    <h1 className="text-xl font-bold font-serif tracking-wide text-black dark:text-white uppercase">
+                        YÖNETİM PANELİ
+                    </h1>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">
