@@ -21,7 +21,7 @@ export default async function AdminLayout({
             {/* Sidebar */}
             <aside className="w-64 bg-white dark:bg-black border-r border-neutral-200 dark:border-neutral-800 hidden md:flex flex-col">
                 <div className="px-4 py-5 border-b border-neutral-100 dark:border-neutral-800">
-                    <h1 className="text-xs font-bold font-serif text-black dark:text-white uppercase tracking-tight">
+                    <h1 className="text-xs font-bold font-serif text-black dark:text-white uppercase tracking-tight text-center">
                         YÖNETİM PANELİ
                     </h1>
                 </div>
