@@ -90,6 +90,7 @@ export default function LoginPage() {
     const [adminName, setAdminName] = useState('');
     const [adminPersonalPassword, setAdminPersonalPassword] = useState('');
     const [adminError, setAdminError] = useState<string | null>(null);
+    const [showAdminPassword, setShowAdminPassword] = useState(false);
 
     const handleSelectUniversity = (uni: typeof UNIVERSITIES[0]) => {
         if (!uni.enabled) {
@@ -260,14 +261,23 @@ export default function LoginPage() {
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-bold uppercase text-neutral-500 mb-1.5">Güvenlik Şifresi</label>
-                                                <input
-                                                    type="password"
-                                                    required
-                                                    value={adminSharedPassword}
-                                                    onChange={e => setAdminSharedPassword(e.target.value)}
-                                                    className="w-full p-3 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white focus:outline-none dark:text-white"
-                                                    placeholder="••••••••"
-                                                />
+                                                <div className="relative">
+                                                    <input
+                                                        type={showAdminPassword ? "text" : "password"}
+                                                        required
+                                                        value={adminSharedPassword}
+                                                        onChange={e => setAdminSharedPassword(e.target.value)}
+                                                        className="w-full p-3 pr-12 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white focus:outline-none dark:text-white"
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors p-1"
+                                                    >
+                                                        {showAdminPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </>
                                     ) : (
@@ -289,14 +299,23 @@ export default function LoginPage() {
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-bold uppercase text-neutral-500 mb-1.5">Kişisel Şifre</label>
-                                                <input
-                                                    type="password"
-                                                    required
-                                                    value={adminPersonalPassword}
-                                                    onChange={e => setAdminPersonalPassword(e.target.value)}
-                                                    className="w-full p-3 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white focus:outline-none dark:text-white"
-                                                    placeholder="Şifreniz (İlk girişte oluşturulur)"
-                                                />
+                                                <div className="relative">
+                                                    <input
+                                                        type={showAdminPassword ? "text" : "password"}
+                                                        required
+                                                        value={adminPersonalPassword}
+                                                        onChange={e => setAdminPersonalPassword(e.target.value)}
+                                                        className="w-full p-3 pr-12 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white focus:outline-none dark:text-white"
+                                                        placeholder="Şifreniz (İlk girişte oluşturulur)"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors p-1"
+                                                    >
+                                                        {showAdminPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                    </button>
+                                                </div>
                                                 <p className="text-[10px] text-neutral-400 mt-1">
                                                     * İsminiz ilk defa giriliyorsa bu şifre kaydedilecektir. Daha sonrakilerde doğrulama için kullanılacaktır.
                                                 </p>

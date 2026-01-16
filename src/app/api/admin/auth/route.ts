@@ -3,8 +3,9 @@ import { cookies } from 'next/headers';
 import crypto from 'crypto';
 import getSupabaseAdmin from '@/lib/supabase-admin';
 
-const SHARED_EMAIL = 'univoksb@gmail.com';
-const SHARED_PASSWORD = 'kesebe42';
+// SECURITY: Credentials are now stored in environment variables
+const SHARED_EMAIL = process.env.ADMIN_SHARED_EMAIL || '';
+const SHARED_PASSWORD = process.env.ADMIN_SHARED_PASSWORD || '';
 
 function hashPassword(password: string) {
     return crypto.createHash('sha256').update(password).digest('hex');

@@ -23,7 +23,7 @@ type SettingsTab = 'account' | 'appearance' | 'privacy';
 export default function SettingsPage() {
     const { user, signOut } = useAuth();
     const router = useRouter();
-    const { theme, setTheme, colorTheme, setColorTheme } = useTheme();
+    const { theme, setTheme, colorTheme, setColorTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [activeTab, setActiveTab] = useState<SettingsTab>('appearance'); // Default to appearance as per user focus
     const [privacySettings, setPrivacySettings] = useState({
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                             <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 mb-6">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm">
-                                        {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                                        {resolvedTheme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
                                     </div>
                                     <div>
                                         <div className="font-bold text-neutral-900 dark:text-white">Karanlık Mod</div>
@@ -227,16 +227,16 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                    onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                                     className={cn(
                                         "relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out",
-                                        theme === 'dark' ? "bg-[var(--primary-color)]" : "bg-neutral-300"
+                                        resolvedTheme === 'dark' ? "bg-[var(--primary-color)]" : "bg-neutral-300"
                                     )}
                                 >
                                     <div
                                         className={cn(
                                             "absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-sm",
-                                            theme === 'dark' ? "translate-x-7" : "translate-x-0"
+                                            resolvedTheme === 'dark' ? "translate-x-7" : "translate-x-0"
                                         )} 
                                     />
                                 </button>
@@ -404,17 +404,17 @@ export default function SettingsPage() {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-                                    {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} className="text-neutral-600" />}
+                                    {resolvedTheme === 'dark' ? <Moon size={20} /> : <Sun size={20} className="text-neutral-600" />}
                                 </div>
                                 <div className="font-medium text-neutral-900 dark:text-white">Karanlık Mod</div>
                             </div>
                             
                             <button
-                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                                 className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200 dark:bg-neutral-700"
-                                style={{ backgroundColor: theme === 'dark' ? 'var(--primary-color)' : undefined }}
+                                style={{ backgroundColor: resolvedTheme === 'dark' ? 'var(--primary-color)' : undefined }}
                             >
-                                <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
+                                <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
                         </div>
 
