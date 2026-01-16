@@ -88,6 +88,7 @@ export default function LoginPage() {
     const [adminSharedPassword, setAdminSharedPassword] = useState('');
     const [adminError, setAdminError] = useState<string | null>(null);
     const [showAdminPassword, setShowAdminPassword] = useState(false);
+    const [isAdminFlow, setIsAdminFlow] = useState(false); // Track if user came from admin auth
 
     const handleSelectUniversity = (uni: typeof UNIVERSITIES[0]) => {
         if (!uni.enabled) {
@@ -148,8 +149,15 @@ export default function LoginPage() {
                     .split(' ')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
-                toast.success(`Hoş geldin, ${welcomeName}!`, { duration: 2000 });
-                router.push('/');
+                
+                // Different message and redirect for admin flow
+                if (isAdminFlow) {
+                    toast.success(`Yönetici olarak hoş geldin, ${welcomeName}!`, { duration: 3000 });
+                    router.push('/admin');
+                } else {
+                    toast.success(`Hoş geldin, ${welcomeName}!`, { duration: 2000 });
+                    router.push('/');
+                }
                 router.refresh();
                 // We keep loading true while redirecting to avoid double clicks
             } else {
@@ -186,9 +194,10 @@ export default function LoginPage() {
                 throw new Error(data.error || 'Giriş başarısız.');
             }
 
-            // Success - redirect to ODTÜ login
+            // Success - redirect to ODTÜ login with admin flow flag
             toast.success('Admin doğrulaması başarılı! Şimdi ODTÜ hesabınızla giriş yapın.');
             setShowAdminLogin(false);
+            setIsAdminFlow(true); // Mark this as admin flow
             const metuUni = UNIVERSITIES.find(u => u.id === 'metu');
             if (metuUni) {
                 setSelectedUni(metuUni);
