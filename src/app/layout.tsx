@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import MetuVerificationGuard from "@/components/auth/MetuVerificationGuard";
 import GlobalSearch from "@/components/search/GlobalSearch";
+import { ReportProvider } from "@/contexts/ReportContext";
 
 export const metadata: Metadata = {
   title: "Univo - University Events & Announcements",
@@ -68,26 +69,28 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            <MetuVerificationGuard>
-              <Header />
-              <GlobalSearch />
-              <main className="flex-1 bg-white dark:bg-[#0a0a0a] pb-20 md:pb-0">
-                <Toaster
-                  position="top-center"
-                  richColors
-                  toastOptions={{
-                    style: {
-                      fontFamily: 'var(--font-inter), Inter, sans-serif',
-                      borderRadius: '12px',
-                      border: '1px solid #e5e5e5',
-                    },
-                  }}
-                />
-                {children}
-              </main>
-              <Footer />
-              <ScrollToTopButton />
-            </MetuVerificationGuard>
+            <ReportProvider>
+              <MetuVerificationGuard>
+                <Header />
+                <GlobalSearch />
+                <main className="flex-1 bg-white dark:bg-[#0a0a0a] pb-20 md:pb-0">
+                  <Toaster
+                    position="top-center"
+                    richColors
+                    toastOptions={{
+                      style: {
+                        fontFamily: 'var(--font-inter), Inter, sans-serif',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e5e5',
+                      },
+                    }}
+                  />
+                  {children}
+                </main>
+                <Footer />
+                <ScrollToTopButton />
+              </MetuVerificationGuard>
+            </ReportProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

@@ -71,3 +71,14 @@ export const BAN_CATEGORIES = [
   { id: 'terms_violation', label: 'Kullanım Koşulları İhlali', description: 'Site kurallarının ihlali' },
   { id: 'other', label: 'Diğer', description: 'Belirtilen kategorilere uymayan sebep' }
 ];
+
+export const REPORT_CATEGORIES = [
+  { id: 'spam', label: 'Spam / Reklam', description: 'İstenmeyen içerik veya reklam' },
+  { id: 'harassment', label: 'Taciz / Zorbalık', description: 'Kişiye yönelik taciz' },
+  { id: 'hate_speech', label: 'Nefret Söylemi', description: 'Ayrımcı içerik' },
+  { id: 'inappropriate', label: 'Uygunsuz İçerik', description: 'Müstehcen veya rahatsız edici' },
+  { id: 'misinformation', label: 'Yanlış Bilgi', description: 'Yanıltıcı bilgi' },
+  { id: 'violence', label: 'Şiddet / Tehdit', description: 'Şiddet içeren veya tehditkar' },
+  { id: 'copyright', label: 'Telif Hakkı İhlali', description: 'İzinsiz içerik kullanımı' },
+  { id: 'other', label: 'Diğer', description: 'Diğer sebepler' }
+];

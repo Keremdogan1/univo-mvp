@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import NotificationCenter from '../NotificationCenter';
-import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, User, BadgeCheck, Globe, Lock, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageSquare, Send, Tag, Award, Ghost, TrendingUp, ArrowRight, ArrowBigUp, ArrowBigDown, MoreVertical, Edit2, Trash2, X, Share2, UserPlus, Users, User, BadgeCheck, Globe, Lock, Sparkles, ChevronDown, ChevronUp, Flag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import CommentThread from '@/components/voice/CommentSystem';
 import FriendButton from '../FriendButton';
 import VoiceStatsWidget from './VoiceStatsWidget';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useReport } from '@/contexts/ReportContext';
 // Shared Component Import
 import SkeletonLoader from '../ui/SkeletonLoader';
 
@@ -169,6 +170,7 @@ function VoiceItem({
     formatRelativeTime,
     renderContentWithTags
 }: VoiceItemProps) {
+    const { openReportModal } = useReport();
     const reactions = voice.reactions || [];
     const myReaction = user ? reactions.find(r => r.user_id === user.id)?.reaction_type : null;
     const likeCount = reactions.filter(r => r.reaction_type === 'like').length;
@@ -270,6 +272,15 @@ function VoiceItem({
                                                     variant="menu-item"
                                                 />
                                             )}
+                                            <button
+                                                onClick={() => {
+                                                    openReportModal({ type: 'post', id: voice.id, preview: voice.content.substring(0, 100) });
+                                                    setActiveMenu(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2 transition-colors"
+                                            >
+                                                <Flag size={14} /> Şikayet Et
+                                            </button>
                                         </>
                                     )}
                                 </div>

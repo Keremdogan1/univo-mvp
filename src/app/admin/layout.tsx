@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Shield, Users, Settings, LogOut, Activity, Ban } from 'lucide-react';
+import { Shield, Users, Settings, LogOut, Activity, Ban, Flag } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
@@ -39,6 +39,10 @@ export default async function AdminLayout({
                     <Link href="/admin/banned" className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-neutral-900 dark:hover:text-white transition-all duration-200">
                         <Ban size={18} />
                         <span>Yasaklılar</span>
+                    </Link>
+                    <Link href="/admin/reports" className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-neutral-900 dark:hover:text-white transition-all duration-200">
+                        <Flag size={18} />
+                        <span>Şikayetler</span>
                     </Link>
                     <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-neutral-900 dark:hover:text-white transition-all duration-200">
                         <Settings size={18} />
