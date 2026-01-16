@@ -33,6 +33,7 @@ export default function SettingsPage() {
         show_polls: true
     });
     const [loading, setLoading] = useState(true);
+    const [isAdminSession, setIsAdminSession] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -41,7 +42,18 @@ export default function SettingsPage() {
             return;
         }
         fetchSettings();
+        checkAdminSession();
     }, [user]);
+
+    const checkAdminSession = async () => {
+        try {
+            const res = await fetch('/api/admin/session');
+            const data = await res.json();
+            setIsAdminSession(data.isAdmin === true);
+        } catch (e) {
+            setIsAdminSession(false);
+        }
+    };
 
     const fetchSettings = async () => {
         try {
@@ -176,7 +188,7 @@ export default function SettingsPage() {
                                 <div>
                                     <div className="font-bold text-lg text-neutral-900 dark:text-white">Hesap Türü</div>
                                     <div className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                        {user?.user_metadata?.full_name && SUPER_ADMIN_NAMES.includes(user.user_metadata.full_name) ? (
+                                        {isAdminSession ? (
                                             <span className="text-[var(--primary-color)] font-bold">Yönetici</span>
                                         ) : (
                                             <span>Kullanıcı</span>
@@ -185,8 +197,8 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            {/* Admin Panel Link - Only for admins */}
-                            {user?.user_metadata?.full_name && SUPER_ADMIN_NAMES.includes(user.user_metadata.full_name) && (
+                            {/* Admin Panel Link - Only for authenticated admins */}
+                            {isAdminSession && (
                                 <div 
                                     onClick={() => router.push('/dashboard')}
                                     className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 flex items-center gap-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
@@ -366,7 +378,7 @@ export default function SettingsPage() {
                                 <div>
                                     <div className="font-medium text-neutral-900 dark:text-white">Hesap Türü</div>
                                     <div className="text-sm text-neutral-500">
-                                        {user?.user_metadata?.full_name && SUPER_ADMIN_NAMES.includes(user.user_metadata.full_name) ? (
+                                        {isAdminSession ? (
                                             <span className="text-[var(--primary-color)] font-bold">Yönetici</span>
                                         ) : (
                                             <span>Kullanıcı</span>
@@ -376,7 +388,7 @@ export default function SettingsPage() {
                             </div>
                         </div>
                         {/* Admin Panel Link */}
-                        {user?.user_metadata?.full_name && SUPER_ADMIN_NAMES.includes(user.user_metadata.full_name) && (
+                        {isAdminSession && (
                             <div 
                                 onClick={() => router.push('/dashboard')}
                                 className="p-4 flex items-center justify-between cursor-pointer active:bg-neutral-50 dark:active:bg-neutral-800"

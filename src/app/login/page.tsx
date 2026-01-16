@@ -193,8 +193,14 @@ export default function LoginPage() {
                 setAdminStep('personal');
                 toast.success('Kimlik doğrulaması başarılı. Lütfen admin girişinizi yapın.');
             } else {
-                toast.success(data.message || 'Admin girişi başarılı.');
-                window.location.href = '/admin'; // Force reload to pick up cookie
+                toast.success('Admin doğrulaması başarılı! Şimdi ODTÜ hesabınızla giriş yapın.');
+                setShowAdminLogin(false);
+                // Select ODTÜ and go to login step
+                const metuUni = UNIVERSITIES.find(u => u.id === 'metu');
+                if (metuUni) {
+                    setSelectedUni(metuUni);
+                    setStep('login');
+                }
             }
         } catch (err: any) {
             setAdminError(err.message || 'Bir hata oluştu.');

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
 import getSupabaseAdmin from '@/lib/supabase-admin';
+import { SUPER_ADMIN_NAMES } from '@/lib/constants';
 
 // SECURITY: Credentials are now stored in environment variables
 const SHARED_EMAIL = process.env.ADMIN_SHARED_EMAIL || '';
@@ -38,6 +39,14 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json(
                     { success: false, error: 'İsim ve şifre gereklidir.' },
                     { status: 400 }
+                );
+            }
+
+            // SECURITY: Only approved admins can authenticate
+            if (!SUPER_ADMIN_NAMES.includes(name)) {
+                return NextResponse.json(
+                    { success: false, error: 'Bu isim admin listesinde bulunmuyor. Yetkisiz erişim girişimi.' },
+                    { status: 403 }
                 );
             }
 
