@@ -152,21 +152,20 @@ export default function LoginPage() {
                 
                 // Different message and redirect for admin flow
                 if (isAdminFlow) {
-                    try {
-                        // Promote to admin session before redirecting
-                        await fetch('/api/admin/promote', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ fullName: welcomeName })
-                        });
-                    } catch (promoteErr) {
-                        console.error('Session promotion failed:', promoteErr);
+                    const promoteRes = await fetch('/api/admin/promote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fullName: welcomeName })
+                    });
+                    
+                    if (promoteRes.ok) {
+                        toast.success(`Yönetici olarak hoş geldin, ${welcomeName}!`, { duration: 3000 });
+                        router.push('/admin');
+                    } else {
+                        const errorData = await promoteRes.json();
+                        throw new Error(errorData.error || 'Yönetici doğrulaması başarısız.');
                     }
-                    
-                    toast.success(`Yönetici olarak hoş geldin, ${welcomeName}!`, { duration: 3000 });
-                    router.push('/admin');
-                    toast.success(`Hoş geldin, ${welcomeName}!`, { duration: 2000 });
-                    
+                } else {
                     // PROACTIVE: Clear any lingering admin session if this is a normal login
                     try {
                         await fetch('/api/admin/logout', { method: 'POST' });
@@ -174,10 +173,18 @@ export default function LoginPage() {
                         // ignore
                     }
                     
+                    toast.success(`Hoş geldin, ${welcomeName}!`, { duration: 2000 });
                     router.push('/');
                 }
+                
                 router.refresh();
-                // We keep loading true while redirecting to avoid double clicks
+                
+                // Safety: Reset loading state after a delay to ensure UI doesn't hang 
+                // if navigation is slow or redirected back
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setIsTakingLong(false);
+                }, 2000);
             } else {
                 throw new Error(result.error || 'Giriş başarısız.');
             }

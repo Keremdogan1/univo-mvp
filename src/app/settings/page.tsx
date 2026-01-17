@@ -95,11 +95,20 @@ export default function SettingsPage() {
     };
 
     const handleSignOut = async () => {
+        setLoading(true);
         await signOut();
+        setIsAdminSession(false);
+        setPrivacySettings({
+            show_interests: true,
+            show_activities: true,
+            show_friends: true,
+            show_polls: true
+        });
+        setLoading(false);
         router.push('/login');
     };
 
-    if (!mounted || loading) return null;
+    if (!mounted || loading || !user) return null;
 
     // === DESKTOP LAYOUT ===
     const DesktopView = () => (
