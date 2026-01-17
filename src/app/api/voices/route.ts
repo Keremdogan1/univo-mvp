@@ -105,17 +105,16 @@ export async function GET(request: Request) {
 
       const isVerified = !voice.is_anonymous && profile?.student_id && profile.student_id.length > 0;
 
-      // ALGORITHM: Calculate Univo Rank Score
+      // ALGORITHM: Calculate Univo Rank Score (Democratic Version)
       const baseValue = 10;
       const engagementPoints = (likes * 1) + (commentsCount * 3);
-      const boosts = (voice.is_editors_choice ? 100 : 0) + (isVerified ? 20 : 0);
       
       const postDate = new Date(voice.created_at);
       const now = new Date();
       const hoursSincePost = Math.max(0, (now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
       const recencyMultiplier = 1 / Math.pow(hoursSincePost + 2, 1.5);
       
-      const univoRank = (baseValue + engagementPoints + boosts) * recencyMultiplier;
+      const univoRank = (baseValue + engagementPoints) * recencyMultiplier;
 
       return {
         id: voice.id,

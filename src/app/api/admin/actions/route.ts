@@ -59,6 +59,27 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, message: 'Ayarlar güncellendi.' });
         }
 
+        // Action: Delete Voice Post
+        if (action === 'delete_voice') {
+            const { voiceId } = body;
+
+            const { error: deleteError } = await supabase
+                .from('campus_voices')
+                .delete()
+                .eq('id', voiceId);
+
+            if (deleteError) throw deleteError;
+
+            // Audit Log
+            await supabase.from('admin_audit_logs').insert({
+                admin_name: session.adminName,
+                action: 'VOICE_DELETE',
+                details: `Post silindi. ID: ${voiceId}`
+            });
+
+            return NextResponse.json({ success: true, message: 'Paylaşım silindi.' });
+        }
+
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     } catch (err: any) {
         console.error('Admin action error:', err);

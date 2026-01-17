@@ -9,6 +9,7 @@ export default function AdminSidebar() {
 
     const menuItems = [
         { href: '/admin', label: 'Kullanıcılar', icon: Users },
+        { href: '/admin/voices', label: 'Paylaşımlar', icon: Activity },
         { href: '/admin/logs', label: 'Admin Hareketleri', icon: Activity },
         { href: '/admin/banned', label: 'Yasaklılar', icon: Ban },
         { href: '/admin/reports', label: 'Şikayetler', icon: Flag },
