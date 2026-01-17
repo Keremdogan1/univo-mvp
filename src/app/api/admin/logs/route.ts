@@ -13,13 +13,16 @@ export async function GET(req: NextRequest) {
     try {
         const { data: logs, error } = await supabase
             .from('admin_audit_logs')
-            .select('*')
+            .select(`
+                *,
+                admin:profiles!admin_id(full_name)
+            `)
             .order('created_at', { ascending: false })
             .limit(500);
 
         if (error) throw error;
 
-        // Parse details JSON to extract target_user_name
+        // Parse details JSON and map admin name
         const enrichedLogs = logs?.map(log => {
             let targetUserName = null;
             let targetUserId = null;
@@ -30,8 +33,10 @@ export async function GET(req: NextRequest) {
                     targetUserId = details.target_user_id || details.user_id || null;
                 }
             } catch (e) {}
+
             return {
                 ...log,
+                admin_name: (log as any).admin?.full_name || 'Bilinmeyen Admin',
                 target_user_name: targetUserName,
                 target_user_id: targetUserId
             };

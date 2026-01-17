@@ -44,8 +44,8 @@ async function cleanup() {
   allComms.forEach(c => console.log(`- ${c.name} (Admin ID: ${c.admin_id})`));
 
   const toDelete = allComms.filter(c => {
-    // Keep it if it's explicitly owned by Kerem
-    if (keremId && c.admin_id === keremId) return false;
+    // Keep it if it's explicitly owned by Kerem AND contains 'Sanat'
+    if (keremId && c.admin_id === keremId && c.name.toLowerCase().includes('sanat')) return false;
     
     // Otherwise, mark for deletion
     return true;

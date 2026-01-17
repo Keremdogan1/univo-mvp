@@ -99,18 +99,13 @@ export default function AdminVoicesPage() {
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-7xl mx-auto space-y-8 animate-pulse">
+            <div className="p-8 max-w-7xl mx-auto space-y-8">
                 <div className="space-y-4">
-                    <div className="h-10 w-48 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
-                    <div className="h-4 w-64 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg"></div>
+                    <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-xl animate-pulse"></div>
+                    <div className="h-4 w-96 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg animate-pulse"></div>
                 </div>
                 
                 <div className="flex gap-3">
-                    <div className="h-12 flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl"></div>
-                    <div className="h-12 w-24 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl"></div>
-                </div>
-
-                <div className="space-y-4">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="h-48 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-100 dark:border-neutral-700"></div>
                     ))}
@@ -214,9 +209,8 @@ export default function AdminVoicesPage() {
                             )}
 
                             <div>
-                                <span className="text-[10px] text-neutral-400 mb-2 block font-bold uppercase">Popüler Etiketler</span>
                                 <div className="flex flex-wrap gap-2">
-                                    {topTags.map((tag) => (
+                                    {topTags.slice(0, 5).map((tag) => (
                                         <button
                                             key={tag}
                                             onClick={() => {
@@ -259,14 +253,19 @@ export default function AdminVoicesPage() {
                 {filteredVoices.length} / {voices.length} paylaşım gösteriliyor
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
+            {/* Voices List */}
+            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden mt-4">
                 <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
                     {filteredVoices.map((voice) => (
                         <div key={voice.id} className="p-6 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex gap-4 items-start flex-1">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-neutral-200 dark:border-neutral-800 ${voice.is_anonymous ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-500'}`}>
-                                        <MessageSquare size={18} />
+                                    <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-neutral-200 dark:border-neutral-800 ${voice.is_anonymous ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}>
+                                        {(!voice.is_anonymous && voice.profiles?.avatar_url) ? (
+                                            <img src={voice.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <MessageSquare size={18} />
+                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1 flex-wrap">

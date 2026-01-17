@@ -71,13 +71,18 @@ export default function AdminCommunitiesPage() {
     if (isLoading) {
         return (
             <div className="p-8 max-w-7xl mx-auto space-y-8">
-                <div className="animate-pulse space-y-4">
-                    <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
-                    <div className="h-4 w-48 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg"></div>
+                <div className="space-y-4">
+                    <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-xl animate-pulse"></div>
+                    <div className="h-4 w-96 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg animate-pulse"></div>
                 </div>
                 
+                <div className="flex gap-3">
+                    <div className="h-12 flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                    <div className="h-12 w-32 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                </div>
+
                 <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden shadow-sm">
-                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16 animate-pulse"></div>
+                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16"></div>
                     <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
                         {[1, 2, 3, 4, 5].map(i => (
                             <div key={i} className="p-6 bg-white dark:bg-neutral-800 h-24 animate-pulse"></div>
@@ -137,7 +142,7 @@ export default function AdminCommunitiesPage() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden mt-4">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-neutral-50 dark:bg-neutral-900 text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200 dark:border-neutral-700">

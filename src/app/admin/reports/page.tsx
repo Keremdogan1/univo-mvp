@@ -94,23 +94,28 @@ export default function AdminReportsPage() {
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-7xl mx-auto space-y-8 animate-pulse">
+            <div className="p-8 max-w-7xl mx-auto space-y-8">
                 <div className="space-y-4">
-                    <div className="h-10 w-48 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
-                    <div className="h-4 w-64 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg"></div>
+                    <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-xl animate-pulse"></div>
+                    <div className="h-4 w-96 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg animate-pulse"></div>
                 </div>
                 
+                <div className="flex gap-3">
+                    <div className="h-12 flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                    <div className="h-12 w-32 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                </div>
+
                 <div className="flex gap-2 flex-wrap">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className="h-10 w-24 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg"></div>
+                        <div key={i} className="h-10 w-24 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg animate-pulse"></div>
                     ))}
                 </div>
 
                 <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden shadow-sm">
-                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16 animate-pulse"></div>
+                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16"></div>
                     <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
                         {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="p-6 bg-white dark:bg-neutral-800 h-16 animate-pulse"></div>
+                            <div key={i} className="p-6 bg-white dark:bg-neutral-800 h-20 animate-pulse"></div>
                         ))}
                     </div>
                 </div>
@@ -182,14 +187,14 @@ export default function AdminReportsPage() {
             )}
 
             {/* Reports Table Header with Counter */}
-            <div className="flex items-center justify-between mb-4 px-1">
+            <div className="flex items-center justify-between mb-2 px-1">
                 <div className="text-sm font-medium text-neutral-500">
                     {filteredReports.length} / {reports.length} şikayet gösteriliyor
                 </div>
             </div>
 
             {/* Reports Table */}
-            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden mt-2">
                 {filteredReports.length === 0 ? (
                     <div className="p-12 text-center text-neutral-500">
                         <Flag size={48} className="mx-auto mb-4 opacity-30" />

@@ -20,6 +20,7 @@ export default function BannedUsersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showFilters, setShowFilters] = useState(false);
+    const [reasonFilter, setReasonFilter] = useState('all');
 
     const fetchBannedUsers = async () => {
         try {
@@ -57,25 +58,37 @@ export default function BannedUsersPage() {
         }
     };
 
-    const filteredUsers = users.filter(u => 
-        u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        u.student_id?.toLowerCase().includes(search.toLowerCase()) ||
-        u.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredUsers = users.filter(u => {
+        const matchesSearch =  
+            u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+            u.student_id?.toLowerCase().includes(search.toLowerCase()) ||
+            u.email?.toLowerCase().includes(search.toLowerCase());
+        
+        const matchesReason = reasonFilter === 'all' ? true : u.ban_reason === reasonFilter;
+        
+        return matchesSearch && matchesReason;
+    });
+
+    const uniqueReasons = [...new Set(users.map(u => u.ban_reason).filter(Boolean))];
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-7xl mx-auto space-y-8 animate-pulse">
+            <div className="p-8 max-w-7xl mx-auto space-y-8">
                 <div className="space-y-4">
-                    <div className="h-10 w-48 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
-                    <div className="h-4 w-64 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg"></div>
+                    <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-xl animate-pulse"></div>
+                    <div className="h-4 w-96 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg animate-pulse"></div>
                 </div>
                 
+                <div className="flex gap-3">
+                    <div className="h-12 flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                    <div className="h-12 w-32 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse"></div>
+                </div>
+
                 <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden shadow-sm">
-                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16 animate-pulse"></div>
+                    <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-16"></div>
                     <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
                         {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="p-6 bg-white dark:bg-neutral-800 h-16 animate-pulse"></div>
+                            <div key={i} className="p-6 bg-white dark:bg-neutral-800 h-20 animate-pulse"></div>
                         ))}
                     </div>
                 </div>
@@ -119,8 +132,35 @@ export default function BannedUsersPage() {
             </div>
 
             {showFilters && (
-                <div className="mb-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <p className="text-sm text-neutral-500 italic">Gelişmiş filtreleme seçenekleri çok yakında.</p>
+                <div className="mb-6 p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-3">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500">Yasaklanma Sebebi</label>
+                        <div className="flex gap-2 flex-wrap">
+                            <button
+                                onClick={() => setReasonFilter('all')}
+                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                    reasonFilter === 'all' 
+                                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                                    : 'bg-white text-neutral-500 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700'
+                                }`}
+                            >
+                                Tümü
+                            </button>
+                            {uniqueReasons.map((reason) => (
+                                <button
+                                    key={reason}
+                                    onClick={() => setReasonFilter(reason!)}
+                                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                        reasonFilter === reason 
+                                        ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                                        : 'bg-white text-neutral-500 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700'
+                                    }`}
+                                >
+                                    {reason}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -131,10 +171,7 @@ export default function BannedUsersPage() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
-                    <h2 className="font-bold text-lg">Yasaklı Listesi</h2>
-                </div>
+            <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden mt-4">
 
                 <table className="w-full text-sm text-left">
                     <thead className="bg-neutral-50 dark:bg-neutral-900 text-neutral-500 font-medium border-b border-neutral-200 dark:border-neutral-700">
