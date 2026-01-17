@@ -4,7 +4,7 @@ import getSupabaseAdmin from '@/lib/supabase-admin';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await verifyAdminSession();
     if (!session) {
