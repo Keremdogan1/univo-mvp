@@ -143,8 +143,8 @@ function HeaderContent() {
       }`;
   };
 
-  // Hide header on login/register/admin pages
-  if (pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
+  // Hide header on login/register pages
+  if (pathname === '/login' || pathname === '/register') {
     return null;
   }
 
@@ -449,7 +449,7 @@ export default function Header() {
   const isAdminPredict = !authLoading && profile?.full_name && SUPER_ADMIN_NAMES.includes(profile.full_name);
 
   // CRITICAL: Prevent Suspense fallback (skeleton) on pages that shouldn't have a header
-  if (pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
+  if (pathname === '/login' || pathname === '/register') {
     return null;
   }
 
