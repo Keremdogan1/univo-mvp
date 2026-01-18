@@ -31,7 +31,9 @@ export default function AdminVoicesPage() {
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<'all' | 'anonymous' | 'public' | 'with_images'>('all');
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedTag, setSelectedTag] = useState<string>('');
+    // Changed from single string to array for multi-tag support
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
     const fetchVoices = async () => {
         try {
@@ -55,9 +57,22 @@ export default function AdminVoicesPage() {
     }, []);
 
     const addToHistory = (tag: string) => {
-        const newHistory = [tag, ...tagHistory.filter(t => t !== tag)].slice(0, 5);
+        const cleanTag = tag.replace(/^#/, '').toLowerCase();
+        const newHistory = [cleanTag, ...tagHistory.filter(t => t !== cleanTag)].slice(0, 5);
         setTagHistory(newHistory);
         localStorage.setItem('admin_tag_history', JSON.stringify(newHistory));
+    };
+
+    const addTagFilter = (tag: string) => {
+        const cleanTag = tag.replace(/^#/, '').toLowerCase();
+        if (cleanTag && !selectedTags.includes(cleanTag)) {
+            setSelectedTags(prev => [...prev, cleanTag]);
+            addToHistory(cleanTag);
+        }
+    };
+
+    const removeTagFilter = (tag: string) => {
+        setSelectedTags(prev => prev.filter(t => t !== tag));
     };
 
     const handleDelete = async (voiceId: string) => {
@@ -91,13 +106,19 @@ export default function AdminVoicesPage() {
                 filter === 'with_images' ? !!v.image_url :
                 !v.is_anonymous;
 
-            const matchesTag = selectedTag ? v.content.toLowerCase().includes(`#${selectedTag.toLowerCase()}`) : true;
+            // Multi-tag matching: post must contain ALL selected tags
+            const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => 
+                v.content.toLowerCase().includes(`#${tag.toLowerCase()}`)
+            );
 
-            return matchesSearch && matchesFilter && matchesTag;
+            // User ID matching
+            const matchesUser = !selectedUserId || v.user_id === selectedUserId;
+
+            return matchesSearch && matchesFilter && matchesTags && matchesUser;
         });
-    }, [voices, search, filter, selectedTag]);
+    }, [voices, search, filter, selectedTags, selectedUserId]);
 
-    const activeFilterCount = [filter !== 'all', selectedTag].filter(Boolean).length;
+    const activeFilterCount = [filter !== 'all', selectedTags.length > 0, selectedUserId].filter(Boolean).length;
 
     if (isLoading) {
         return (
@@ -209,19 +230,39 @@ export default function AdminVoicesPage() {
                         <div className="space-y-3">
                             <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500">Tag Yönetimi</label>
                             
-                            {tagHistory.length > 0 && (
+                            {/* Active Tags */}
+                            {selectedTags.length > 0 && (
+                                <div className="mb-4">
+                                    <span className="text-[10px] text-neutral-400 mb-2 block font-bold uppercase">Aktif Taglar</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedTags.map((tag) => (
+                                            <div 
+                                                key={tag}
+                                                className="bg-black dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-bold animate-in zoom-in-95"
+                                            >
+                                                <span>#{tag}</span>
+                                                <button 
+                                                    onClick={() => removeTagFilter(tag)}
+                                                    className="hover:bg-white/20 dark:hover:bg-black/20 rounded-full p-0.5"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Recent Tags (excluding active) */}
+                            {tagHistory.filter(t => !selectedTags.includes(t)).length > 0 && (
                                 <div className="mb-4">
                                     <span className="text-[10px] text-neutral-400 mb-2 block font-bold uppercase">Son Arananlar</span>
                                     <div className="flex flex-wrap gap-2">
-                                        {tagHistory.map((tag) => (
+                                        {tagHistory.filter(t => !selectedTags.includes(t)).map((tag) => (
                                             <button
                                                 key={tag}
-                                                onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
-                                                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                                                    selectedTag === tag
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400'
-                                                }`}
+                                                onClick={() => addTagFilter(tag)}
+                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-600"
                                             >
                                                 #{tag}
                                             </button>
@@ -230,24 +271,20 @@ export default function AdminVoicesPage() {
                                 </div>
                             )}
 
+                            {/* Popular Tags (excluding active) */}
                             <div>
+                                <span className="text-[10px] text-neutral-400 mb-2 block font-bold uppercase">Popüler</span>
                                 <div className="flex flex-wrap gap-2">
-                                    {topTags.slice(0, 5).map((tag) => (
+                                    {topTags.filter(t => !selectedTags.includes(t)).slice(0, 5).map((tag) => (
                                         <button
                                             key={tag}
-                                            onClick={() => {
-                                                setSelectedTag(selectedTag === tag ? '' : tag);
-                                                if (selectedTag !== tag) addToHistory(tag);
-                                            }}
-                                            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                                                selectedTag === tag
-                                                ? 'bg-primary text-white border-transparent'
-                                                : 'bg-white text-neutral-400 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700'
-                                            }`}
+                                            onClick={() => addTagFilter(tag)}
+                                            className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all bg-white text-neutral-400 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700 hover:border-primary hover:text-primary"
                                         >
                                             #{tag}
                                         </button>
                                     ))}
+                                    {topTags.filter(t => !selectedTags.includes(t)).length === 0 && topTags.length > 0 && <span className="text-xs text-neutral-400 italic">Tüm popüler taglar seçili.</span>}
                                     {topTags.length === 0 && <span className="text-xs text-neutral-400 italic">Henüz etiket bulunmuyor.</span>}
                                 </div>
                             </div>
@@ -259,7 +296,8 @@ export default function AdminVoicesPage() {
                                     onClick={() => {
                                         setFilter('all');
                                         setSearch('');
-                                        setSelectedTag('');
+                                        setSelectedTags([]);
+                                        setSelectedUserId(null);
                                     }}
                                     className="text-sm text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 font-bold"
                                 >
