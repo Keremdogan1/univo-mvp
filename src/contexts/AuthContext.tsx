@@ -15,6 +15,8 @@ interface Profile {
   ban_category?: string;
   banned_by?: string;
   university?: string;
+  role?: string;
+  is_admin?: boolean;
 }
 
 interface UniversityLoginResult {
