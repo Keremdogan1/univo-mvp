@@ -208,9 +208,10 @@ export default function OfficialView() {
                             type: 'email',
                             title: msg.subject,
                             source: senderName, // Use sender name instead of 'ODTÜ E-Posta'
-                            date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
+                            date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
                             summary: `E-posta içeriği için tıklayınız.`,
-                            link: `https://metumail.metu.edu.tr/`
+                            link: `https://metumail.metu.edu.tr/`,
+                            timestamp: msg.timestamp || new Date(msg.date).getTime()
                         };
                     });
 
@@ -268,9 +269,10 @@ export default function OfficialView() {
                     type: 'email',
                     title: msg.subject,
                     source: senderName,
-                    date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
+                    date: new Date(msg.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
                     summary: `E-posta içeriği için tıklayınız.`,
-                    link: `https://metumail.metu.edu.tr/`
+                    link: `https://metumail.metu.edu.tr/`,
+                    timestamp: msg.timestamp || new Date(msg.date).getTime()
                 };
             });
 
@@ -492,8 +494,8 @@ export default function OfficialView() {
         if (a.type === 'email' && b.type !== 'email') return -1;
         if (b.type === 'email' && a.type !== 'email') return 1;
 
-        let scoreA = parseDate(a.date);
-        let scoreB = parseDate(b.date);
+        let scoreA = a.timestamp || parseDate(a.date);
+        let scoreB = b.timestamp || parseDate(b.date);
 
         // Boost Unread
         const isReadA = readIds.includes(String(a.id));

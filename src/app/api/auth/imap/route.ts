@@ -27,13 +27,17 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
 
     // Optimization: Don't fetch headers for ALL messages in the last 14 days.
     // 1. Just find the messages first (lightweight)
-    const delay = 24 * 3600 * 1000 * 7; // User Request: Last 1 week (7 days)
-    const since = new Date(Date.now() - delay);
-    const searchCriteria = [['SINCE', since]];
+    const delay = 24 * 3600 * 1000 * 14; // Increase to 14 days for robustness (UI will filter if needed)
+    const sinceDate = new Date(Date.now() - delay);
+    
+    // IMAP SINCE expects "DD-Mon-YYYY" format (e.g., 01-Jan-2024)
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const sinceStr = `${String(sinceDate.getDate()).padStart(2, '0')}-${months[sinceDate.getMonth()]}-${sinceDate.getFullYear()}`;
+    const searchCriteria = [['SINCE', sinceStr]];
     
     // We only need the UID and SeqNo initially to sort
     const searchOptions = {
-        bodies: ['HEADER.FIELDS (DATE)'], // Minimal fetch to verify existence
+        bodies: ['HEADER.FIELDS (DATE)'], 
         struct: false
     };
 
@@ -43,17 +47,15 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
     // 2. Sort by UID descending (Newest first)
     searchRes.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
-    // 3. Take only the top 15 latest
-    const top15 = searchRes.slice(0, 15);
+    // 3. Take only the top 50 latest
+    const topLimit = searchRes.slice(0, 50);
     
     // Collect UIDs to fetch fully
-    let uidsToFetch = top15.map(m => m.attributes.uid);
+    let uidsToFetch = topLimit.map(m => m.attributes.uid);
 
     // 4. Add Extra UIDs (Starred) if provided
     if (extraUids && extraUids.length > 0) {
-        // Ensure uids are numbers
         const numericExtras = extraUids.map(u => Number(u)).filter(n => !isNaN(n));
-        // Filter out UIDs we already have in top15 to avoid duplicates
         const newUids = numericExtras.filter(uid => !uidsToFetch.includes(uid));
         uidsToFetch = [...uidsToFetch, ...newUids];
     }
@@ -62,8 +64,10 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
     let emails: any[] = [];
     
     if (uidsToFetch.length > 0) {
-        // Fetch specific UIDs
-        const fetchCriteria = [['UID', uidsToFetch]];
+        // IMPORTANT: Join UIDs with a comma for the IMAP search string. 
+        // Passing an array directly to 'UID' criteria can sometimes result in only searching for the first item.
+        const uidString = uidsToFetch.join(',');
+        const fetchCriteria = [['UID', uidString]];
         const fetchPartsOptions = {
             bodies: ['HEADER'], 
             markSeen: false,
@@ -77,20 +81,23 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
             const headerPart = m.parts.find(p => p.which === 'HEADER');
             const headerBody = headerPart ? headerPart.body : {};
             
-            // Decode Subject if encoded (e.g. =?UTF-8?B?...) - simple heuristic, can add library later if critical
+            // Decode Subject if encoded
             let subject = headerBody.subject ? headerBody.subject[0] : 'Konusuz';
             let from = headerBody.from ? headerBody.from[0] : 'Bilinmeyen Gönderen';
+            let dateStr = headerBody.date ? headerBody.date[0] : new Date().toISOString();
+            let timestamp = Date.parse(dateStr) || Date.now();
 
             return {
                 id: m.attributes.uid,
                 seq: m.seqNo,
                 subject: subject,
                 from: from,
-                date: headerBody.date ? headerBody.date[0] : new Date().toISOString()
+                date: dateStr,
+                timestamp: timestamp
             };
         });
 
-        // Re-sort because the second search might return in ID order or random
+        // Re-sort because the second search might return in different order
         emails.sort((a, b) => b.id - a.id);
     }
 
