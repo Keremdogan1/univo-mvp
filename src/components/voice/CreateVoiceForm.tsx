@@ -26,6 +26,8 @@ interface CreateVoiceFormProps {
     setImageFile: (val: File | null) => void;
     handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
     photoPostsEnabled: boolean;
+    videoPostsEnabled: boolean;
+    mediaType: 'image' | 'video';
 }
 
 export default function CreateVoiceForm({
@@ -48,7 +50,9 @@ export default function CreateVoiceForm({
     imageFile,
     setImageFile,
     handleImageSelect,
-    photoPostsEnabled
+    photoPostsEnabled,
+    videoPostsEnabled,
+    mediaType
 }: CreateVoiceFormProps) {
     if (!user) {
         return (
@@ -84,14 +88,18 @@ export default function CreateVoiceForm({
 
                 {imagePreview && (
                     <div className="relative w-full max-h-64 mb-3 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800">
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                        {mediaType === 'video' ? (
+                            <video src={imagePreview} controls className="w-full h-full object-contain max-h-64" />
+                        ) : (
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                        )}
                         <button
                             type="button"
                             onClick={() => {
                                 setImagePreview(null);
                                 setImageFile(null);
                             }}
-                            className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                            className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors z-10"
                         >
                             <X size={20} />
                         </button>
@@ -133,16 +141,16 @@ export default function CreateVoiceForm({
                         <div className="relative">
                             <button
                                 type="button"
-                                className={`p-2 transition-colors ${photoPostsEnabled ? 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white' : 'text-neutral-300 dark:text-neutral-700 cursor-not-allowed'}`}
-                                title={photoPostsEnabled ? "Fotoğraf Ekle" : "Fotoğraf yükleme geçici olarak kapalı"}
-                                onClick={() => photoPostsEnabled && document.getElementById('voice-image-upload')?.click()}
+                                className={`p-2 transition-colors ${photoPostsEnabled || videoPostsEnabled ? 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white' : 'text-neutral-300 dark:text-neutral-700 cursor-not-allowed'}`}
+                                title={photoPostsEnabled || videoPostsEnabled ? "Medya Ekle (Video/Resim)" : "Medya yükleme geçici olarak kapalı"}
+                                onClick={() => (photoPostsEnabled || videoPostsEnabled) && document.getElementById('voice-media-upload')?.click()}
                             >
                                 <Camera size={20} />
                             </button>
                             <input
-                                id="voice-image-upload"
+                                id="voice-media-upload"
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,video/*"
                                 className="hidden"
                                 onChange={handleImageSelect}
                             />

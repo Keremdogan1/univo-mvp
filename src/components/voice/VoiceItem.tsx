@@ -58,6 +58,8 @@ interface VoiceItemProps {
     imageFile: File | null;
     setImageFile: (val: File | null) => void;
     handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    // Assume user will pass mediaType or we detect it?
+    // Since we only get voice object, we should detect from URL.
 }
 
 export default function VoiceItem({
@@ -235,54 +237,68 @@ export default function VoiceItem({
                                 <div className="mt-3">
                                     {imagePreview ? (
                                         <div className="relative rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 h-48 sm:h-64">
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            {/* Simple detection for preview */}
+                                            {imagePreview.startsWith('data:video') ? (
+                                                <video src={imagePreview} controls className="w-full h-full object-contain" />
+                                            ) : (
+                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            )}
+                                               
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setImagePreview(null);
+                                                        setImageFile(null);
+                                                    }}
+                                                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors z-10"
+                                                >
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                        ) : (
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setImagePreview(null);
-                                                    setImageFile(null);
-                                                }}
-                                                className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                                                onClick={() => document.getElementById(`edit-image-upload-${voice.id}`)?.click()}
+                                                className="w-full py-4 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-lg flex flex-col items-center justify-center gap-2 text-neutral-500 hover:text-black dark:hover:text-white hover:border-neutral-300 dark:hover:border-neutral-600 transition-all"
                                             >
-                                                <X size={20} />
+                                                <Camera size={24} />
+                                                <span className="text-xs font-bold uppercase">Medya Ekle / Değiştir</span>
                                             </button>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() => document.getElementById(`edit-image-upload-${voice.id}`)?.click()}
-                                            className="w-full py-4 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-lg flex flex-col items-center justify-center gap-2 text-neutral-500 hover:text-black dark:hover:text-white hover:border-neutral-300 dark:hover:border-neutral-600 transition-all"
-                                        >
-                                            <Camera size={24} />
-                                            <span className="text-xs font-bold uppercase">Fotoğraf Ekle</span>
-                                        </button>
-                                    )}
-                                    <input
-                                        id={`edit-image-upload-${voice.id}`}
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleImageSelect}
-                                    />
-                                </div>
-                            </form>
-                        ) : (
-                            <div className="mb-4 group/content relative">
-                                <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif mb-3">
-                                    {renderContentWithTags(voice.content)}
-                                </p>
-                                {voice.image_url && (
-                                    <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
-                                        <img 
-                                            src={voice.image_url} 
-                                            alt="Post image" 
-                                            className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
-                                            onClick={() => voice.image_url && setLightboxImage?.(voice.image_url)}
+                                        )}
+                                        <input
+                                            id={`edit-image-upload-${voice.id}`}
+                                            type="file"
+                                            accept="image/*,video/*"
+                                            className="hidden"
+                                            onChange={handleImageSelect}
                                         />
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                </form>
+                            ) : (
+                                <div className="mb-4 group/content relative">
+                                    <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif mb-3">
+                                        {renderContentWithTags(voice.content)}
+                                    </p>
+                                    {voice.image_url && (
+                                        <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
+                                            {voice.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                                <video 
+                                                    src={voice.image_url} 
+                                                    controls 
+                                                    className="w-full h-auto max-h-[500px] object-contain bg-black"
+                                                />
+                                            ) : (
+                                                <img 
+                                                    src={voice.image_url} 
+                                                    alt="Post media" 
+                                                    className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
+                                                    onClick={() => voice.image_url && setLightboxImage?.(voice.image_url)}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                     </div>
 
                     {/* Footer Actions (Votes + Comments + Share) */}

@@ -27,6 +27,7 @@ export async function GET() {
             maintenance_mode: settingsMap.maintenance_mode ?? false,
             registration_enabled: settingsMap.registration_enabled ?? true,
             photo_uploads_enabled: settingsMap.photo_uploads_enabled ?? true,
+            video_uploads_enabled: settingsMap.video_uploads_enabled ?? true,
             site_name: settingsMap.site_name || 'Univo',
             announcement_text: settingsMap.announcement_text || '',
         };

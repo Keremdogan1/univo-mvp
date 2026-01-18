@@ -612,43 +612,66 @@ export default function VoiceView() {
     const [cursorPos, setCursorPos] = useState<number>(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Image Upload State
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    // Media Upload State (Image & Video)
+    const [mediaFile, setMediaFile] = useState<File | null>(null);
+    const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+    const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
     const [photoPostsEnabled, setPhotoPostsEnabled] = useState(true);
+    const [videoPostsEnabled, setVideoPostsEnabled] = useState(true);
 
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!photoPostsEnabled) {
-            toast.error('Fotoğraf yükleme özelliği geçici olarak devre dışı bırakılmıştır.');
-            if (e.target) e.target.value = '';
-            return;
-        }
-
+    const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+            const isVideo = file.type.startsWith('video/');
+            const isImage = file.type.startsWith('image/');
+
+            if (isVideo) {
+                 if (!videoPostsEnabled) {
+                    toast.error('Video yükleme özelliği geçici olarak devre dışı bırakılmıştır.');
+                    if (e.target) e.target.value = '';
+                    return;
+                }
+                if (file.size > 50 * 1024 * 1024) { // 50MB limit for video
+                    toast.error('Video boyutu 50MB\'dan küçük olmalıdır.');
+                    return;
+                }
+                setMediaType('video');
+            } else if (isImage) {
+                 if (!photoPostsEnabled) {
+                    toast.error('Fotoğraf yükleme özelliği geçici olarak devre dışı bırakılmıştır.');
+                    if (e.target) e.target.value = '';
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit for image
+                    toast.error('Görsel boyutu 5MB\'dan küçük olmalıdır.');
+                    return;
+                }
+                setMediaType('image');
+            } else {
+                toast.error('Sadece resim ve video dosyaları yüklenebilir.');
                 return;
             }
-            setImageFile(file);
+
+            setMediaFile(file);
             const reader = new FileReader();
-            reader.onload = (e) => setImagePreview(e.target?.result as string);
+            reader.onload = (e) => setMediaPreview(e.target?.result as string);
             reader.readAsDataURL(file);
         }
     };
 
-    const uploadImage = async (): Promise<string | null> => {
-        if (!imageFile || !user) return null;
-        const fileExt = imageFile.name.split('.').pop();
+    const uploadMedia = async (): Promise<string | null> => {
+        if (!mediaFile || !user) return null;
+
+        const fileExt = mediaFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        console.log('Uploading image to post_images bucket:', fileName);
-        
+
+        console.log('Uploading media to voice-media bucket:', fileName);
+
         const { error: uploadError } = await supabase.storage
-            .from('post_images')
-            .upload(fileName, imageFile, { 
+            .from('voice-media')
+            .upload(fileName, mediaFile, {
                 upsert: true,
-                contentType: imageFile.type 
+                contentType: mediaFile.type
             });
 
         if (uploadError) {
@@ -657,10 +680,10 @@ export default function VoiceView() {
         }
 
         const { data: { publicUrl } } = supabase.storage
-            .from('post_images')
+            .from('voice-media')
             .getPublicUrl(fileName);
 
-        console.log('Image uploaded successfully. Public URL:', publicUrl);
+        console.log('Media uploaded successfully. Public URL:', publicUrl);
         return publicUrl;
     };
 
@@ -700,6 +723,9 @@ export default function VoiceView() {
             .then(data => {
                 if (data.photo_uploads_enabled !== undefined) {
                     setPhotoPostsEnabled(data.photo_uploads_enabled);
+                }
+                if (data.video_uploads_enabled !== undefined) {
+                    setVideoPostsEnabled(data.video_uploads_enabled);
                 }
             })
             .catch(err => console.error('Failed to load settings', err));
@@ -826,19 +852,19 @@ export default function VoiceView() {
 
         setIsPosting(true);
         try {
-            let uploadedImageUrl = null;
-            if (imageFile) {
+            let uploadedMediaUrl = null;
+            if (mediaFile) {
                 try {
-                    uploadedImageUrl = await uploadImage();
-                    if (!uploadedImageUrl) {
-                        toast.error('Fotoğraf yüklenemedi. Lütfen tekrar deneyin veya fotoğrafı kaldırın.');
+                    uploadedMediaUrl = await uploadMedia();
+                    if (!uploadedMediaUrl) {
+                        toast.error('Medya yüklenemedi. Lütfen tekrar deneyin veya medyayı kaldırın.');
                         setIsPosting(false);
                         return;
                     }
                 } catch (err: any) {
-                    console.error('Image upload failed:', err);
+                    console.error('Media upload failed:', err);
                     const errorMessage = err?.message || 'Bilinmeyen bir hata';
-                    toast.error(`Fotoğraf yüklenirken bir hata oluştu: ${errorMessage}`);
+                    toast.error(`Medya yüklenirken bir hata oluştu: ${errorMessage}`);
                     setIsPosting(false);
                     return;
                 }
@@ -859,15 +885,15 @@ export default function VoiceView() {
                     content: newStatus,
                     is_anonymous: isAnonymous,
                     tags: extractedTags,
-                    image_url: uploadedImageUrl
+                    image_url: uploadedMediaUrl // Renamed from image_url to media_url if backend supports
                 })
             });
 
             if (res.ok) {
                 setNewStatus('');
                 setIsAnonymous(false);
-                setImageFile(null);
-                setImagePreview(null);
+                setMediaFile(null);
+                setMediaPreview(null);
                 fetchVoices();
             } else {
                 const err = await res.json();
@@ -1122,22 +1148,28 @@ export default function VoiceView() {
                 setShowSuggestions(false);
             }
         } else {
-            setShowSuggestions(false);
+            setSearchSuggestions([]);
         }
     };
 
     const insertTag = (tag: string) => {
-        const textBeforeCursor = newStatus.slice(0, cursorPos);
-        const textAfterCursor = newStatus.slice(cursorPos);
-        const matches = textBeforeCursor.match(/#([\w\u011f\u011e\u0131\u0130\u00f6\u00d6\u015f\u015e\u00fc\u00dc\u00e7\u00c7]*)$/);
-        if (matches) {
-            const prefix = textBeforeCursor.slice(0, matches.index);
-            const newValue = prefix + tag + ' ' + textAfterCursor;
-            setNewStatus(newValue);
-            setShowSuggestions(false);
-            if (textareaRef.current) {
-                textareaRef.current.focus();
-            }
+        const text = newStatus;
+        const before = text.substring(0, cursorPos);
+        const after = text.substring(cursorPos);
+        
+        // Find the last partial tag before cursor
+        const lastHashIndex = before.lastIndexOf('#');
+        if (lastHashIndex !== -1) {
+            const newText = before.substring(0, lastHashIndex) + tag + ' ' + after;
+            setNewStatus(newText);
+            // new cursor pos will be updated by onChange handleTextChange
+        } else {
+            const newText = before + tag + ' ' + after;
+            setNewStatus(newText);
+        }
+        setShowSuggestions(false);
+        if (textareaRef.current) {
+            textareaRef.current.focus();
         }
     };
 
@@ -1164,8 +1196,8 @@ export default function VoiceView() {
     const startEdit = (voice: Voice) => {
         setEditingId(voice.id);
         setEditContent(voice.content);
-        setImagePreview(voice.image_url || null);
-        setImageFile(null);
+        setMediaPreview(voice.image_url || null); // Assuming image_url can also be used for media preview
+        setMediaFile(null);
     };
 
     const handleUpdate = async (e: React.FormEvent) => {
@@ -1181,13 +1213,13 @@ export default function VoiceView() {
                 return;
             }
 
-            let finalImageUrl = imagePreview; // Could be old URL, new preview (base64/blob), or null
+            let finalMediaUrl = mediaPreview; // Could be old URL, new preview (base64/blob), or null
 
-            // If a new file was selected (imageFile exists), upload it
-            if (imageFile) {
-                const uploadedUrl = await uploadImage();
+            // If a new file was selected (mediaFile exists), upload it
+            if (mediaFile) {
+                const uploadedUrl = await uploadMedia();
                 if (uploadedUrl) {
-                    finalImageUrl = uploadedUrl;
+                    finalMediaUrl = uploadedUrl;
                 }
             }
 
@@ -1203,7 +1235,7 @@ export default function VoiceView() {
                 body: JSON.stringify({ 
                     content: editContent,
                     tags: extractedTags,
-                    image_url: finalImageUrl
+                    image_url: finalMediaUrl // Assuming backend still expects image_url for any media
                 })
             });
 
@@ -1218,8 +1250,8 @@ export default function VoiceView() {
             }
             
             setEditingId(null);
-            setImagePreview(null);
-            setImageFile(null);
+            setMediaPreview(null);
+            setMediaFile(null);
             toast.success('Gönderi güncellendi.');
             await fetchVoices();
         } catch (e: any) {
@@ -1542,12 +1574,14 @@ export default function VoiceView() {
                                         isPosting={isPosting}
                                         activeTagFilter={null}
                                         setActiveTagFilter={() => {}}
-                                        imagePreview={imagePreview}
-                                        setImagePreview={setImagePreview}
-                                        imageFile={imageFile}
-                                        setImageFile={setImageFile}
-                                        handleImageSelect={handleImageSelect}
+                                        imagePreview={mediaPreview}
+                                        setImagePreview={setMediaPreview}
+                                        imageFile={mediaFile}
+                                        setImageFile={setMediaFile}
+                                        handleImageSelect={handleMediaSelect}
                                         photoPostsEnabled={photoPostsEnabled}
+                                        videoPostsEnabled={videoPostsEnabled}
+                                        mediaType={mediaType}
                                     />
                                 ) : (
                                     <div className="bg-neutral-100 dark:bg-neutral-900 p-6 text-center border border-neutral-200 dark:border-neutral-800 mb-8">
@@ -1604,11 +1638,11 @@ export default function VoiceView() {
                                                         formatRelativeTime={formatRelativeTime}
                                                         renderContentWithTags={renderContentWithTags}
                                                         setLightboxImage={setLightboxImage}
-                                                        imagePreview={imagePreview}
-                                                        setImagePreview={setImagePreview}
-                                                        imageFile={imageFile}
-                                                        setImageFile={setImageFile}
-                                                        handleImageSelect={handleImageSelect}
+                                                        imagePreview={mediaPreview}
+                                                        setImagePreview={setMediaPreview}
+                                                        imageFile={mediaFile}
+                                                        setImageFile={setMediaFile}
+                                                        handleImageSelect={handleMediaSelect}
                                                     />
                                                 ))}
                                             </motion.div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Settings, Save, Shield, Power, Globe, Bell, AlertTriangle, X, Image as ImageIcon } from 'lucide-react';
+import { Settings, Save, Shield, Power, Globe, Bell, AlertTriangle, X, Image as ImageIcon, Video } from 'lucide-react';
 
 interface SystemSetting {
     key: string;
@@ -17,6 +17,7 @@ export default function AdminSettingsPage() {
         announcement_text: '',
         site_name: 'Univo',
         photo_uploads_enabled: true,
+        video_uploads_enabled: true,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -166,6 +167,28 @@ export default function AdminSettingsPage() {
                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.photo_uploads_enabled ? 'bg-green-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}
                         >
                             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.photo_uploads_enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Video Upload Switch */}
+                <div className="bg-white dark:bg-neutral-800 p-6 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                                <Video size={20} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-neutral-900 dark:text-white text-lg">Video Yükleme</h3>
+                                <p className="text-sm text-neutral-500">Kullanıcıların gönderilere video eklemesini kontrol edin.</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => handleSave('video_uploads_enabled', !settings.video_uploads_enabled)}
+                            disabled={isSaving}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.video_uploads_enabled ? 'bg-green-600' : 'bg-neutral-200 dark:bg-neutral-700'}`}
+                        >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.video_uploads_enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                         </button>
                     </div>
                 </div>
