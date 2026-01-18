@@ -289,7 +289,7 @@ export default function AdminVoicesPage() {
                             </div>
                         </div>
 
-                        <div className="sm:col-span-2 space-y-3">
+                        <div className="space-y-3">
                             <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500">Medya</label>
                             <div className="flex gap-2">
                                 <button
