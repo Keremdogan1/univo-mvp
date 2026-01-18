@@ -77,7 +77,7 @@ const OfficialViewSkeleton = () => {
 };
 
 export default function OfficialView() {
-    const { user, setViewLoading, loading: showSkeleton } = useAuth();
+    const { user, profile, setViewLoading, loading: showSkeleton } = useAuth();
     const [isGlobalMode, setIsGlobalMode] = React.useState(false);
     const news = [
         {
@@ -139,6 +139,8 @@ export default function OfficialView() {
     const [starredIds, setStarredIds] = React.useState<string[]>([]);
     const [blockedSources, setBlockedSources] = React.useState<string[]>([]);
     const [subscribedSources, setSubscribedSources] = React.useState<string[]>([]);
+    const university = profile?.university || 'metu';
+    const isBilkent = university === 'bilkent';
 
     // Pagination State - Show 10 items at a time
     const [displayLimit, setDisplayLimit] = React.useState(10);
@@ -369,8 +371,8 @@ export default function OfficialView() {
 
                 // Fetch Fresh Data in Background
                 const [menuRes, annRes] = await Promise.all([
-                    fetch('/api/menu', { cache: 'no-store' }),
-                    fetch('/api/announcements', { cache: 'no-store' })
+                    fetch(`/api/menu?uni=${university}`, { cache: 'no-store' }),
+                    fetch(`/api/announcements?uni=${university}`, { cache: 'no-store' })
                 ]);
 
                 if (menuRes.ok) {
@@ -679,7 +681,9 @@ export default function OfficialView() {
             {/* Newspaper Header - Static on mobile */}
             <div className="relative border-b-4 border-black dark:border-neutral-600 pb-4 mb-8 text-center transition-colors md:static bg-neutral-50 dark:bg-[#0a0a0a] pt-4 -mt-4 -mx-4 px-4 min-h-[240px]">
                 <div className="flex flex-col items-center justify-center gap-4">
-                    <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight text-black dark:text-white leading-none">Resmi Gündem</h2>
+                    <h2 className="text-4xl md:text-6xl font-black font-serif uppercase tracking-tight text-black dark:text-white leading-none">
+                        {isBilkent ? 'Kampüs Gündemi' : 'Resmi Gündem'}
+                    </h2>
 
                     {/* Global Mode Switch - Custom Morphing Button (3D Flip) */}
                     <div className="flex items-center gap-3">
@@ -692,9 +696,9 @@ export default function OfficialView() {
                                 className="w-full h-full relative preserve-3d transition-transform duration-700 ease-in-out"
                                 style={{ transform: isGlobalMode ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                             >
-                                {/* Front: ODTÜ */}
-                                <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md">
-                                     <img src="/odtu_logo.png" alt="ODTÜ" className="w-full h-full object-cover" />
+                                {/* Front: Uni Logo */}
+                                <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md flex items-center justify-center">
+                                     <img src={isBilkent ? "/bilkent_logo.png" : "/odtu_logo.png"} alt="University Logo" className="w-10 h-10 object-contain" />
                                 </div>
                                 {/* Back: Global */}
                                 <div 
@@ -797,7 +801,7 @@ export default function OfficialView() {
                                     {[
                                         { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="shrink-0" /> },
                                         { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="shrink-0" /> },
-                                        { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.filter((item: any) => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0" /> },
+                                        { id: 'odtuclass', label: isBilkent ? 'MOODLE' : 'ODTÜCLASS', count: odtuClassData.filter((item: any) => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0" /> },
                                         { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0" /> },
                                         { id: 'history', label: '', icon: <Trash2 size={14} className="shrink-0" />, count: readIds.length }
                                     ].map(tab => {
@@ -866,9 +870,9 @@ export default function OfficialView() {
                                                         <Lock size={32} className="mx-auto text-neutral-300 dark:text-neutral-600" />
                                                         <p className="text-neutral-600 dark:text-neutral-400 font-medium max-w-xs mx-auto">
                                                             {activeTab === 'emails'
-                                                                ? 'ODTÜ e-posta hesabınızı bağlayarak kütüphane, öğrenci işleri ve bölüm duyurularını buradan takip edin.'
+                                                                ? `${isBilkent ? 'Bilkent' : 'ODTÜ'} e-posta hesabınızı bağlayarak kütüphane, öğrenci işleri ve bölüm duyurularını buradan takip edin.`
                                                                 : activeTab === 'odtuclass'
-                                                                    ? 'ODTÜClass derslerinizi ve ödevlerinizi takip etmek için giriş yapın.'
+                                                                    ? `${isBilkent ? 'Moodle' : 'ODTÜClass'} derslerinizi ve ödevlerinizi takip etmek için giriş yapın.`
                                                                     : 'Yıldızladığınız ve okuduğunuz içerikleri görmek için giriş yapın.'
                                                             }
                                                         </p>
@@ -1189,16 +1193,16 @@ export default function OfficialView() {
                             <button onClick={() => setShowLoginModal(false)} className="absolute right-4 top-4 text-black dark:text-white hover:rotate-90 transition-transform"><X size={24} strokeWidth={3} /></button>
                             <div className="text-center mb-8">
                                 <div className="w-16 h-16 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center mx-auto mb-4 border-2 border-transparent"><Lock size={32} /></div>
-                                <h3 className="text-2xl font-black font-serif uppercase tracking-tight dark:text-white">ODTÜ Giriş</h3>
-                                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">E-postalarınıza erişmek için ODTÜ kullanıcı kodunuzu kullanın.</p>
+                                <h3 className="text-2xl font-black font-serif uppercase tracking-tight dark:text-white">{isBilkent ? 'Bilkent Giriş' : 'ODTÜ Giriş'}</h3>
+                                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-medium">E-postalarınıza erişmek için {isBilkent ? 'Bilkent ID' : 'ODTÜ kullanıcı kodunuzu'} kullanın.</p>
                             </div>
                             <form onSubmit={handleImapLogin} className="space-y-6">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-neutral-500 dark:text-neutral-500 mb-1.5 ml-1">Kullanıcı Adı</label>
                                     <div className="relative">
-                                        <input
+                                            <input
                                             type="text"
-                                            placeholder="e123456"
+                                            placeholder={isBilkent ? "2210XXXX" : "e123456"}
                                             className="w-full p-3 pl-4 pr-32 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded-lg focus:outline-none focus:border-black dark:focus:border-white transition-colors font-mono dark:text-white"
                                             value={loginForm.username}
                                             onChange={e => {
@@ -1209,12 +1213,12 @@ export default function OfficialView() {
                                             }}
                                             disabled={loadingEmails}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold select-none pointer-events-none text-sm">@metu.edu.tr</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold select-none pointer-events-none text-sm">@{isBilkent ? 'ug.bilkent.edu.tr' : 'metu.edu.tr'}</span>
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black uppercase text-black dark:text-white mb-2">Şifre</label>
-                                    <input type="password" required placeholder="ODTÜ Şifreniz" className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} />
+                                    <input type="password" required placeholder={isBilkent ? "Bilkent Şifreniz" : "ODTÜ Şifreniz"} className="w-full p-3 border border-neutral-200 dark:border-neutral-700 font-mono text-sm placeholder:text-neutral-400 focus:outline-none focus:bg-neutral-50 dark:focus:bg-neutral-800 dark:text-white transition-colors dark:bg-neutral-900 rounded-sm focus:border-neutral-400 dark:focus:border-neutral-500" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} />
                                 </div>
                                 {loginError && (<div className="p-3 bg-red-50 text-red-600 text-sm font-bold border-2 border-red-100 flex items-center gap-2"><span className="uppercase">Hata:</span> {loginError}</div>)}
                                 <div className="bg-neutral-100 dark:bg-neutral-800 p-4 border border-neutral-200 dark:border-neutral-700 text-xs text-black dark:text-neutral-300 relative rounded">
@@ -1222,7 +1226,7 @@ export default function OfficialView() {
                                     Şifreniz yalnızca şifreli bağlantı kurmak için anlık olarak kullanılır ve sunucularımıza <u>asla kaydedilmez</u>.
                                 </div>
                                 <button type="submit" disabled={loadingEmails} className="w-full py-4 bg-primary text-white font-black text-sm uppercase hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    {loadingEmails ? (<><Loader2 size={18} className="animate-spin" />BAĞLANIYOR...</>) : ('GİRİŞ YAP VE BAĞLA')}
+                                    {loadingEmails ? (<><Loader2 size={18} className="animate-spin" />{isBilkent ? 'BAĞLANIYOR...' : 'BAĞLANIYOR...'}</>) : ('GİRİŞ YAP VE BAĞLA')}
                                 </button>
                             </form>
                         </div>

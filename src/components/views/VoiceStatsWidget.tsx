@@ -19,6 +19,7 @@ interface VoiceStatsWidgetProps {
     activeUsers: number;
     issueNumber: number;
     onVotersClick: () => void;
+    isGlobalMode?: boolean;
 }
 
 export default function VoiceStatsWidget({
@@ -35,7 +36,8 @@ export default function VoiceStatsWidget({
     onTagRemove,
     activeUsers,
     issueNumber,
-    onVotersClick
+    onVotersClick,
+    isGlobalMode
 }: VoiceStatsWidgetProps) {
     const { user } = useAuth();
 
@@ -73,14 +75,14 @@ export default function VoiceStatsWidget({
                 <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
                     <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-3">
                         <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white">
-                            Haftanın Anketi
+                            {isGlobalMode ? 'Global Anket' : 'Haftanın Anketi'}
                         </h3>
                         <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
                             <span
                                 className="w-2 h-2 rounded-full animate-pulse"
                                 style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                             ></span>
-                            Yapay Zeka
+                            {isGlobalMode ? 'Univo Global' : 'Yapay Zeka'}
                         </span>
                     </div>
 
@@ -141,7 +143,7 @@ export default function VoiceStatsWidget({
                 <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight flex items-center gap-2 dark:text-white">
                         <TrendingUp size={24} style={{ color: 'var(--primary-color, #C8102E)' }} />
-                        Kampüste Gündem
+                        {isGlobalMode ? 'Global Gündem' : 'Kampüste Gündem'}
                     </h3>
                     
                     {/* 1. AKTİF TAGLAR */}
@@ -233,7 +235,7 @@ export default function VoiceStatsWidget({
                 {/* Campus Pulse */}
                 <div className="border-4 border-black dark:border-neutral-600 p-6 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
                     <h3 className="text-xl font-bold border-b-2 border-black dark:border-neutral-600 pb-2 mb-4 font-serif uppercase tracking-tight text-center dark:text-white">
-                        Kampüs Nabzı
+                        {isGlobalMode ? 'Global Nabız' : 'Kampüs Nabzı'}
                     </h3>
                     <div className="grid grid-cols-2 gap-4 text-center">
                         <div
@@ -249,7 +251,7 @@ export default function VoiceStatsWidget({
                                 {activeUsers}
                             </span>
                             <span className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
-                                Aktif Öğrenci
+                                {isGlobalMode ? 'Tüm Üniversiteler' : 'Aktif Öğrenci'}
                             </span>
                         </div>
                         <div className="p-3 bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-700">

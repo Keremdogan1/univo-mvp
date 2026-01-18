@@ -10,18 +10,22 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 // but technically we could cache this response for a while too.
 export const revalidate = 0;
 
-const FALLBACK_POLLS = [
-    { question: "ODTÜ'de kütüphane çalışma saatleri (7/24) yeterli mi?", options: ["Evet", "Hayır, yetersiz", "Haftasonu artırılmalı"] },
-    { question: "Yemekhane menüsünde vegan seçenekler artırılmalı mı?", options: ["Kesinlikle", "Mevcut durum iyi", "Gereksiz"] },
-    { question: "Ring seferlerinin sıklığı ve güzergahları verimli mi?", options: ["Verimli", "Yetersiz", "Güzergah değişmeli"] },
-    { question: "Kampüs kedileri için yapılan 'Kedi Evi' projesini nasıl buluyorsunuz?", options: ["Harika", "Daha iyi olabilir", "Gereksiz"] },
-    { question: "Bahar şenliği bütçesi topluluklara mı sanatçılara mı ayrılmalı?", options: ["Topluluklara", "Sanatçılara", "Eşit olmalı"] },
-    { question: "Online ders seçeneği kalıcı hale gelmeli mi?", options: ["Evet", "Hibrit olmalı", "Hayır, yüz yüze iyi"] },
-    { question: "Kampüs içi bisiklet yolları yeterli mi?", options: ["Evet", "Hayır, artırılmalı", "Bakım gerekli"] },
-    { question: "Devrim stadyumundaki etkinliklerin sesi çevreye rahatsızlık veriyor mu?", options: ["Evet, çok fazla", "Hayır, normal", "Sadece sınav dönemleri"] },
-    { question: "Yurt internet hızından memnun musunuz?", options: ["Memnunum", "Yavaş", "Sürekli kesiliyor"] },
-    { question: "A1 kapısındaki trafik yoğunluğu için çözüm öneriniz nedir?", options: ["Yeni giriş açılmalı", "Ring sayısı artmalı", "Araç girişi kısıtlanmalı"] }
-];
+const FALLBACK_POLLS: Record<string, { question: string, options: string[] }[]> = {
+    metu: [
+        { question: "ODTÜ'de kütüphane çalışma saatleri (7/24) yeterli mi?", options: ["Evet", "Hayır, yetersiz", "Haftasonu artırılmalı"] },
+        { question: "Yemekhane menüsünde vegan seçenekler artırılmalı mı?", options: ["Kesinlikle", "Mevcut durum iyi", "Gereksiz"] },
+        { question: "Ring seferlerinin sıklığı ve güzergahları verimli mi?", options: ["Verimli", "Yetersiz", "Güzergah değişmeli"] },
+        { question: "Kampüs kedileri için yapılan 'Kedi Evi' projesini nasıl buluyorsunuz?", options: ["Harika", "Daha iyi olabilir", "Gereksiz"] },
+        { question: "Bahar şenliği bütçesi topluluklara mı sanatçılara mı ayrılmalı?", options: ["Topluluklara", "Sanatçılara", "Eşit olmalı"] }
+    ],
+    bilkent: [
+        { question: "Bilkent kütüphanesi sınav döneminde 7/24 açık kalmalı mı?", options: ["Evet, kesinlikle", "Gerek yok", "Sadece A binası"] },
+        { question: "Millet Berberi'ndeki sıra bekleme süreleri nasıl?", options: ["Çok uzun", "Normal", "Daha hızlı olmalı"] },
+        { question: "Ring servislerinin güzergahı (Merkez-Doğu) yeterli mi?", options: ["Yeterli", "Doğu kampüs artırılmalı", "Ek sefer gelmeli"] },
+        { question: "Bilkent Odeon konserlerini ne sıklıkla takip ediyorsunuz?", options: ["Her zaman", "Ara sıra", "Hiç gitmedim"] },
+        { question: "Moodle üzerindeki ödev teslim süreçleri verimli mi?", options: ["Evet", "Hayır, karışık", "Geliştirilmeli"] }
+    ]
+};
 
 // Helper to get ISO Week String (YYYY-WW)
 function getWeekId() {
@@ -36,8 +40,12 @@ function getWeekId() {
     return `${d.getUTCFullYear()}-W${weekNo}`;
 }
 
-export async function GET() {
-  const getRandomFallback = () => FALLBACK_POLLS[Math.floor(Math.random() * FALLBACK_POLLS.length)];
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const uni = searchParams.get('uni') || 'metu';
+  const uniFallbacks = FALLBACK_POLLS[uni === 'bilkent' ? 'bilkent' : 'metu'];
+
+  const getRandomFallback = () => uniFallbacks[Math.floor(Math.random() * uniFallbacks.length)];
 
   // 1. Setup Supabase
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -59,9 +67,9 @@ export async function GET() {
         hash = weekId.charCodeAt(i) + ((hash << 5) - hash);
       }
       // Ensure positive index
-      const index = Math.abs(hash) % FALLBACK_POLLS.length;
-      console.log(`Using Deterministic Fallback for ${weekId} -> Index ${index}`);
-      return FALLBACK_POLLS[index];
+      const index = Math.abs(hash) % uniFallbacks.length;
+      console.log(`Using Deterministic Fallback for ${weekId} (${uni}) -> Index ${index}`);
+      return uniFallbacks[index];
   };
 
   try {
@@ -99,18 +107,21 @@ export async function GET() {
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    const uniName = uni === 'bilkent' ? 'Bilkent Üniversitesi' : 'ODTÜ (Orta Doğu Teknik Üniversitesi)';
+    const uniJargon = uni === 'bilkent' ? 'İhsan Doğramacı, Merkez, Doğu, Odeon, Mayfest, Moodle, Stars, Ring' : 'Hocam, Devrim, Ring, Çatı, Yalıncak, A1 Kapısı, ODTÜClass';
+
     const prompt = `
-      Sen ODTÜ (Orta Doğu Teknik Üniversitesi) kampüs gazetesinin yapay zeka editörüsün.
+      Sen ${uniName} kampüs gazetesinin yapay zeka editörüsün.
       
       GÖREV:
       1. Şu anki tarihi analiz et: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
-      2. Bu tarihte/haftada ODTÜ'de akademik veya sosyal olarak ne olduğunu TAHMİN ET (Örn: Final haftası mı? Tatil mi? Kayıt dönemi mi?).
-      3. ODTÜ Kültürü ile bu gündemi birleştirerek HAFTALIK bir anket sorusu oluştur.
+      2. Bu tarihte/haftada ${uniName} kampüsünde akademik veya sosyal olarak ne olduğunu TAHMİN ET (Örn: Final haftası mı? Tatil mi? Kayıt dönemi mi?).
+      3. ${uniName} Kültürü ile bu gündemi birleştirerek HAFTALIK bir anket sorusu oluştur.
       
       KRİTİK KURALLAR:
       - Soru metni içinde kesinlikle spesifik bir GÜN veya TARİH (Örn: "5 Ocak", "Bugün Pazartesi") BELİRTME. 
       - Soru, tüm hafta boyunca yayında kalacağı için zamandan bağımsız ama haftalık gündeme uygun olmalı.
-      - ODTÜ jargonunu (Hocam, Devrim, Ring, Çatı vb.) doğal bir şekilde kullan.
+      - ${uniName} jargonunu (${uniJargon}) doğal bir şekilde kullan.
       
       Çıktı Formatı (JSON):
       {

@@ -32,11 +32,11 @@ export async function GET(request: Request) {
       .select(`
         *,
         image_url,
-        profiles:user_id (full_name, nickname, department, avatar_url, student_id, class_year),
+        profiles:user_id (full_name, nickname, department, avatar_url, student_id, class_year, university),
         voice_reactions (user_id, reaction_type),
         voice_comments (
           id, content, created_at, user_id, parent_id,
-          user:user_id (full_name, avatar_url, department, class_year),
+          user:user_id (full_name, avatar_url, department, class_year, university),
           voice_comment_reactions (user_id, reaction_type)
         )
       `)
@@ -73,11 +73,11 @@ export async function GET(request: Request) {
         .from('campus_voices')
         .select(`
           *,
-          profiles:user_id (full_name, department, avatar_url, student_id, class_year),
+          profiles:user_id (full_name, department, avatar_url, student_id, class_year, university),
           voice_reactions (user_id, reaction_type),
           voice_comments (
             id, content, created_at, user_id, parent_id,
-            user:user_id (full_name, avatar_url, department, class_year),
+            user:user_id (full_name, avatar_url, department, class_year, university),
             voice_comment_reactions (user_id, reaction_type)
           )
         `)
@@ -179,6 +179,7 @@ export async function GET(request: Request) {
             user_avatar: c.user?.avatar_url,
             user_department: c.user?.department ? cleanDept(c.user.department) : null,
             user_class: c.user?.class_year,
+            user_university: c.user?.university,
             user_id: c.user_id,
             parent_id: c.parent_id,
             reactions: { count: cLikes - cDislikes, data: c.voice_comment_reactions || []}

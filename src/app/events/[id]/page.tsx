@@ -181,6 +181,8 @@ export default async function EventDetailPage({
                       eventTime={event.time}
                       eventLocation={event.location}
                       eventDescription={event.description}
+                      registrationLink={event.registration_link}
+                      quota={event.quota}
                     />
                 ) : (
                     <div className="text-center font-bold text-neutral-500 py-4 border-2 border-neutral-300 bg-neutral-100 italic">

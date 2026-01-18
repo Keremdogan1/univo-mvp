@@ -86,8 +86,11 @@ const CommunityViewSkeleton = () => {
 
 export default function CommunityView() {
   const router = useRouter();
-  const { setViewLoading, loading: showSkeleton } = useAuth();
+  const { user, profile, setViewLoading, loading: showSkeleton } = useAuth();
   const [isGlobalMode, setIsGlobalMode] = useState(false);
+
+  const university = profile?.university || 'metu';
+  const isBilkent = university === 'bilkent';
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [popularEvents, setPopularEvents] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
@@ -184,15 +187,15 @@ export default function CommunityView() {
             <div 
                 className="relative w-14 h-14 rounded-full perspective-1000 cursor-pointer mb-2"
                 onClick={() => setIsGlobalMode(!isGlobalMode)}
-                title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
+                title={isGlobalMode ? (isBilkent ? "Bilkent Moduna Geç" : "ODTÜ Moduna Geç") : "Global Moda Geç"}
             >
                 <div 
                     className="w-full h-full relative preserve-3d transition-transform duration-700 ease-in-out"
                     style={{ transform: isGlobalMode ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                 >
-                    {/* Front: ODTÜ */}
-                    <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md">
-                         <img src="/odtu_logo.png" alt="ODTÜ" className="w-full h-full object-cover" />
+                    {/* Front: Uni Logo */}
+                    <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md flex items-center justify-center">
+                         <img src={isBilkent ? "/bilkent_logo.png" : "/odtu_logo.png"} alt="University Logo" className="w-10 h-10 object-contain" />
                     </div>
                     {/* Back: Global */}
                     <div 

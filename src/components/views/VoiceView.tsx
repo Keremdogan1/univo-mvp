@@ -145,6 +145,7 @@ interface VoiceItemProps {
     setImageFile: (val: File | null) => void;
     handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isPlaying: boolean;
+    isGlobalMode?: boolean;
 }
 
 function VoiceItem({
@@ -187,7 +188,8 @@ function VoiceItem({
     imageFile,
     setImageFile,
     handleImageSelect,
-    isPlaying
+    isPlaying,
+    isGlobalMode
 }: VoiceItemProps) {
     const { openReportModal } = useReport();
     const reactions = voice.reactions || [];
@@ -240,10 +242,10 @@ function VoiceItem({
                                 {voice.user?.full_name || 'Kullanıcı'}
                             </Link>
                         )}
-                        {(voice.user?.department || voice.user?.class_year) && (
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                        {(voice.user?.department || voice.user?.class_year || (isGlobalMode && voice.user?.university)) && (
+                            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium capitalize">
                                 <span className="mx-1 opacity-50">|</span>
-                                {[voice.user.department, voice.user.class_year].filter(Boolean).join(' • ')}
+                                {[isGlobalMode ? voice.user?.university : null, voice.user.department, voice.user.class_year].filter(Boolean).join(' • ')}
                             </span>
                         )}
                         <span className="text-xs text-neutral-400 dark:text-neutral-500 font-serif">
@@ -562,6 +564,7 @@ interface Voice {
         full_name: string;
         nickname?: string;
         department: string;
+        university?: string;
         avatar_url?: string;
         class_year?: string;
     };
@@ -588,10 +591,13 @@ interface Voice {
 const INITIAL_TAGS = ['#kampüs', '#yemekhane', '#kütüphane', '#ulaşım', '#sınav', '#etkinlik', '#spor'];
 
 export default function VoiceView() {
-    const { user, setViewLoading, loading: showSkeleton } = useAuth();
+    const { user, profile, setViewLoading, loading: showSkeleton } = useAuth();
     const router = useRouter();
     const [voices, setVoices] = useState<Voice[]>([]);
     const [isGlobalMode, setIsGlobalMode] = useState(false);
+
+    const university = profile?.university || 'metu';
+    const isBilkent = university === 'bilkent';
 
     const [newStatus, setNewStatus] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
@@ -1555,7 +1561,7 @@ export default function VoiceView() {
     useEffect(() => {
         const fetchPoll = async () => {
             try {
-                const res = await fetch('/api/poll');
+                const res = await fetch(`/api/poll?uni=${university}`);
                 const data = await res.json();
                 setActivePoll(data);
                 fetchPollResults(data);
@@ -1565,7 +1571,7 @@ export default function VoiceView() {
             } finally { setPollLoading(false); }
         };
         fetchPoll();
-    }, [user]);
+    }, [user, university]);
 
     const fetchVoters = async () => {
         if (!activePoll) return;
@@ -1606,15 +1612,15 @@ export default function VoiceView() {
                         <div 
                             className="relative w-14 h-14 rounded-full perspective-1000 cursor-pointer mb-2"
                             onClick={() => setIsGlobalMode(!isGlobalMode)}
-                            title={isGlobalMode ? "ODTÜ Moduna Geç" : "Global Moda Geç"}
+                        title={isGlobalMode ? (isBilkent ? "Bilkent Moduna Geç" : "ODTÜ Moduna Geç") : "Global Moda Geç"}
                         >
                                 <div 
                                     className="w-full h-full relative preserve-3d transition-transform duration-700 ease-in-out"
                                     style={{ transform: isGlobalMode ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                                 >
-                                {/* Front: ODTÜ */}
-                                <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md">
-                                     <img src="/odtu_logo.png" alt="ODTÜ" className="w-full h-full object-cover" />
+                                {/* Front: Uni Logo */}
+                                <div className="absolute inset-0 backface-hidden rounded-full overflow-hidden border-2 border-black dark:border-neutral-400 bg-white dark:bg-black shadow-md flex items-center justify-center">
+                                     <img src={isBilkent ? "/bilkent_logo.png" : "/odtu_logo.png"} alt="University Logo" className="w-10 h-10 object-contain" />
                                 </div>
                                 {/* Back: Global */}
                                 <div 
@@ -1725,15 +1731,15 @@ export default function VoiceView() {
 
                                 <div className="space-y-6">
                                     {voices.length === 0 && !showSkeleton ? (
-                                        <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz bir ses yok. İlk sen ol!</div>
+                                        <div className="text-center py-20 bg-neutral-50 dark:bg-[#0a0a0a]/50 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-800 w-full">
+                                            <Sparkles className="mx-auto mb-4 text-neutral-300 dark:text-neutral-700" size={48} />
+                                            <p className="text-neutral-500 dark:text-neutral-400 font-serif italic">Henüz bir ses duyulmadı. İlk sen ol!</p>
+                                        </div>
                                     ) : (
-                                        <AnimatePresence mode="wait">
+                                        <AnimatePresence mode="popLayout">
                                             <motion.div
-                                                key="voices-list"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.2 }}
+                                                layout
+                                                className="space-y-4"
                                             >
                                                 {voices.map((voice) => (
                                                     <VoiceItem
@@ -1778,6 +1784,7 @@ export default function VoiceView() {
                                                         setImageFile={setMediaFile}
                                                         handleImageSelect={handleMediaSelect}
                                                         isPlaying={playingVideoId === voice.id}
+                                                        isGlobalMode={isGlobalMode}
                                                     />
                                                 ))}
                                             </motion.div>
@@ -1786,9 +1793,9 @@ export default function VoiceView() {
                                 </div>
                             </div>
 
-                            {/* Sidebar: Polls & Stats - Shows first on mobile, last on desktop */}
-                            <div className="order-first lg:order-last -mx-4 px-4 lg:mx-0 lg:px-0">
-                                <VoiceStatsWidget
+                            {/* Right Sidebar - Sticky on desktop */}
+                            <div className="lg:col-span-1 space-y-6">
+                                <VoiceStatsWidget 
                                     activePoll={activePoll}
                                     pollLoading={pollLoading}
                                     pollResults={pollResults}
@@ -1803,13 +1810,10 @@ export default function VoiceView() {
                                     activeUsers={activeUsers}
                                     issueNumber={issueNumber}
                                     onVotersClick={fetchVoters}
+                                    isGlobalMode={isGlobalMode}
                                 />
-
                             </div>
                         </div>
-
-
-
                     </motion.div>
                 )}
             </AnimatePresence>

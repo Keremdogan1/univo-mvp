@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { ExternalLink } from 'lucide-react';
 
 interface RSVPButtonProps {
   eventId: string;
@@ -12,6 +14,8 @@ interface RSVPButtonProps {
   eventTime: string;
   eventLocation: string;
   eventDescription: string;
+  registrationLink?: string;
+  quota?: number;
 }
 
 export default function RSVPButton({ 
@@ -20,7 +24,9 @@ export default function RSVPButton({
   eventDate,
   eventTime,
   eventLocation,
-  eventDescription
+  eventDescription,
+  registrationLink,
+  quota
 }: RSVPButtonProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -30,6 +36,9 @@ export default function RSVPButton({
   
   // New state for confirmation step
   const [confirming, setConfirming] = useState(false);
+
+  // Helper to check if eventId is a valid UUID
+  const isUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
   // Helper to generate Google Calendar URL
   const getGoogleCalendarUrl = () => {
@@ -73,7 +82,7 @@ export default function RSVPButton({
   };
 
   const fetchRSVPStatus = async () => {
-    if (!user || !eventId) return;
+    if (!user || !eventId || !isUuid(eventId)) return;
 
     try {
       const { data, error } = await supabase
@@ -81,7 +90,7 @@ export default function RSVPButton({
         .select('rsvp_status')
         .eq('event_id', eventId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (data) {
         setStatus(data.rsvp_status as 'going' | 'not_going');
@@ -93,7 +102,7 @@ export default function RSVPButton({
   };
 
   const fetchAttendeeCount = async () => {
-    if (!eventId) return;
+    if (!eventId || !isUuid(eventId)) return;
 
     try {
       const { count, error } = await supabase
@@ -133,20 +142,41 @@ export default function RSVPButton({
     setLoading(true);
 
     try {
+      // If it's a mock ID (not UUID), just update local state and toast
+      if (!isUuid(eventId)) {
+        if (newStatus === 'going') {
+          setAttendeeCount(attendeeCount + 1);
+          setStatus('going');
+          toast.success('Kaydınız başarıyla tamamlandı! (Demo Modu)');
+        } else {
+          if (status === 'going') {
+            setAttendeeCount(Math.max(0, attendeeCount - 1));
+          }
+          setStatus(null);
+          toast.info('Kaydınız iptal edildi. (Demo Modu)');
+        }
+        setConfirming(false);
+        setLoading(false);
+        return;
+      }
+
       // If clicking "İptal Et" (not_going), always remove the RSVP
       if (newStatus === 'not_going') {
-        await supabase
+        const { error } = await supabase
           .from('event_attendees')
           .delete()
           .eq('event_id', eventId)
           .eq('user_id', user.id);
         
+        if (error) throw error;
+
         // Update count if they were going
         if (status === 'going') {
           setAttendeeCount(Math.max(0, attendeeCount - 1));
         }
         setStatus(null);
         setConfirming(false); // Reset confirmation state on cancel
+        toast.info('Kaydınız iptal edildi.');
       } else if (newStatus === 'going') {
         // If clicking "Katılıyorum" (confirming), insert or update
         const { error } = await supabase
@@ -165,6 +195,7 @@ export default function RSVPButton({
         }
         setStatus(newStatus);
         setConfirming(false);
+        toast.success('Etkinliğe başarıyla katıldınız!');
       }
       
       // Notify other components (like AttendeesList) that RSVP changed
@@ -173,6 +204,7 @@ export default function RSVPButton({
 
     } catch (error) {
       console.error('Error updating RSVP:', error);
+      toast.error('İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
