@@ -650,31 +650,79 @@ export default function VoiceView() {
         const observerOptions = {
             root: null,
             rootMargin: '0px',
-            threshold: 0.7 // Video must be 70% visible to play
+            threshold: 0.6 // Reduced to 60% for better detection
         };
 
         const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+            // Find the most visible video
+            let maxRatio = 0;
+            let bestVideoId: string | null = null;
+            let currentPlayingIntersecting = false;
+
             entries.forEach(entry => {
+                const videoId = entry.target.getAttribute('data-voice-id');
+                
                 if (entry.isIntersecting) {
-                    const videoId = entry.target.getAttribute('data-voice-id');
-                    if (videoId) {
-                        // Start playing this video
-                        setPlayingVideoId(videoId);
-                    }
-                } else {
-                    const videoId = entry.target.getAttribute('data-voice-id');
-                    // Only stop if it's the currently playing one
-                    setPlayingVideoId(prev => (prev === videoId ? null : prev));
+                   if (entry.intersectionRatio > maxRatio) {
+                       maxRatio = entry.intersectionRatio;
+                       bestVideoId = videoId;
+                   }
+                }
+                
+                // Check if the currently playing video is still valid/intersecting
+                if (videoId && videoId === playingVideoId && entry.isIntersecting) {
+                    currentPlayingIntersecting = true;
                 }
             });
+
+            if (bestVideoId) {
+                setPlayingVideoId(bestVideoId);
+            } else if (!currentPlayingIntersecting && entries.length > 0) {
+                 // If the current video is present in entries but NOT intersecting anymore, stop it.
+                 // We need to be careful not to stop it if it wasn't part of this specific batch of entries.
+                 // However, usually we won't get partial batches often.
+                 // Safer logic:
+                 entries.forEach(entry => {
+                     const vidId = entry.target.getAttribute('data-voice-id');
+                     if (vidId === playingVideoId && !entry.isIntersecting) {
+                         setPlayingVideoId(null);
+                     }
+                 });
+            }
         };
 
-        const observer = new IntersectionObserver(handleIntersection, observerOptions);
-        const videoElements = document.querySelectorAll('.autoplay-video-container');
-        videoElements.forEach(el => observer.observe(el));
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const videoId = entry.target.getAttribute('data-voice-id');
+                if (entry.isIntersecting) {
+                    setPlayingVideoId(videoId);
+                } else {
+                     setPlayingVideoId(prev => (prev === videoId ? null : prev));
+                }
+            });
+        }, observerOptions);
+
+        let timeoutId: NodeJS.Timeout;
+        
+        // Wait for DOM to paint (especially with animations)
+        const initObserver = () => {
+             const videoElements = document.querySelectorAll('.autoplay-video-container');
+             if (videoElements.length > 0) {
+                 videoElements.forEach(el => observer.observe(el));
+             } else {
+                 // Retry once if empty (maybe too early)
+                 setTimeout(() => {
+                     const retryElements = document.querySelectorAll('.autoplay-video-container');
+                     retryElements.forEach(el => observer.observe(el));
+                 }, 1000);
+             }
+        };
+
+        timeoutId = setTimeout(initObserver, 500);
 
         return () => {
             observer.disconnect();
+            clearTimeout(timeoutId);
         };
     }, [voices]); // Re-run when voices list changes
 
