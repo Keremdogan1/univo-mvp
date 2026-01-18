@@ -690,7 +690,7 @@ export default function VoiceView() {
         }
 
         const { data: { publicUrl } } = supabase.storage
-            .from('voice-images')
+            .from('voice-media')
             .getPublicUrl(fileName);
 
         console.log('Media uploaded successfully. Public URL:', publicUrl);
