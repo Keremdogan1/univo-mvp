@@ -134,6 +134,7 @@ interface VoiceItemProps {
 
     formatRelativeTime: (d: string) => string;
     renderContentWithTags: (content: string) => React.ReactNode;
+    setLightboxImage?: (url: string | null) => void;
 }
 
 function VoiceItem({
@@ -169,7 +170,8 @@ function VoiceItem({
     newComment,
     setNewComment,
     formatRelativeTime,
-    renderContentWithTags
+    renderContentWithTags,
+    setLightboxImage
 }: VoiceItemProps) {
     const { openReportModal } = useReport();
     const reactions = voice.reactions || [];
@@ -328,7 +330,7 @@ function VoiceItem({
                                             src={voice.image_url} 
                                             alt="Post image" 
                                             className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
-                                            onClick={() => voice.image_url && window.open(voice.image_url, '_blank')}
+                                            onClick={() => voice.image_url && setLightboxImage(voice.image_url)}
                                         />
                                     </div>
                                 )}
@@ -619,6 +621,7 @@ export default function VoiceView() {
     const [voters, setVoters] = useState<{ user_id: string, display_name: string, option_index: number, avatar_url?: string }[]>([]);
     const [isLoadingVoters, setIsLoadingVoters] = useState(false);
     const [selectedVoterOption, setSelectedVoterOption] = useState(0);
+    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
     useEffect(() => {
         fetchVoices();
@@ -1470,6 +1473,7 @@ export default function VoiceView() {
                                                         setNewComment={setNewComment}
                                                         formatRelativeTime={formatRelativeTime}
                                                         renderContentWithTags={renderContentWithTags}
+                                                        setLightboxImage={setLightboxImage}
                                                     />
                                                 ))}
                                             </motion.div>
@@ -1500,6 +1504,38 @@ export default function VoiceView() {
 
 
 
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Lightbox Modal */}
+            <AnimatePresence>
+                {lightboxImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setLightboxImage(null)}
+                        className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+                    >
+                        <motion.button
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="absolute top-6 right-6 text-white p-2 hover:bg-white/10 rounded-full transition-colors"
+                            onClick={() => setLightboxImage(null)}
+                        >
+                            <X size={32} />
+                        </motion.button>
+                        <motion.img
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            src={lightboxImage}
+                            alt="Full size post image"
+                            className="max-w-full max-h-full object-contain rounded-sm shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
