@@ -13,6 +13,7 @@ import CommentThread from '@/components/voice/CommentSystem';
 import CreateVoiceForm from '@/components/voice/CreateVoiceForm';
 import FriendButton from '../FriendButton';
 import VoiceStatsWidget from './VoiceStatsWidget';
+import VideoPlayer from '@/components/ui/VideoPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReport } from '@/contexts/ReportContext';
 // Shared Component Import
@@ -376,12 +377,21 @@ function VoiceItem({
                                 </p>
                                 {voice.image_url && (
                                     <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
-                                        <img 
-                                            src={voice.image_url} 
-                                            alt="Post image" 
-                                            className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
-                                            onClick={() => voice.image_url && setLightboxImage?.(voice.image_url)}
-                                        />
+                                        {voice.image_url.match(/\.(mp4|webm|ogg|mov)/i) ? (
+                                            <div className="h-auto max-h-[500px] w-full bg-black">
+                                                <VideoPlayer 
+                                                    src={voice.image_url} 
+                                                    className="w-full h-full max-h-[500px]"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <img 
+                                                src={voice.image_url} 
+                                                alt="Paylaşım medyası" 
+                                                className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
+                                                onClick={() => voice.image_url && setLightboxImage?.(voice.image_url)}
+                                            />
+                                        )}
                                     </div>
                                 )}
                             </div>
