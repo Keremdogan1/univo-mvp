@@ -238,8 +238,8 @@ export default function VoiceItem({
                                 <div className="mt-3">
                                     {imagePreview ? (
                                         <div className="relative rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 h-48 sm:h-64">
-                                            {/* Simple detection for preview */}
-                                            {imagePreview.startsWith('data:video') ? (
+                                            {/* Detect video by data uri or extension */}
+                                            {imagePreview.startsWith('data:video') || imagePreview.match(/\.(mp4|webm|ogg|mov)(?:\?|$)/i) ? (
                                                 <div className="h-64 w-full bg-black">
                                                     <VideoPlayer src={imagePreview} className="w-full h-full object-contain" />
                                                 </div>
@@ -284,7 +284,7 @@ export default function VoiceItem({
                                     </p>
                                     {voice.image_url && (
                                         <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
-                                            {voice.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                            {voice.image_url.match(/\.(mp4|webm|ogg|mov)(?:\?|$)/i) ? (
                                                 <div className="h-auto max-h-[500px] w-full bg-black">
                                                     <VideoPlayer 
                                                         src={voice.image_url} 
