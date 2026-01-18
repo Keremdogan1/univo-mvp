@@ -1,4 +1,3 @@
-```typescript
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { toTitleCase } from '@/lib/utils';
