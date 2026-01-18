@@ -19,14 +19,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
             .from('communities')
             .select(`
                 *,
-                admin:admin_id (id, full_name, email, avatar_url, student_id, department)
+                admin:admin_id (id, full_name, avatar_url, student_id, department)
             `)
             .eq('id', id)
             .single();
 
         if (communityError) throw communityError;
 
-        // 2. Fetch Follower Count
+        // 2. Fetch Admin Email separately (since it's in auth.users, not profiles)
+        let adminEmail = null;
+        if (community.admin_id) {
+            const { data: { user: authUser } } = await supabase.auth.admin.getUserById(community.admin_id);
+            adminEmail = authUser?.email;
+        }
+
+        // 3. Fetch Follower Count
         const { count: followerCount, error: followersError } = await supabase
             .from('community_followers')
             .select('*', { count: 'exact', head: true })
@@ -49,7 +56,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
                 follower_count: followerCount || 0,
                 event_count: events?.length || 0
             },
-            admin: community.admin,
+            admin: {
+                ...community.admin,
+                email: adminEmail
+            },
             events: events || []
         });
 
