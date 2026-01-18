@@ -601,8 +601,8 @@ export default function OfficialView() {
             if (blockedSources.includes(item.source)) return false;
 
             if (activeTab === 'agenda') {
-                // Show only unread announcements/event
-                return (item.type === 'announcement' || item.type === 'event') && !readIds.includes(String(item.id));
+                // Show only unread announcements, events, and emails
+                return (item.type === 'announcement' || item.type === 'event' || item.type === 'email') && !readIds.includes(String(item.id));
             }
 
             if (activeTab === 'emails') {
@@ -744,7 +744,7 @@ export default function OfficialView() {
                                 {/* Tab Navigation - Icons always visible, active tab shows label */}
                                 <div className="flex border-b-2 border-black dark:border-white mb-6 gap-1 sm:gap-2 md:gap-4 overflow-x-auto no-scrollbar scroll-smooth">
                                     {[
-                                        { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event'))).length, icon: <Megaphone size={14} className="shrink-0" /> },
+                                        { id: 'agenda', label: 'GÜNDEM', count: allNews.filter(n => (!readIds.includes(String(n.id)) && (n.type === 'announcement' || n.type === 'event' || n.type === 'email'))).length, icon: <Megaphone size={14} className="shrink-0" /> },
                                         { id: 'emails', label: 'E-POSTA', count: user ? emails.filter(n => !readIds.includes(String(n.id))).length : 0, icon: <Mail size={14} className="shrink-0" /> },
                                         { id: 'odtuclass', label: 'ODTÜCLASS', count: odtuClassData.filter((item: any) => !readIds.includes(String(item.id))).length, icon: <GraduationCap size={14} className="shrink-0" /> },
                                         { id: 'starred', label: '', count: starredIds.length, icon: <Star size={14} className="shrink-0" /> },

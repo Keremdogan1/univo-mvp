@@ -25,32 +25,24 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
     const connection = await imaps.connect(config);
     await connection.openBox('INBOX');
 
-    // Optimization: Don't fetch headers for ALL messages in the last 14 days.
-    // 1. Just find the messages first (lightweight)
-    const delay = 24 * 3600 * 1000 * 14; // Increase to 14 days for robustness (UI will filter if needed)
-    const sinceDate = new Date(Date.now() - delay);
-    
-    // IMAP SINCE expects "DD-Mon-YYYY" format (e.g., 01-Jan-2024)
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const sinceStr = `${String(sinceDate.getDate()).padStart(2, '0')}-${months[sinceDate.getMonth()]}-${sinceDate.getFullYear()}`;
-    const searchCriteria = [['SINCE', sinceStr]];
-    
-    // We only need the UID and SeqNo initially to sort
+    // 1. Get ALL message summaries (Lightweight) to find the latest UIDs
     const searchOptions = {
         bodies: ['HEADER.FIELDS (DATE)'], 
         struct: false
     };
 
-    // Get all messages in range (Lightweight)
-    let searchRes = await connection.search(searchCriteria, searchOptions);
+    let searchRes = await connection.search(['ALL'], searchOptions);
+
+    if (searchRes.length === 0) {
+        connection.end();
+        return [];
+    }
 
     // 2. Sort by UID descending (Newest first)
     searchRes.sort((a, b) => b.attributes.uid - a.attributes.uid);
 
     // 3. Take only the top 50 latest
     const topLimit = searchRes.slice(0, 50);
-    
-    // Collect UIDs to fetch fully
     let uidsToFetch = topLimit.map(m => m.attributes.uid);
 
     // 4. Add Extra UIDs (Starred) if provided
@@ -60,46 +52,39 @@ async function fetchRecentEmails(username: string, password: string, extraUids: 
         uidsToFetch = [...uidsToFetch, ...newUids];
     }
 
-    // 5. If we have messages, fetch their FULL headers now
-    let emails: any[] = [];
+    // 5. Fetch detailed headers for these specific UIDs
+    const fetchCriteria = [['UID', uidsToFetch]]; // imap-simple handles arrays of UIDs here
+    const fetchPartsOptions = {
+        bodies: ['HEADER'], 
+        markSeen: false,
+        struct: true
+    };
+
+    const detailedRes = await connection.search(fetchCriteria, fetchPartsOptions);
     
-    if (uidsToFetch.length > 0) {
-        // IMPORTANT: Join UIDs with a comma for the IMAP search string. 
-        // Passing an array directly to 'UID' criteria can sometimes result in only searching for the first item.
-        const uidString = uidsToFetch.join(',');
-        const fetchCriteria = [['UID', uidString]];
-        const fetchPartsOptions = {
-            bodies: ['HEADER'], 
-            markSeen: false,
-            struct: true
-        };
-
-        const detailedRes = await connection.search(fetchCriteria, fetchPartsOptions);
+    // Map the detailed results
+    const emails = detailedRes.map((m: any) => {
+        const headerPart = m.parts.find((p: any) => p.which === 'HEADER');
+        const headerBody = headerPart ? headerPart.body : {};
         
-        // Map the detailed results
-        emails = detailedRes.map((m) => {
-            const headerPart = m.parts.find(p => p.which === 'HEADER');
-            const headerBody = headerPart ? headerPart.body : {};
-            
-            // Decode Subject if encoded
-            let subject = headerBody.subject ? headerBody.subject[0] : 'Konusuz';
-            let from = headerBody.from ? headerBody.from[0] : 'Bilinmeyen Gönderen';
-            let dateStr = headerBody.date ? headerBody.date[0] : new Date().toISOString();
-            let timestamp = Date.parse(dateStr) || Date.now();
+        // Decode Subject/From
+        let subject = headerBody.subject ? headerBody.subject[0] : 'Konusuz';
+        let from = headerBody.from ? headerBody.from[0] : 'Bilinmeyen Gönderen';
+        let dateStr = headerBody.date ? headerBody.date[0] : new Date().toISOString();
+        let timestamp = Date.parse(dateStr) || Date.now();
 
-            return {
-                id: m.attributes.uid,
-                seq: m.seqNo,
-                subject: subject,
-                from: from,
-                date: dateStr,
-                timestamp: timestamp
-            };
-        });
+        return {
+            id: m.attributes.uid,
+            seq: m.seqNo,
+            subject: subject,
+            from: from,
+            date: dateStr,
+            timestamp: timestamp
+        };
+    });
 
-        // Re-sort because the second search might return in different order
-        emails.sort((a, b) => b.id - a.id);
-    }
+    // Final sort by UID descending
+    emails.sort((a, b) => b.id - a.id);
 
     connection.end();
     return emails;
