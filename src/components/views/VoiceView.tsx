@@ -758,7 +758,7 @@ export default function VoiceView() {
         setFilters(prev => ({ ...prev, [key]: prev[key] === value ? null : value }));
     };
 
-    const handleSearchInput = async (val: string) => {
+    const handleSearchInput = (val: string) => {
         setSearchTerm(val);
         if (val.startsWith('#')) {
             const query = val.slice(1).toLowerCase();
@@ -768,23 +768,11 @@ export default function VoiceView() {
             setSearchSuggestions(filtered.slice(0, 5));
         } else if (val.startsWith('@')) {
             const query = val.slice(1).toLowerCase();
-            if (query.length > 1) {
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('id, full_name, nickname')
-                    .or(`full_name.ilike.%${query}%,nickname.ilike.%${query}%`)
-                    .limit(5);
-                
-                if (data) {
-                    setSearchSuggestions(data.map(u => ({ 
-                        type: 'user' as const, 
-                        value: u.id, 
-                        label: `@${u.nickname || u.full_name}` 
-                    })));
-                }
-            } else {
-                setSearchSuggestions([]);
-            }
+            const users = voices
+                .filter(v => !v.is_anonymous && (v.user?.full_name?.toLowerCase().includes(query) || v.user?.nickname?.toLowerCase().includes(query)))
+                .map(v => ({ type: 'user' as const, value: v.user_id, label: `@${v.user?.full_name || 'Kullanıcı'}` }));
+            const uniqueUsers = Array.from(new Map(users.map(u => [u.value, u])).values());
+            setSearchSuggestions(uniqueUsers.slice(0, 5));
         } else {
             setSearchSuggestions([]);
         }
@@ -1659,69 +1647,38 @@ export default function VoiceView() {
                                 )}
 
                                 <div className="space-y-6">
-                                    {/* Multi-select filter chips row (Restored and Improved) */}
-                                    <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-1 px-1">
-                                        <button
-                                            onClick={() => setFilters(prev => ({ ...prev, tags: [], userId: null }))}
-                                            className={cn(
-                                                "h-10 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2",
-                                                filters.tags.length === 0 && !filters.userId
-                                                    ? "bg-black dark:bg-white text-white dark:text-black border-transparent shadow-md"
-                                                    : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
-                                            )}
-                                        >
-                                            Hepsi
-                                        </button>
-                                        
-                                        {/* Special Media Filter Chip */}
-                                        <button
-                                            onClick={() => toggleFilter('hasImage', true)}
-                                            className={cn(
-                                                "h-10 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2 flex items-center gap-2",
-                                                filters.hasImage === true
-                                                    ? "bg-primary text-white border-transparent shadow-md scale-105"
-                                                    : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-primary/30"
-                                            )}
-                                        >
-                                            <Camera size={14} />
-                                            Medya
-                                        </button>
-
-                                        {/* Standard Tags Chips */}
-                                        {INITIAL_TAGS.map(tagStr => {
-                                            const tag = tagStr.replace('#', '');
-                                            const isActive = filters.tags.includes(tag);
-                                            return (
-                                                <button
-                                                    key={tag}
-                                                    onClick={() => isActive ? removeTagFilter(tag) : addTagFilter(tag)}
-                                                    className={cn(
-                                                        "h-10 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border-2 whitespace-nowrap",
-                                                        isActive
-                                                            ? "bg-black dark:bg-white text-white dark:text-black border-transparent shadow-md"
-                                                            : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
-                                                    )}
-                                                >
-                                                    #{tag}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Additional Status: Anonymous toggle if needed, but Medya is already above as a chip */}
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <button
-                                            onClick={() => toggleFilter('isAnonymous', true)}
-                                            className={cn(
-                                                "h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2",
-                                                filters.isAnonymous === true
-                                                    ? "bg-neutral-900 dark:bg-white text-white dark:text-black border-transparent shadow-sm"
-                                                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 border-transparent hover:bg-neutral-200"
-                                            )}
-                                        >
-                                            <Shield size={12} />
-                                            Sadece Anonimler
-                                        </button>
+                                    {/* Media & Status Section */}
+                                    <div className="p-4 bg-neutral-50 dark:bg-black/30 border-2 border-neutral-200 dark:border-neutral-800 rounded-2xl">
+                                        <div className="text-[10px] font-black tracking-widest text-neutral-400 uppercase mb-3 px-1 flex items-center gap-2">
+                                            <Camera size={12} />
+                                            Medya & Görünüm
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => toggleFilter('hasImage', true)}
+                                                className={cn(
+                                                    "h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
+                                                    filters.hasImage === true
+                                                        ? "bg-[var(--primary-color)] text-white border-transparent shadow-md scale-105"
+                                                        : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-primary/30"
+                                                )}
+                                            >
+                                                <Camera size={16} />
+                                                Fotoğraflılar
+                                            </button>
+                                            <button
+                                                onClick={() => toggleFilter('isAnonymous', true)}
+                                                className={cn(
+                                                    "h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
+                                                    filters.isAnonymous === true
+                                                        ? "bg-neutral-900 dark:bg-white text-white dark:text-black border-transparent shadow-md scale-105"
+                                                        : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-black/30"
+                                                )}
+                                            >
+                                                <Shield size={16} />
+                                                Anonimler
+                                            </button>
+                                        </div>
                                     </div>
                                     {voices.length === 0 && !showSkeleton ? (
                                         <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz bir ses yok. İlk sen ol!</div>
