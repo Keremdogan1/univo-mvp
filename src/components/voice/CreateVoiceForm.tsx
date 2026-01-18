@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MessageSquare, Tag, Send } from 'lucide-react';
+import { MessageSquare, Tag, Send, Camera, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface CreateVoiceFormProps {
@@ -10,6 +10,7 @@ interface CreateVoiceFormProps {
     newStatus: string;
     handleTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+    cursorPos: number;
     setCursorPos: (pos: number) => void;
     showSuggestions: boolean;
     suggestionList: string[];
@@ -19,6 +20,11 @@ interface CreateVoiceFormProps {
     isPosting: boolean;
     activeTagFilter: string | null;
     setActiveTagFilter: (val: string | null) => void;
+    imagePreview: string | null;
+    setImagePreview: (val: string | null) => void;
+    imageFile: File | null;
+    setImageFile: (val: File | null) => void;
+    handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function CreateVoiceForm({
@@ -27,6 +33,7 @@ export default function CreateVoiceForm({
     newStatus,
     handleTextChange,
     textareaRef,
+    cursorPos,
     setCursorPos,
     showSuggestions,
     suggestionList,
@@ -34,7 +41,12 @@ export default function CreateVoiceForm({
     isAnonymous,
     setIsAnonymous,
     isPosting,
-    activeTagFilter // Used only for potentially clearing filter if needed, or context
+    activeTagFilter, // Used only for potentially clearing filter if needed, or context
+    imagePreview,
+    setImagePreview,
+    imageFile,
+    setImageFile,
+    handleImageSelect
 }: CreateVoiceFormProps) {
     if (!user) {
         return (
@@ -68,6 +80,22 @@ export default function CreateVoiceForm({
                     onKeyUp={(e) => setCursorPos(e.currentTarget.selectionStart)}
                 />
 
+                {imagePreview && (
+                    <div className="relative w-full max-h-64 mb-3 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setImagePreview(null);
+                                setImageFile(null);
+                            }}
+                            className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
+
                 {showSuggestions && (
                     <div className="absolute left-0 bottom-full mb-1 w-64 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg z-[1000] max-h-48 overflow-y-auto">
                         <ul className="py-1">
@@ -99,7 +127,24 @@ export default function CreateVoiceForm({
                         <span className={`text-sm ${isAnonymous ? 'font-bold text-black dark:text-white' : 'text-neutral-500 dark:text-neutral-400'}`}>Anonim Paylaş</span>
                     </label>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <button
+                                type="button"
+                                className="p-2 text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors"
+                                title="Fotoğraf Ekle"
+                                onClick={() => document.getElementById('voice-image-upload')?.click()}
+                            >
+                                <Camera size={20} />
+                            </button>
+                            <input
+                                id="voice-image-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageSelect}
+                            />
+                        </div>
                         <span className="text-xs text-neutral-400 dark:text-neutral-500">{newStatus.length}/280</span>
                         <button
                             type="submit"

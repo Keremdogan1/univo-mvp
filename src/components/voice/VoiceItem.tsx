@@ -209,9 +209,19 @@ export default function VoiceItem({
                             </form>
                         ) : (
                             <div className="mb-4 group/content relative">
-                                <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif">
+                                <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif mb-3">
                                     {renderContentWithTags(voice.content)}
                                 </p>
+                                {voice.image_url && (
+                                    <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
+                                        <img 
+                                            src={voice.image_url} 
+                                            alt="Post image" 
+                                            className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
+                                            onClick={() => voice.image_url && window.open(voice.image_url, '_blank')}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

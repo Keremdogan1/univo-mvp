@@ -7,6 +7,7 @@ export interface Voice {
     is_editors_choice: boolean;
     is_verified?: boolean;
     tags: string[] | null;
+    image_url?: string | null;
     user: {
         full_name: string;
         nickname?: string;

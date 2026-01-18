@@ -26,6 +26,7 @@ export async function GET(request: Request) {
       .from('campus_voices')
       .select(`
         *,
+        image_url,
         profiles:user_id (full_name, nickname, department, avatar_url, student_id, class_year),
         voice_reactions (user_id, reaction_type),
         voice_comments (
@@ -120,6 +121,7 @@ export async function GET(request: Request) {
         id: voice.id,
         user_id: voice.user_id,
         content: voice.content,
+        image_url: voice.image_url,
         is_anonymous: voice.is_anonymous,
         is_editors_choice: voice.is_editors_choice,
         is_verified: isVerified,
@@ -194,7 +196,7 @@ export async function POST(request: Request) {
     }
 
     const json = await request.json();
-    const { content, is_anonymous, tags } = json;
+    const { content, is_anonymous, tags, image_url } = json;
 
     if (!content || content.trim().length === 0) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
@@ -222,6 +224,7 @@ export async function POST(request: Request) {
       .insert({
         user_id: user.id,
         content: content.substring(0, 280),
+        image_url: image_url || null,
         is_anonymous: is_anonymous || false,
         tags: tags || [],
         moderation_status: 'approved'

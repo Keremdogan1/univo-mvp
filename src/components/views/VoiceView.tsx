@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import CommentThread from '@/components/voice/CommentSystem';
+import CreateVoiceForm from '@/components/voice/CreateVoiceForm';
 import FriendButton from '../FriendButton';
 import VoiceStatsWidget from './VoiceStatsWidget';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -318,9 +319,19 @@ function VoiceItem({
                             </form>
                         ) : (
                             <div className="mb-4 group/content relative">
-                                <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif">
+                                <p className="text-neutral-900 dark:text-neutral-200 leading-relaxed text-lg font-serif mb-3">
                                     {renderContentWithTags(voice.content)}
                                 </p>
+                                {voice.image_url && (
+                                    <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 mb-3">
+                                        <img 
+                                            src={voice.image_url} 
+                                            alt="Post image" 
+                                            className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" 
+                                            onClick={() => voice.image_url && window.open(voice.image_url, '_blank')}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -481,6 +492,7 @@ interface Voice {
     is_editors_choice: boolean;
     is_verified?: boolean;
     tags: string[] | null;
+    image_url?: string | null;
     user: {
         full_name: string;
         nickname?: string;
@@ -552,6 +564,38 @@ export default function VoiceView() {
     const [suggestionList, setSuggestionList] = useState<string[]>([]);
     const [cursorPos, setCursorPos] = useState<number>(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Image Upload State
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+                return;
+            }
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target?.result as string);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const uploadImage = async (): Promise<string | null> => {
+        if (!imageFile || !user) return null;
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+            .from('post_images')
+            .upload(fileName, imageFile);
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage
+            .from('post_images')
+            .getPublicUrl(fileName);
+        return publicUrl;
+    };
 
     // Filter state
     const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
@@ -638,6 +682,16 @@ export default function VoiceView() {
 
         setIsPosting(true);
         try {
+            let uploadedImageUrl = null;
+            if (imageFile) {
+                try {
+                    uploadedImageUrl = await uploadImage();
+                } catch (err) {
+                    console.error('Image upload failed:', err);
+                    toast.error('Fotoğraf yüklenemedi, sadece metin paylaşılıyor...');
+                }
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return toast.error('Oturum hatası');
 
@@ -652,13 +706,16 @@ export default function VoiceView() {
                 body: JSON.stringify({
                     content: newStatus,
                     is_anonymous: isAnonymous,
-                    tags: extractedTags
+                    tags: extractedTags,
+                    image_url: uploadedImageUrl
                 })
             });
 
             if (res.ok) {
                 setNewStatus('');
                 setIsAnonymous(false);
+                setImageFile(null);
+                setImagePreview(null);
                 fetchVoices();
             } else {
                 const err = await res.json();
@@ -1325,64 +1382,28 @@ export default function VoiceView() {
                                             Sesini Duyur
                                         </h4>
 
-                                        <form onSubmit={handlePost} className="relative z-50">
-                                            <textarea
-                                                ref={textareaRef}
-                                                rows={3}
-                                                maxLength={280}
-                                                className="w-full p-3 border-2 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:border-transparent focus:ring-2 hover:border-neutral-400 dark:hover:border-neutral-600 bg-white dark:bg-neutral-800 dark:text-white mb-3 font-serif resize-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
-                                                style={{ '--tw-ring-color': 'var(--primary-color, #C8102E)' } as React.CSSProperties}
-                                                placeholder="Kampüs gündemi hakkında ne düşünüyorsun? (#etiket kullanabilirsin)"
-                                                value={newStatus}
-                                                onChange={handleTextChange}
-                                                onClick={(e) => setCursorPos(e.currentTarget.selectionStart)}
-                                                onKeyUp={(e) => setCursorPos(e.currentTarget.selectionStart)}
-                                            />
-
-                                            {showSuggestions && (
-                                                <div className="absolute left-0 bottom-full mb-1 w-64 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg z-[1000] max-h-48 overflow-y-auto">
-                                                    <ul className="py-1">
-                                                        {suggestionList.map(tag => (
-                                                            <li
-                                                                key={tag}
-                                                                onClick={() => insertTag(tag)}
-                                                                className="px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer font-bold font-serif text-sm flex items-center gap-2 dark:text-neutral-200"
-                                                            >
-                                                                <Tag size={12} />
-                                                                {tag}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-
-                                            <div className="flex justify-between items-center border-t border-neutral-200 dark:border-neutral-800 pt-3">
-                                                <label className="flex items-center gap-2 cursor-pointer group">
-                                                    <div className={`w-4 h-4 border transition-colors flex items-center justify-center ${isAnonymous ? 'bg-neutral-900 dark:bg-white border-neutral-900 dark:border-white' : 'border-neutral-300 dark:border-neutral-700 group-hover:border-neutral-900 dark:group-hover:border-white'}`}>
-                                                        {isAnonymous && <span className="text-white dark:text-black text-[10px] choice">✓</span>}
-                                                    </div>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="hidden"
-                                                        checked={isAnonymous}
-                                                        onChange={(e) => setIsAnonymous(e.target.checked)}
-                                                    />
-                                                    <span className={`text-sm ${isAnonymous ? 'font-bold text-black dark:text-white' : 'text-neutral-500 dark:text-neutral-400'}`}>Anonim Paylaş</span>
-                                                </label>
-
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{newStatus.length}/280</span>
-                                                    <button
-                                                        type="submit"
-                                                        disabled={!newStatus.trim() || isPosting}
-                                                        className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black font-bold uppercase text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 flex items-center gap-2 transition-colors"
-                                                    >
-                                                        <Send size={14} />
-                                                        {isPosting ? 'Yayınlanıyor...' : 'Yayınla'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        <CreateVoiceForm 
+                                            user={user}
+                                            newStatus={newStatus}
+                                            handleTextChange={handleTextChange}
+                                            cursorPos={cursorPos}
+                                            setCursorPos={setCursorPos}
+                                            textareaRef={textareaRef}
+                                            showSuggestions={showSuggestions}
+                                            suggestionList={suggestionList}
+                                            insertTag={insertTag}
+                                            isAnonymous={isAnonymous}
+                                            setIsAnonymous={setIsAnonymous}
+                                            handlePost={handlePost}
+                                            isPosting={isPosting}
+                                            activeTagFilter={activeTagFilter}
+                                            setActiveTagFilter={setActiveTagFilter}
+                                            imagePreview={imagePreview}
+                                            setImagePreview={setImagePreview}
+                                            imageFile={imageFile}
+                                            setImageFile={setImageFile}
+                                            handleImageSelect={handleImageSelect}
+                                        />
                                     </div>
                                 ) : (
                                     <div className="bg-neutral-100 dark:bg-neutral-900 p-6 text-center border border-neutral-200 dark:border-neutral-800 mb-8">
