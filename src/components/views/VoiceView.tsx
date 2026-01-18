@@ -1491,9 +1491,9 @@ export default function VoiceView() {
                 ) : (
                     <motion.div
                         key="odtu"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         className="w-full"
                     >
@@ -1505,115 +1505,6 @@ export default function VoiceView() {
                                         <MessageSquare size={24} />
                                         Öğrenci Kürsüsü
                                     </h3>
-
-                                    <div className="flex items-center gap-4">
-                                        {(filters.tags.length > 0 || filters.isAnonymous !== null || filters.hasImage !== null || filters.userId !== null) && (
-                                            <button
-                                                onClick={() => setFilters({ tags: [], isAnonymous: null, hasImage: null, userId: null })}
-                                                className="text-xs font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm group text-white bg-neutral-900 dark:bg-white dark:text-black"
-                                            >
-                                                <span>TEMİZLE</span>
-                                                <X size={12} strokeWidth={3} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Advanced Filter Bar */}
-                                <div className="space-y-4 mb-8">
-                                    {/* Search Input for Tags & Mentions */}
-                                    <div className="relative group perspective-1000">
-                                        <div className="flex items-center gap-2 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 p-2 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] transition-all focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:focus-within:shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)]">
-                                            <div className="pl-2 text-neutral-400">
-                                                <Search size={20} />
-                                            </div>
-                                            <input 
-                                                type="text"
-                                                value={searchTerm}
-                                                onChange={(e) => handleSearchInput(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' && searchTerm) {
-                                                        if (searchTerm.startsWith('#')) addTagFilter(searchTerm);
-                                                        // if (searchTerm.startsWith('@')) ... handle mention selection if unique enough
-                                                    }
-                                                }}
-                                                placeholder="#etiket veya @kişi ara..."
-                                                className="flex-1 bg-transparent border-none outline-none font-bold text-neutral-900 dark:text-white placeholder:text-neutral-400 py-1"
-                                            />
-                                            {searchTerm && (
-                                                <button 
-                                                    onClick={() => searchTerm.startsWith('#') ? addTagFilter(searchTerm) : null}
-                                                    className="px-4 py-1 bg-black dark:bg-white text-white dark:text-black rounded-lg text-xs font-black uppercase transition-transform active:scale-95"
-                                                >
-                                                    EKLE
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        {/* Suggestions Dropdown */}
-                                        <AnimatePresence>
-                                            {searchSuggestions.length > 0 && (
-                                                <motion.div 
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: 10 }}
-                                                    className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-xl shadow-xl z-[60] overflow-hidden"
-                                                >
-                                                    {searchSuggestions.map((s, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            onClick={() => {
-                                                                if (s.type === 'tag') addTagFilter(s.value);
-                                                                else if (s.type === 'user') setFilters(prev => ({ ...prev, userId: s.value }));
-                                                                setSearchTerm('');
-                                                                setSearchSuggestions([]);
-                                                            }}
-                                                            className="w-full text-left p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
-                                                        >
-                                                            <div className={cn(
-                                                                "p-1.5 rounded-lg",
-                                                                s.type === 'tag' ? "bg-primary/10 text-primary" : "bg-blue-500/10 text-blue-500"
-                                                            )}>
-                                                                {s.type === 'tag' ? <Tag size={14} /> : <User size={14} />}
-                                                            </div>
-                                                            <span className="font-bold text-neutral-900 dark:text-white">{s.label}</span>
-                                                        </button>
-                                                    ))}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-
-                                    {/* Active Filters Display */}
-                                    <div className="flex flex-wrap gap-2">
-                                        {filters.tags.map(tag => (
-                                            <div 
-                                                key={tag}
-                                                className="bg-black dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold shadow-sm animate-in zoom-in-95 duration-200"
-                                            >
-                                                <span>#{tag}</span>
-                                                <button 
-                                                    onClick={() => removeTagFilter(tag)}
-                                                    className="hover:bg-white/20 dark:hover:bg-black/20 rounded-full p-0.5 transition-colors"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        {filters.userId && (
-                                            <div 
-                                                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold shadow-sm"
-                                            >
-                                                <span>Profil Görüntüleniyor</span>
-                                                <button 
-                                                    onClick={() => setFilters(prev => ({ ...prev, userId: null }))}
-                                                    className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
 
                                 {/* Input Area */}
@@ -1632,8 +1523,8 @@ export default function VoiceView() {
                                         setIsAnonymous={setIsAnonymous}
                                         handlePost={handlePost}
                                         isPosting={isPosting}
-                                        activeTagFilter={filters.tags[0] || null}
-                                        setActiveTagFilter={(tag) => tag && addTagFilter(tag)}
+                                        activeTagFilter={null}
+                                        setActiveTagFilter={() => {}}
                                         imagePreview={imagePreview}
                                         setImagePreview={setImagePreview}
                                         imageFile={imageFile}
@@ -1647,49 +1538,16 @@ export default function VoiceView() {
                                 )}
 
                                 <div className="space-y-6">
-                                    {/* Media & Status Section */}
-                                    <div className="p-4 bg-neutral-50 dark:bg-black/30 border-2 border-neutral-200 dark:border-neutral-800 rounded-2xl">
-                                        <div className="text-[10px] font-black tracking-widest text-neutral-400 uppercase mb-3 px-1 flex items-center gap-2">
-                                            <Camera size={12} />
-                                            Medya & Görünüm
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            <button
-                                                onClick={() => toggleFilter('hasImage', true)}
-                                                className={cn(
-                                                    "h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
-                                                    filters.hasImage === true
-                                                        ? "bg-[var(--primary-color)] text-white border-transparent shadow-md scale-105"
-                                                        : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-primary/30"
-                                                )}
-                                            >
-                                                <Camera size={16} />
-                                                Fotoğraflılar
-                                            </button>
-                                            <button
-                                                onClick={() => toggleFilter('isAnonymous', true)}
-                                                className={cn(
-                                                    "h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
-                                                    filters.isAnonymous === true
-                                                        ? "bg-neutral-900 dark:bg-white text-white dark:text-black border-transparent shadow-md scale-105"
-                                                        : "bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800 hover:border-black/30"
-                                                )}
-                                            >
-                                                <Shield size={16} />
-                                                Anonimler
-                                            </button>
-                                        </div>
-                                    </div>
                                     {voices.length === 0 && !showSkeleton ? (
                                         <div className="text-center py-12 text-neutral-500 italic font-serif">Henüz bir ses yok. İlk sen ol!</div>
                                     ) : (
                                         <AnimatePresence mode="wait">
                                             <motion.div
-                                                key={`voices-${filters.tags.join('-')}-${filters.isAnonymous}-${filters.hasImage}-${filters.userId}`}
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: -20 }}
-                                                transition={{ duration: 0.3 }}
+                                                key="voices-list"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
                                             >
                                                 {voices.map((voice) => (
                                                     <VoiceItem
