@@ -23,6 +23,8 @@ export default function VideoPlayer({ src, className = "", poster }: VideoPlayer
     
     let controlsTimeout: NodeJS.Timeout;
 
+    const [error, setError] = useState(false);
+
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -45,16 +47,24 @@ export default function VideoPlayer({ src, className = "", poster }: VideoPlayer
              setPlaybackRate(video.playbackRate);
         }
 
+        const handleError = () => {
+            console.error("Video load error:", video.error);
+            setError(true);
+            setIsPlaying(false);
+        };
+
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', updateDuration);
         video.addEventListener('ended', handleEnded);
         video.addEventListener('ratechange', handleRateChange);
+        video.addEventListener('error', handleError);
 
         return () => {
             video.removeEventListener('timeupdate', updateProgress);
             video.removeEventListener('loadedmetadata', updateDuration);
             video.removeEventListener('ended', handleEnded);
             video.removeEventListener('ratechange', handleRateChange);
+            video.removeEventListener('error', handleError);
         };
     }, []);
 
@@ -174,8 +184,16 @@ export default function VideoPlayer({ src, className = "", poster }: VideoPlayer
                 playsInline
             />
 
+            {/* Error Message */}
+            {error && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
+                    <span className="text-white text-sm font-medium mb-1">Video Oynatılamadı</span>
+                    <span className="text-white/50 text-xs">Bağlantı veya yetki hatası</span>
+                </div>
+            )}
+
             {/* Play/Pause Overlay Icon (Centered) */}
-            {!isPlaying && !showSettings && (
+            {!isPlaying && !showSettings && !error && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
                     <div className="bg-black/50 p-4 rounded-full backdrop-blur-sm">
                         <Play size={32} className="text-white fill-white ml-1" />
