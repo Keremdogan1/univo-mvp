@@ -84,6 +84,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
       setProfile(data);
+
+      if (data.university === 'bilkent') {
+          localStorage.setItem('themeColor', '#002D72');
+          document.documentElement.style.setProperty('--primary-rgb', '0 45 114'); // #002D72
+      } else if (data.university === 'metu' || !data.university) {
+          localStorage.setItem('themeColor', '#C8102E');
+          document.documentElement.style.setProperty('--primary-rgb', '200 16 46'); // #C8102E
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
