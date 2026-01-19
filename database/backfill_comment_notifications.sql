@@ -1,53 +1,36 @@
--- Backfill Notifications for Existing Comments
--- This script generates notifications for all past comments that don't have notifications yet.
+-- Backfill Notifications for Existing Comments (Without metadata column)
+-- This script generates notifications for all past comments.
 -- Run this ONCE after deploying the notification system upgrade.
 
--- Insert notifications for voice_comments that are NOT self-comments and don't have existing notifications
-INSERT INTO notifications (user_id, actor_id, type, message, metadata, created_at, read)
+-- Insert notifications for voice_comments (top-level comments to voice owner)
+INSERT INTO notifications (user_id, actor_id, type, message, created_at, read)
 SELECT 
     cv.user_id as user_id,           -- Voice owner receives notification
     vc.user_id as actor_id,          -- Commenter is the actor
-    CASE 
-        WHEN vc.parent_id IS NOT NULL THEN 'voice_reply'
-        ELSE 'voice_comment'
-    END as type,
-    CASE 
-        WHEN vc.parent_id IS NOT NULL THEN 'Yorumunuza yanıt verdi'
-        ELSE 'Gönderinize yorum yaptı'
-    END as message,
-    jsonb_build_object(
-        'voice_id', vc.voice_id,
-        'comment_id', vc.id,
-        'parent_id', vc.parent_id,
-        'backfilled', true
-    ) as metadata,
+    'voice_comment' as type,
+    'Gönderinize yorum yaptı' as message,
     vc.created_at as created_at,     -- Use original comment time
     true as read                      -- Mark as read so users aren't spammed
 FROM voice_comments vc
 JOIN campus_voices cv ON cv.id = vc.voice_id
 WHERE 
-    -- Don't notify yourself
-    vc.user_id != cv.user_id
-    -- Check if notification already exists for this comment
+    vc.parent_id IS NULL              -- Only top-level comments
+    AND vc.user_id != cv.user_id      -- Don't notify yourself
     AND NOT EXISTS (
         SELECT 1 FROM notifications n 
-        WHERE n.metadata->>'comment_id' = vc.id::text
-        AND n.type IN ('voice_comment', 'voice_reply')
+        WHERE n.user_id = cv.user_id 
+        AND n.actor_id = vc.user_id
+        AND n.type = 'voice_comment'
+        AND n.created_at = vc.created_at
     );
 
--- Also backfill reply notifications (notify parent comment owner, not voice owner)
-INSERT INTO notifications (user_id, actor_id, type, message, metadata, created_at, read)
+-- Insert notifications for replies (notify parent comment owner)
+INSERT INTO notifications (user_id, actor_id, type, message, created_at, read)
 SELECT 
     parent_vc.user_id as user_id,    -- Parent comment owner receives notification
     vc.user_id as actor_id,          -- Replier is the actor
     'voice_reply' as type,
     'Yorumunuza yanıt verdi' as message,
-    jsonb_build_object(
-        'voice_id', vc.voice_id,
-        'comment_id', vc.id,
-        'parent_id', vc.parent_id,
-        'backfilled', true
-    ) as metadata,
     vc.created_at as created_at,
     true as read
 FROM voice_comments vc
@@ -57,11 +40,11 @@ WHERE
     AND vc.user_id != parent_vc.user_id
     AND NOT EXISTS (
         SELECT 1 FROM notifications n 
-        WHERE n.metadata->>'comment_id' = vc.id::text
+        WHERE n.user_id = parent_vc.user_id 
+        AND n.actor_id = vc.user_id
         AND n.type = 'voice_reply'
-        AND n.user_id = parent_vc.user_id
+        AND n.created_at = vc.created_at
     );
 
--- Report how many notifications were created
--- Run this SELECT after the INSERTs to see the count:
--- SELECT COUNT(*) as backfilled_count FROM notifications WHERE metadata->>'backfilled' = 'true';
+-- Check count after running:
+-- SELECT type, COUNT(*) FROM notifications WHERE read = true GROUP BY type;
