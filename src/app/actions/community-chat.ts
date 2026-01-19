@@ -24,17 +24,22 @@ export type CommunityPost = {
 }
 
 export type CommunityPostComment = {
-    id: string
-    post_id: string
-    user_id: string
-    content: string
-    created_at: string
+    id: string;
+    post_id: string;
+    user_id: string;
+    content: string;
+    created_at: string;
+    parent_id: string | null;
     profiles?: {
-        full_name: string
-        avatar_url: string
-        department?: string
-        class_year?: string
-    }
+        full_name: string;
+        avatar_url: string;
+        department?: string;
+        class_year?: string;
+    };
+    reactions?: { reaction_type: 'like' | 'dislike'; user_id: string }[];
+    reaction_count?: number;
+    user_reaction?: 'like' | 'dislike' | null;
+    children?: CommunityPostComment[];
 }
 
 export async function getCommunityPosts(communityId: string) {
@@ -61,7 +66,7 @@ export async function getCommunityPosts(communityId: string) {
 
         return data.map(post => {
             const reactions = post.reactions || []
-            const userReaction = user ? reactions.find((r: any) => r.user_id === user.id) : null
+            const userReaction = user ? (reactions as any[]).find((r: any) => r.user_id === user.id) : null
             
             return {
                 ...post,
@@ -114,9 +119,10 @@ export async function getPostComments(postId: string) {
     const { data, error } = await supabase
         .from('community_post_comments')
         .select(`
-        *,
-        profiles:user_id (full_name, avatar_url, department, class_year)
-      `)
+            *,
+            profiles:user_id (full_name, avatar_url, department, class_year),
+            reactions:community_comment_reactions(reaction_type, user_id)
+        `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
 
@@ -125,10 +131,45 @@ export async function getPostComments(postId: string) {
         return []
     }
 
-    return data as CommunityPostComment[]
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Process comments to add reaction counts and user reaction state
+    const processedComments = data.map(comment => {
+        const reactions = comment.reactions || []
+        const userReaction = user ? (reactions as any[]).find((r: any) => r.user_id === user.id) : null
+        
+        // Calculate aggregate count: Like (+1), Dislike (-1)
+        const likes = (reactions as any[]).filter(r => r.reaction_type === 'like').length
+        const dislikes = (reactions as any[]).filter(r => r.reaction_type === 'dislike').length
+        
+        return {
+            ...comment,
+            reaction_count: likes - dislikes,
+            user_reaction: userReaction ? userReaction.reaction_type : null,
+            children: []
+        }
+    })
+
+    // Build tree
+    const commentMap: Record<string, CommunityPostComment> = {}
+    const roots: CommunityPostComment[] = []
+
+    processedComments.forEach(comment => {
+        commentMap[comment.id] = comment as CommunityPostComment
+    })
+
+    processedComments.forEach(comment => {
+        if (comment.parent_id && commentMap[comment.parent_id]) {
+            commentMap[comment.parent_id].children?.push(commentMap[comment.id])
+        } else {
+            roots.push(commentMap[comment.id])
+        }
+    })
+
+    return roots
 }
 
-export async function createComment(postId: string, content: string) {
+export async function createComment(postId: string, content: string, parentId: string | null = null) {
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
@@ -142,7 +183,8 @@ export async function createComment(postId: string, content: string) {
             .insert({
                 post_id: postId,
                 user_id: user.id,
-                content
+                content,
+                parent_id: parentId
             })
 
         if (error) {
@@ -150,14 +192,14 @@ export async function createComment(postId: string, content: string) {
             return { success: false, message: 'Yorum yapılamadı' }
         }
 
-        // Trigger notification
+        // Trigger notification if not replying to self
         const { data: post } = await supabase
             .from('community_posts')
             .select('user_id, community_id')
             .eq('id', postId)
             .single()
 
-        if (post && post.user_id !== user.id) {
+        if (post && post.user_id !== user.id && !parentId) {
             await supabase.from('notifications').insert({
                 user_id: post.user_id,
                 actor_id: user.id,
@@ -172,6 +214,80 @@ export async function createComment(postId: string, content: string) {
     } catch (e: any) {
         console.error('Unexpected error in createComment:', e)
         return { success: false, message: 'Beklenmedik bir hata oluştu' }
+    }
+}
+
+export async function updateComment(commentId: string, content: string) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return { success: false, message: 'Oturum açmanız gerekiyor' }
+
+        const { error } = await supabase
+            .from('community_post_comments')
+            .update({ content, updated_at: new Date().toISOString() })
+            .eq('id', commentId)
+            .eq('user_id', user.id)
+
+        if (error) throw error
+        return { success: true }
+    } catch (e: any) {
+        console.error('Error updateComment:', e)
+        return { success: false, message: 'Yorum güncellenemedi' }
+    }
+}
+
+export async function deleteComment(commentId: string) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return { success: false, message: 'Yetkisiz erişim' }
+
+        const { error } = await supabase
+            .from('community_post_comments')
+            .delete()
+            .eq('id', commentId)
+            .eq('user_id', user.id) // RLS will also check for community admin
+
+        if (error) throw error
+        return { success: true }
+    } catch (e: any) {
+        console.error('Error deleteComment:', e)
+        return { success: false, message: 'Yorum silinemedi' }
+    }
+}
+
+export async function reactToComment(commentId: string, reactionType: 'like' | 'dislike' | null) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return { success: false, message: 'Oturum açmanız gerekiyor' }
+
+        if (reactionType === null) {
+            const { error } = await supabase
+                .from('community_comment_reactions')
+                .delete()
+                .eq('comment_id', commentId)
+                .eq('user_id', user.id)
+            if (error) throw error
+        } else {
+            const { error } = await supabase
+                .from('community_comment_reactions')
+                .upsert({
+                    comment_id: commentId,
+                    user_id: user.id,
+                    reaction_type: reactionType
+                }, { onConflict: 'comment_id,user_id' })
+            if (error) throw error
+        }
+
+        return { success: true }
+    } catch (e: any) {
+        console.error('Error in reactToComment:', e)
+        return { success: false, message: 'İşlem başarısız' }
     }
 }
 
