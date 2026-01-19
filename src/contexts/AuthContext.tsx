@@ -17,6 +17,14 @@ interface Profile {
   university?: string;
   role?: string;
   is_admin?: boolean;
+  notification_settings?: {
+    likes: boolean;
+    comments: boolean;
+    mentions: boolean;
+    follows: boolean;
+    friend_requests: boolean;
+    email_subscription: boolean;
+  };
 }
 
 interface UniversityLoginResult {

@@ -89,17 +89,31 @@ export async function POST(
 
             // 3. Insert Notification (if not self-action)
             if (targetUserId !== actorId) {
-                await supabase.from('notifications').insert({
-                    user_id: targetUserId,
-                    actor_id: actorId,
-                    type: notificationType,
-                    message: message,
-                    metadata: {
-                        voice_id: id,
-                        comment_id: data.id, // the new comment id
-                        parent_id: parent_id
-                    }
-                });
+                // Check Target User's Notification Settings
+                const { data: targetProfile } = await supabase
+                    .from('profiles')
+                    .select('notification_settings')
+                    .eq('id', targetUserId)
+                    .single();
+
+                const settings = targetProfile?.notification_settings as any;
+                // Default to true. Logic: if it's a voice_comment check 'comments', if reply check 'comments' (or 'mentions' if we had that distinction, but usually comments covers replies)
+                // Let's assume 'comments' covers both for now as per plan
+                const shouldNotify = settings?.comments !== false;
+
+                if (shouldNotify) {
+                    await supabase.from('notifications').insert({
+                        user_id: targetUserId,
+                        actor_id: actorId,
+                        type: notificationType,
+                        message: message,
+                        metadata: {
+                            voice_id: id,
+                            comment_id: data.id, // the new comment id
+                            parent_id: parent_id
+                        }
+                    });
+                }
             }
         }
     } catch (notifyError) {

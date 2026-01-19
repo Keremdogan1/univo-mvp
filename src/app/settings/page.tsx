@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { ArrowLeft, Moon, Sun, Shield, Bell, LogOut, Check, User, Users, Heart, BarChart2, Laptop, Palette, Lock, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Shield, Bell, LogOut, Check, User, Users, Heart, BarChart2, Laptop, Palette, Lock, LayoutDashboard, Mail } from 'lucide-react';
 import { SUPER_ADMIN_NAMES } from '@/lib/constants';
 import { useTheme, ColorTheme } from '@/contexts/ThemeContext';
 import { toTitleCase, cn } from '@/lib/utils';
@@ -18,7 +18,7 @@ const colorThemes: { id: ColorTheme; label: string; color: string; bg: string }[
     { id: 'orange', label: 'Gün Batımı', color: '#f97316', bg: 'bg-orange-500' },
 ];
 
-type SettingsTab = 'account' | 'appearance' | 'privacy';
+type SettingsTab = 'account' | 'appearance' | 'privacy' | 'notifications';
 
 export default function SettingsPage() {
     const { user, signOut } = useAuth();
@@ -31,6 +31,14 @@ export default function SettingsPage() {
         show_activities: true,
         show_friends: true,
         show_polls: true
+    });
+    const [notificationSettings, setNotificationSettings] = useState({
+        likes: true,
+        comments: true,
+        mentions: true,
+        follows: true,
+        friend_requests: true,
+        email_subscription: true
     });
     const [loading, setLoading] = useState(true);
     const [isAdminSession, setIsAdminSession] = useState(false);
@@ -59,13 +67,16 @@ export default function SettingsPage() {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('privacy_settings')
+                .select('privacy_settings, notification_settings')
                 .eq('id', user?.id)
                 .single();
 
             if (error) throw error;
             if (data?.privacy_settings) {
                 setPrivacySettings(data.privacy_settings);
+            }
+            if (data?.notification_settings) {
+                setNotificationSettings(data.notification_settings as any);
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
@@ -91,6 +102,26 @@ export default function SettingsPage() {
             console.error('Error updating settings:', error);
             toast.error('Güncellenemedi');
             setPrivacySettings(prev => ({ ...prev, [key]: !value }));
+        }
+    };
+
+    const updateNotificationSettings = async (key: string, value: boolean) => {
+        const newSettings = { ...notificationSettings, [key]: value };
+        setNotificationSettings(newSettings);
+
+        try {
+            // Need to cast to any or ensure type matches JSONB structure for supabase client
+            const { error } = await supabase
+                .from('profiles')
+                .update({ notification_settings: newSettings } as any)
+                .eq('id', user?.id);
+
+            if (error) throw error;
+            toast.success('Bildirim ayarları güncellendi');
+        } catch (error) {
+            console.error('Error updating noficiation settings:', error);
+            toast.error('Güncellenemedi');
+            setNotificationSettings(prev => ({ ...prev, [key]: !value }));
         }
     };
 
@@ -153,6 +184,18 @@ export default function SettingsPage() {
                         >
                             <Lock size={20} />
                             Gizlilik
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('notifications')}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left font-medium",
+                                activeTab === 'notifications' 
+                                    ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm" 
+                                    : "text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                            )}
+                        >
+                            <Bell size={20} />
+                            Bildirimler
                         </button>
                     </nav>
                 </div>
@@ -368,6 +411,55 @@ export default function SettingsPage() {
                         </section>
                     </div>
                 )}
+
+                {activeTab === 'notifications' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <section>
+                            <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">Bildirim Tercihleri</h2>
+                            <p className="text-sm text-neutral-500 mb-6">Hangi durumlarda bildirim almak istediğinizi seçin.</p>
+                            
+                            <div className="space-y-4">
+                                {[
+                                    { id: 'likes', label: 'Beğeniler', desc: 'Gönderileriniz beğenildiğinde bildirim alın', icon: Heart, color: 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400' },
+                                    { id: 'comments', label: 'Yorumlar', desc: 'İçeriklerinize yorum yapıldığında bildirim alın', icon: User, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400' },
+                                    { id: 'mentions', label: 'Bahsetmeler', desc: 'Birisi sizden bahsettiğinde bildirim alın', icon: Users, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400' },
+                                    { id: 'friend_requests', label: 'Arkadaşlık İstekleri', desc: 'Yeni arkadaşlık isteği geldiğinde bildirim alın', icon: Users, color: 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400' },
+                                    { id: 'email_subscription', label: 'E-posta Kaynakları', desc: 'Takip ettiğiniz kaynaklardan e-posta geldiğinde bildirim alın', icon: Mail, color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' },
+                                ].map((item) => (
+                                    <div key={item.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className={cn("p-3 rounded-lg shadow-sm", item.color)}>
+                                                <item.icon size={20} />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-neutral-900 dark:text-white">{item.label}</div>
+                                                <div className="text-sm font-medium text-neutral-500">{item.desc}</div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => updateNotificationSettings(item.id, !notificationSettings[item.id as keyof typeof notificationSettings])}
+                                            className={cn(
+                                                "relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out",
+                                                notificationSettings[item.id as keyof typeof notificationSettings] 
+                                                    ? "bg-[var(--primary-color)]" 
+                                                    : "bg-neutral-300 dark:bg-neutral-600"
+                                            )}
+                                        >
+                                            <span 
+                                                className={cn(
+                                                    "absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 shadow-sm",
+                                                    notificationSettings[item.id as keyof typeof notificationSettings] 
+                                                        ? "translate-x-6" 
+                                                        : "translate-x-0"
+                                                )} 
+                                            />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -533,6 +625,39 @@ export default function SettingsPage() {
                                     style={{ backgroundColor: privacySettings[item.id as keyof typeof privacySettings] ? 'var(--primary-color)' : undefined }}
                                 >
                                     <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${privacySettings[item.id as keyof typeof privacySettings] ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Notifications Section Mobile */}
+                <section>
+                    <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 ml-1">Bildirimler</h2>
+                    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden divide-y divide-neutral-100 dark:divide-neutral-800">
+                        {[
+                            { id: 'likes', label: 'Beğeniler', desc: 'Gönderi beğenildiğinde', icon: Heart, color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                            { id: 'comments', label: 'Yorumlar', desc: 'Yorum yapıldığında', icon: User, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                            { id: 'mentions', label: 'Bahsetmeler', desc: 'Senden bahsedildiğinde', icon: Users, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                            { id: 'friend_requests', label: 'Arkadaşlık', desc: 'İstek geldiğinde', icon: Users, color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                            { id: 'email_subscription', label: 'E-postalar', desc: 'Yeni e-posta geldiğinde', icon: Mail, color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                        ].map((item) => (
+                            <div key={item.id} className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={cn("p-2 rounded-lg", item.color)}>
+                                        <item.icon size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-neutral-900 dark:text-white">{item.label}</div>
+                                        <div className="text-xs text-neutral-500">{item.desc}</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => updateNotificationSettings(item.id, !notificationSettings[item.id as keyof typeof notificationSettings])}
+                                    className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out bg-neutral-200 dark:bg-neutral-700"
+                                    style={{ backgroundColor: notificationSettings[item.id as keyof typeof notificationSettings] ? 'var(--primary-color)' : undefined }}
+                                >
+                                    <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${notificationSettings[item.id as keyof typeof notificationSettings] ? 'translate-x-6' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         ))}
