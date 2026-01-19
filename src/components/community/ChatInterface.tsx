@@ -4,10 +4,9 @@ import { useState, useRef } from 'react';
 import { CommunityPost, requestPostPermission, createComment, getPostComments, getCommunityPosts, reactToPost, deletePost } from '@/app/actions/community-chat';
 import PostComposer from './PostComposer';
 import AdminRequestPanel from './AdminRequestPanel';
-import { MessageSquare, Heart, Share2, MoreHorizontal, Hand, Send, Trash2, ShieldCheck, Flag, ArrowBigUp, ArrowBigDown } from 'lucide-react';
+import { MessageSquare, Heart, Share2, MoreHorizontal, Hand, Send, Trash2, Flag, ArrowBigUp, ArrowBigDown, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { ThreadConnector, BranchConnector } from '../ui/ThreadConnectors';
 
 interface ChatInterfaceProps {
     communityId: string;
@@ -118,11 +117,6 @@ function PostItem({
     const [submittingComment, setSubmittingComment] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     
-    // Refs for Connection Lines
-    const postOwnerAvatarRef = useRef<HTMLDivElement>(null);
-    const commentsContainerRef = useRef<HTMLDivElement>(null);
-    const commentAvatarRefs = useRef<(HTMLDivElement | null)[]>([]);
-    
     // Reaction State
     const [reactionCount, setReactionCount] = useState(post.reaction_count || 0);
     const [userReaction, setUserReaction] = useState<'like' | 'dislike' | null>(post.user_reaction || null);
@@ -214,10 +208,7 @@ function PostItem({
                 {/* Header */}
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                        <div 
-                            ref={postOwnerAvatarRef}
-                            className="w-10 h-10 rounded-full bg-neutral-200 overflow-hidden border-2 border-black dark:border-neutral-700 z-20"
-                        >
+                        <div className="w-10 h-10 rounded-full bg-neutral-200 overflow-hidden border-2 border-black dark:border-neutral-700">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={post.profiles?.avatar_url || '/placeholder-user.jpg'}
@@ -226,16 +217,21 @@ function PostItem({
                             />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <h4 className="font-bold text-sm text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
                                     {post.profiles?.full_name}
-                                    {isCommunityAdmin && (
-                                        <span className="flex items-center gap-0.5 text-[#ff4b2b] dark:text-[#ff6b4b] text-[10px] bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/50">
-                                            <ShieldCheck size={10} />
-                                            Topluluk Sahibi
-                                        </span>
-                                    )}
                                 </h4>
+                                {isCommunityAdmin && (
+                                    <span className="text-[#ff4b2b] dark:text-[#ff6b4b] text-[10px] bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/50 font-black uppercase tracking-tight">
+                                        Topluluk Sahibi
+                                    </span>
+                                )}
+                                {post.profiles?.department && (
+                                    <span className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                                        <span className="mx-1 opacity-50">|</span>
+                                        {post.profiles.department} {post.profiles.class_year && `• ${post.profiles.class_year}`}
+                                    </span>
+                                )}
                                 {post.is_announcement && (
                                     <span className="bg-black text-white dark:bg-white dark:text-black text-[10px] font-black px-2 py-0.5 rounded-none uppercase tracking-tighter">
                                         DUYURU
@@ -336,58 +332,46 @@ function PostItem({
 
             {/* Comments Section */}
             {showComments && (
-                <div ref={commentsContainerRef} className="bg-neutral-50 dark:bg-neutral-950/30 p-4 border-t-2 border-black dark:border-neutral-700 relative">
+                <div className="bg-neutral-50 dark:bg-neutral-950/30 p-4 border-t-2 border-black dark:border-neutral-700 relative">
                     {loadingComments ? (
                         <div className="text-center py-4">
                             <Loader2 size={24} className="animate-spin mx-auto text-black dark:text-white opacity-20" />
                         </div>
                     ) : (
-                        <div className="space-y-4 mb-4 relative">
-                            {/* Vertical Rail from Post Owner to last comment */}
-                            <ThreadConnector 
-                                containerRef={commentsContainerRef}
-                                startRef={postOwnerAvatarRef}
-                                endRefs={commentAvatarRefs}
-                                offsetX={16} // Center of the 8x8 comment avatar (offset 4) + padding 16? No, avatar is 32px (8w), center is 16px.
-                            />
-
-                            {comments.map((comment, idx) => (
-                                <div key={comment.id} className="group relative">
-                                    {/* Branch from Rail to this avatar */}
-                                    <BranchConnector 
-                                        containerRef={commentsContainerRef}
-                                        avatarRef={{ current: commentAvatarRefs.current[idx] }}
-                                        offsetX={16}
-                                    />
-
-                                    <div className="flex gap-2.5 relative">
-                                        <div 
-                                            ref={el => { commentAvatarRefs.current[idx] = el; }}
-                                            className="w-8 h-8 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0 border border-black dark:border-neutral-800 z-20"
-                                        >
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={comment.profiles?.avatar_url || '/placeholder-user.jpg'}
-                                                className="w-full h-full object-cover"
-                                                alt="User"
-                                            />
-                                        </div>
-                                        <div className="bg-white dark:bg-[#0a0a0a] px-3 py-2 border-2 border-black dark:border-neutral-700 text-sm flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] relative z-20 rounded-xl">
-                                            <div className="flex justify-between items-baseline mb-1">
+                        <div className="space-y-4 mb-4">
+                            {comments.map((comment) => (
+                                <div key={comment.id} className="flex gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0 border border-black dark:border-neutral-800">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={comment.profiles?.avatar_url || '/placeholder-user.jpg'}
+                                            className="w-full h-full object-cover"
+                                            alt="User"
+                                        />
+                                    </div>
+                                    <div className="bg-white dark:bg-[#0a0a0a] px-3 py-2 border-2 border-black dark:border-neutral-700 text-sm flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] rounded-xl">
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <div className="flex items-center gap-1 flex-wrap">
                                                 <span className="font-bold text-[11px] text-neutral-900 dark:text-neutral-200">
                                                     {comment.profiles?.full_name}
-                                                    {comment.user_id === communityAdminId && (
-                                                        <span className="ml-1.5 text-[#ff4b2b] dark:text-[#ff6b4b] text-[9px] font-black bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/50 uppercase tracking-tight">Topluluk Sahibi</span>
-                                                    )}
                                                 </span>
-                                                <span className="text-[9px] font-bold text-neutral-400 uppercase">
-                                                    {new Date(comment.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                                {comment.user_id === communityAdminId && (
+                                                    <span className="text-[#ff4b2b] dark:text-[#ff6b4b] text-[9px] font-black bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/50 uppercase tracking-tight">Topluluk Sahibi</span>
+                                                )}
+                                                {comment.profiles?.department && (
+                                                    <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">
+                                                        <span className="mx-1 opacity-50">|</span>
+                                                        {comment.profiles.department} {comment.profiles.class_year && `• ${comment.profiles.class_year}`}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <p className="text-neutral-700 dark:text-neutral-300 font-serif leading-tight">
-                                                {comment.content}
-                                            </p>
+                                            <span className="text-[9px] font-bold text-neutral-400 uppercase">
+                                                {new Date(comment.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
                                         </div>
+                                        <p className="text-neutral-700 dark:text-neutral-300 font-serif leading-tight">
+                                            {comment.content}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
@@ -427,5 +411,3 @@ function PostItem({
         </div>
     );
 }
-
-import { Loader2 } from 'lucide-react';

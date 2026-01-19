@@ -15,6 +15,8 @@ export type CommunityPost = {
     profiles?: {
         full_name: string
         avatar_url: string
+        department?: string
+        class_year?: string
     }
     reaction_count?: number
     comment_count?: number
@@ -30,6 +32,8 @@ export type CommunityPostComment = {
     profiles?: {
         full_name: string
         avatar_url: string
+        department?: string
+        class_year?: string
     }
 }
 
@@ -41,7 +45,7 @@ export async function getCommunityPosts(communityId: string) {
             .from('community_posts')
             .select(`
                 *,
-                profiles:user_id (full_name, avatar_url),
+                profiles:user_id (full_name, avatar_url, department, class_year),
                 reactions:community_post_reactions(reaction_type, user_id),
                 comments:community_post_comments(id)
             `)
@@ -111,7 +115,7 @@ export async function getPostComments(postId: string) {
         .from('community_post_comments')
         .select(`
         *,
-        profiles:user_id (full_name, avatar_url)
+        profiles:user_id (full_name, avatar_url, department, class_year)
       `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
