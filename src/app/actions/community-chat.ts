@@ -16,6 +16,9 @@ export type CommunityPost = {
         full_name: string
         avatar_url: string
     }
+    reaction_count?: number
+    comment_count?: number
+    user_reaction?: 'like' | 'dislike' | null
 }
 
 export type CommunityPostComment = {
@@ -37,9 +40,11 @@ export async function getCommunityPosts(communityId: string) {
         const { data, error } = await supabase
             .from('community_posts')
             .select(`
-          *,
-          profiles:user_id (full_name, avatar_url)
-        `)
+                *,
+                profiles:user_id (full_name, avatar_url),
+                reactions:community_post_reactions(reaction_type, user_id),
+                comments:community_post_comments(id)
+            `)
             .eq('community_id', communityId)
             .order('created_at', { ascending: false })
 
@@ -48,7 +53,19 @@ export async function getCommunityPosts(communityId: string) {
             return []
         }
 
-        return data as CommunityPost[]
+        const { data: { user } } = await supabase.auth.getUser()
+
+        return data.map(post => {
+            const reactions = post.reactions || []
+            const userReaction = user ? reactions.find((r: any) => r.user_id === user.id) : null
+            
+            return {
+                ...post,
+                reaction_count: reactions.length,
+                comment_count: post.comments?.length || 0,
+                user_reaction: userReaction ? userReaction.reaction_type : null
+            }
+        }) as CommunityPost[]
     } catch (e) {
         console.error('Unexpected error in getCommunityPosts:', e)
         return []
@@ -127,6 +144,24 @@ export async function createComment(postId: string, content: string) {
         if (error) {
             console.error('Error creating comment:', error)
             return { success: false, message: 'Yorum yapılamadı' }
+        }
+
+        // Trigger notification
+        const { data: post } = await supabase
+            .from('community_posts')
+            .select('user_id, community_id')
+            .eq('id', postId)
+            .single()
+
+        if (post && post.user_id !== user.id) {
+            await supabase.from('notifications').insert({
+                user_id: post.user_id,
+                actor_id: user.id,
+                type: 'community_post_comment',
+                content: 'Gönderine yorum yaptı',
+                target_id: postId,
+                metadata: { community_id: post.community_id }
+            })
         }
 
         return { success: true }
@@ -270,5 +305,86 @@ export async function checkUserPermission(communityId: string) {
     } catch (e) {
         console.error('Unexpected error in checkUserPermission:', e)
         return { hasPermission: false, isAdmin: false }
+    }
+}
+
+export async function reactToPost(postId: string, reactionType: 'like' | 'dislike' | null) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, message: 'Oturum açmanız gerekiyor' }
+        }
+
+        if (reactionType === null) {
+            // Remove reaction
+            const { error } = await supabase
+                .from('community_post_reactions')
+                .delete()
+                .eq('post_id', postId)
+                .eq('user_id', user.id)
+
+            if (error) throw error
+        } else {
+            // Upsert reaction
+            const { error } = await supabase
+                .from('community_post_reactions')
+                .upsert({
+                    post_id: postId,
+                    user_id: user.id,
+                    reaction_type: reactionType
+                }, { onConflict: 'post_id,user_id' })
+
+            if (error) throw error
+
+            // Trigger notification if it's a new like
+            if (reactionType === 'like') {
+                const { data: post } = await supabase
+                    .from('community_posts')
+                    .select('user_id, community_id')
+                    .eq('id', postId)
+                    .single()
+
+                if (post && post.user_id !== user.id) {
+                    await supabase.from('notifications').insert({
+                        user_id: post.user_id,
+                        actor_id: user.id,
+                        type: 'community_post_like',
+                        content: 'Gönderini beğendi',
+                        target_id: postId,
+                        metadata: { community_id: post.community_id }
+                    })
+                }
+            }
+        }
+
+        return { success: true }
+    } catch (e: any) {
+        console.error('Error in reactToPost:', e)
+        return { success: false, message: 'İşlem başarısız' }
+    }
+}
+
+export async function deletePost(postId: string, communityId: string) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return { success: false, message: 'Yetkisiz erişim' }
+
+        const { error } = await supabase
+            .from('community_posts')
+            .delete()
+            .eq('id', postId)
+            .eq('user_id', user.id) // RLS also check for admin
+
+        if (error) throw error
+
+        revalidatePath(`/community/${communityId}/chat`)
+        return { success: true }
+    } catch (e: any) {
+        console.error('Error deletePost:', e)
+        return { success: false, message: 'Silme işlemi başarısız' }
     }
 }

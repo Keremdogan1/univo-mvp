@@ -1,18 +1,20 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { CommunityPost, requestPostPermission, createComment, getPostComments, getCommunityPosts } from '@/app/actions/community-chat';
+import { CommunityPost, requestPostPermission, createComment, getPostComments, getCommunityPosts, reactToPost, deletePost } from '@/app/actions/community-chat';
 import PostComposer from './PostComposer';
 import AdminRequestPanel from './AdminRequestPanel';
-import { MessageSquare, Heart, Share2, MoreHorizontal, Hand, Send } from 'lucide-react';
+import { MessageSquare, Heart, Share2, MoreHorizontal, Hand, Send, Trash2, ShieldCheck, Flag } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface ChatInterfaceProps {
     communityId: string;
     initialPosts: CommunityPost[];
     isAdmin: boolean;
-    hasPermission: boolean; // if true (admin or approved), show composer
-    pendingRequests: any[]; // Only passed if isAdmin
+    hasPermission: boolean; 
+    pendingRequests: any[]; 
+    communityAdminId?: string;
 }
 
 export default function ChatInterface({
@@ -20,8 +22,10 @@ export default function ChatInterface({
     initialPosts,
     isAdmin,
     hasPermission,
-    pendingRequests
+    pendingRequests,
+    communityAdminId
 }: ChatInterfaceProps) {
+    const { user } = useAuth();
     const [posts, setPosts] = useState(initialPosts);
 
     const fetchPosts = async () => {
@@ -76,7 +80,13 @@ export default function ChatInterface({
             {/* Feed */}
             <div className="space-y-6">
                 {posts.map(post => (
-                    <PostItem key={post.id} post={post} />
+                    <PostItem 
+                        key={post.id} 
+                        post={post} 
+                        currentUserId={user?.id}
+                        communityAdminId={communityAdminId}
+                        onDeleted={fetchPosts}
+                    />
                 ))}
                 {posts.length === 0 && (
                     <div className="text-center py-12 text-neutral-500 dark:text-neutral-400">
@@ -89,12 +99,64 @@ export default function ChatInterface({
     );
 }
 
-function PostItem({ post }: { post: CommunityPost }) {
+function PostItem({ 
+    post, 
+    currentUserId, 
+    communityAdminId,
+    onDeleted 
+}: { 
+    post: CommunityPost; 
+    currentUserId?: string;
+    communityAdminId?: string;
+    onDeleted?: () => void;
+}) {
     const [showComments, setShowComments] = useState(false);
-    const [comments, setComments] = useState<any[]>([]); // Need type
+    const [comments, setComments] = useState<any[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
     const [commentContent, setCommentContent] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    
+    // Reaction State
+    const [reactionCount, setReactionCount] = useState(post.reaction_count || 0);
+    const [userReaction, setUserReaction] = useState<'like' | 'dislike' | null>(post.user_reaction || null);
+
+    const isOwner = post.user_id === currentUserId;
+    const isCommunityAdmin = communityAdminId === post.user_id;
+    const canDelete = isOwner || communityAdminId === currentUserId;
+
+    const handleLike = async () => {
+        const newReaction = userReaction === 'like' ? null : 'like';
+        const prevReaction = userReaction;
+        
+        // Optimistic UI
+        setUserReaction(newReaction);
+        if (newReaction === 'like') {
+            setReactionCount(prev => prev + 1);
+        } else if (prevReaction === 'like') {
+            setReactionCount(prev => prev - 1);
+        }
+
+        const result = await reactToPost(post.id, newReaction);
+        if (!result.success) {
+            // Revert
+            setUserReaction(prevReaction);
+            setReactionCount(post.reaction_count || 0);
+            toast.error(result.message);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return;
+        
+        const result = await deletePost(post.id, post.community_id);
+        if (result.success) {
+            toast.success('Gönderi silindi');
+            if (onDeleted) onDeleted();
+        } else {
+            toast.error(result.message);
+        }
+    };
 
     const loadComments = async () => {
         if (showComments) {
@@ -117,11 +179,16 @@ function PostItem({ post }: { post: CommunityPost }) {
 
         setSubmittingComment(true);
         try {
-            await createComment(post.id, commentContent);
-            setCommentContent('');
-            // Refresh comments
-            const data = await getPostComments(post.id);
-            setComments(data);
+            const result = await createComment(post.id, commentContent);
+            if (result.success) {
+                setCommentContent('');
+                // Refresh comments
+                const data = await getPostComments(post.id);
+                setComments(data);
+                toast.success('Yorum yapıldı');
+            } else {
+                toast.error(result.message);
+            }
         } catch (error) {
             toast.error('Yorum yapılamadı');
         } finally {
@@ -130,12 +197,12 @@ function PostItem({ post }: { post: CommunityPost }) {
     };
 
     return (
-        <div className="bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] overflow-visible">
             <div className="p-4">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-neutral-200 overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-neutral-200 overflow-hidden border-2 border-black dark:border-neutral-700">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={post.profiles?.avatar_url || '/placeholder-user.jpg'}
@@ -145,107 +212,168 @@ function PostItem({ post }: { post: CommunityPost }) {
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h4 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">
+                                <h4 className="font-bold text-sm text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
                                     {post.profiles?.full_name}
+                                    {isCommunityAdmin && (
+                                        <span className="flex items-center gap-0.5 text-[#ff4b2b] dark:text-[#ff6b4b] text-[10px] bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/50">
+                                            <ShieldCheck size={10} />
+                                            Topluluk Sahibi
+                                        </span>
+                                    )}
                                 </h4>
                                 {post.is_announcement && (
-                                    <span className="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                        Duyuru
+                                    <span className="bg-black text-white dark:bg-white dark:text-black text-[10px] font-black px-2 py-0.5 rounded-none uppercase tracking-tighter">
+                                        DUYURU
                                     </span>
                                 )}
                             </div>
-                            <span className="text-xs text-neutral-500">
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
                                 {new Date(post.created_at).toLocaleDateString('tr-TR', {
                                     day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
                                 })}
                             </span>
                         </div>
                     </div>
+
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowMenu(!showMenu)}
+                            className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                        >
+                            <MoreHorizontal size={20} className="text-neutral-400" />
+                        </button>
+                        
+                        {showMenu && (
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-10" 
+                                    onClick={() => setShowMenu(false)}
+                                />
+                                <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] z-20 py-1">
+                                    {canDelete && (
+                                        <button 
+                                            onClick={() => { setShowMenu(false); handleDelete(); }}
+                                            className="w-full px-4 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2"
+                                        >
+                                            <Trash2 size={14} />
+                                            Gönderiyi Sil
+                                        </button>
+                                    )}
+                                    <button 
+                                        className="w-full px-4 py-2 text-left text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2"
+                                        onClick={() => setShowMenu(false)}
+                                    >
+                                        <Flag size={14} />
+                                        Bildir
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* Content */}
-                <div className="text-neutral-800 dark:text-neutral-200 text-sm whitespace-pre-wrap mb-4">
+                <div className="text-neutral-800 dark:text-neutral-200 text-sm whitespace-pre-wrap mb-4 font-serif leading-relaxed">
                     {post.content}
                 </div>
 
                 {post.media_url && (
-                    <div className="mb-4 rounded-lg overflow-hidden border border-neutral-100 dark:border-neutral-800">
+                    <div className="mb-4 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={post.media_url} className="w-full" alt="Post content" />
                     </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-4 text-neutral-500 dark:text-neutral-400 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-                    <button className="flex items-center gap-1.5 text-xs font-medium hover:text-red-500 transition-colors">
-                        <Heart size={16} />
-                        Beğen
+                <div className="flex items-center gap-4 text-neutral-500 dark:text-neutral-400 pt-3 border-t-2 border-neutral-100 dark:border-neutral-800">
+                    <button 
+                        onClick={handleLike}
+                        className={`flex items-center gap-1.5 text-xs font-bold transition-all ${userReaction === 'like' ? 'text-[#ff4b2b] scale-110' : 'hover:text-[#ff4b2b]'}`}
+                    >
+                        <Heart size={16} fill={userReaction === 'like' ? 'currentColor' : 'none'} />
+                        <span>{reactionCount > 0 ? reactionCount : 'Beğen'}</span>
                     </button>
                     <button
                         onClick={loadComments}
-                        className="flex items-center gap-1.5 text-xs font-medium hover:text-blue-500 transition-colors"
+                        className="flex items-center gap-1.5 text-xs font-bold hover:text-black dark:hover:text-white transition-colors"
                     >
                         <MessageSquare size={16} />
-                        Yorumlar
+                        <span>{post.comment_count && post.comment_count > 0 ? post.comment_count : 'Yorumlar'}</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 text-xs font-bold hover:text-black dark:hover:text-white transition-colors ml-auto">
+                        <Share2 size={16} />
                     </button>
                 </div>
             </div>
 
             {/* Comments Section */}
             {showComments && (
-                <div className="bg-neutral-50 dark:bg-neutral-950/50 p-4 border-t border-neutral-100 dark:border-neutral-800">
+                <div className="bg-neutral-50 dark:bg-neutral-950/30 p-4 border-t-2 border-black dark:border-neutral-700">
                     {loadingComments ? (
                         <div className="text-center py-4">
-                            <Loader2 size={20} className="animate-spin mx-auto text-neutral-400" />
+                            <Loader2 size={24} className="animate-spin mx-auto text-black dark:text-white opacity-20" />
                         </div>
                     ) : (
                         <div className="space-y-4 mb-4">
                             {comments.map(comment => (
-                                <div key={comment.id} className="flex gap-2.5">
-                                    <div className="w-6 h-6 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0 mt-1">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={comment.profiles?.avatar_url || '/placeholder-user.jpg'}
-                                            className="w-full h-full object-cover"
-                                            alt="User"
-                                        />
-                                    </div>
-                                    <div className="bg-white dark:bg-neutral-900 p-2.5 border-2 border-black dark:border-neutral-700 text-sm flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]">
-                                        <div className="flex justify-between items-baseline mb-1">
-                                            <span className="font-bold text-xs text-neutral-900 dark:text-neutral-200">
-                                                {comment.profiles?.full_name}
-                                            </span>
-                                            <span className="text-[10px] text-neutral-400">
-                                                {new Date(comment.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
+                                <div key={comment.id} className="group">
+                                    <div className="flex gap-2.5">
+                                        <div className="w-8 h-8 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0 border border-black dark:border-neutral-800">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={comment.profiles?.avatar_url || '/placeholder-user.jpg'}
+                                                className="w-full h-full object-cover"
+                                                alt="User"
+                                            />
                                         </div>
-                                        <p className="text-neutral-700 dark:text-neutral-300">
-                                            {comment.content}
-                                        </p>
+                                        <div className="bg-white dark:bg-neutral-900 px-3 py-2 border-2 border-black dark:border-neutral-700 text-sm flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] relative">
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <span className="font-bold text-[11px] text-neutral-900 dark:text-neutral-200">
+                                                    {comment.profiles?.full_name}
+                                                    {comment.user_id === communityAdminId && (
+                                                        <span className="ml-1.5 text-[#ff4b2b] text-[9px] font-black uppercase tracking-tighter">SAHİBİ</span>
+                                                    )}
+                                                </span>
+                                                <span className="text-[9px] font-bold text-neutral-400 uppercase">
+                                                    {new Date(comment.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <p className="text-neutral-700 dark:text-neutral-300 font-serif leading-tight">
+                                                {comment.content}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                             {comments.length === 0 && (
-                                <p className="text-center text-xs text-neutral-400 italic">İlk yorumu sen yap!</p>
+                                <div className="text-center py-4 border-2 border-dashed border-neutral-200 dark:border-neutral-800">
+                                    <p className="text-xs text-neutral-400 italic font-serif">Henüz hiç yorum yapılmamış. İlk yorumu sen yap!</p>
+                                </div>
                             )}
                         </div>
                     )}
 
                     <form onSubmit={handleComment} className="flex gap-2">
-                        <input
-                            type="text"
-                            className="flex-1 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none"
-                            placeholder="Yorum yaz..."
+                        <textarea
+                            className="flex-1 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none font-serif min-h-[42px] max-h-32 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)]"
+                            placeholder="Bir şeyler yaz..."
+                            rows={1}
                             value={commentContent}
                             onChange={(e) => setCommentContent(e.target.value)}
                             disabled={submittingComment}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleComment(e as any);
+                                }
+                            }}
                         />
                         <button
                             type="submit"
                             disabled={!commentContent.trim() || submittingComment}
-                            className="bg-black dark:bg-white text-white dark:text-black p-2 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)] active:shadow-none active:translate-x-[1px] active:translate-y-[1px]"
+                            className="bg-black dark:bg-white text-white dark:text-black w-10 h-10 flex items-center justify-center disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] active:shadow-none active:translate-x-[1px] active:translate-y-[1px] flex-shrink-0"
                         >
-                            <Send size={16} />
+                            <Send size={18} />
                         </button>
                     </form>
                 </div>

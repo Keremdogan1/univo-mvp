@@ -10,6 +10,14 @@ export default async function CommunityChatPage({ params }: { params: Promise<{ 
     const postsData = getCommunityPosts(id);
     const permissionData = checkUserPermission(id);
 
+    // Fetch community admin_id for role labeling
+    const supabase = await (await import('@/lib/supabase-server')).createClient();
+    const { data: community } = await supabase
+        .from('communities')
+        .select('admin_id')
+        .eq('id', id)
+        .maybeSingle();
+
     // Parallel fetch
     const [posts, permission] = await Promise.all([postsData, permissionData]);
 
@@ -48,6 +56,7 @@ export default async function CommunityChatPage({ params }: { params: Promise<{ 
                 isAdmin={isAdmin}
                 hasPermission={hasPermission}
                 pendingRequests={pendingRequests}
+                communityAdminId={community?.admin_id}
             />
         </div>
     );

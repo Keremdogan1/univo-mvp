@@ -13,6 +13,7 @@ interface PostComposerProps {
 
 export default function PostComposer({ communityId, onPostCreated, isAnnouncement = false }: PostComposerProps) {
     const [content, setContent] = useState('');
+    const [isAnnouncementPost, setIsAnnouncementPost] = useState(false);
     const [mediaUrl, setMediaUrl] = useState(''); // Placeholder for future media implementation
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,12 +23,13 @@ export default function PostComposer({ communityId, onPostCreated, isAnnouncemen
 
         setIsSubmitting(true);
         try {
-            const result = await createPost(communityId, content, mediaUrl || undefined, isAnnouncement);
+            const result = await createPost(communityId, content, mediaUrl || undefined, isAnnouncementPost);
             
             if (result.success) {
                 setContent('');
                 setMediaUrl('');
-                toast.success(isAnnouncement ? 'Duyuru paylaşıldı' : 'Gönderi paylaşıldı');
+                setIsAnnouncementPost(false);
+                toast.success(isAnnouncementPost ? 'Duyuru paylaşıldı' : 'Gönderi paylaşıldı');
                 if (onPostCreated) onPostCreated();
             } else {
                 toast.error(result.message || 'Paylaşım yapılamadı');
@@ -54,14 +56,28 @@ export default function PostComposer({ communityId, onPostCreated, isAnnouncemen
                 </div>
 
                 <div className="flex justify-between items-center border-t-2 border-neutral-200 dark:border-neutral-700 pt-3">
-                    <button
-                        type="button"
-                        className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                        title="Resim ekle (Yakında)"
-                        disabled
-                    >
-                        <ImageIcon size={20} />
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            type="button"
+                            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                            title="Resim ekle (Yakında)"
+                            disabled
+                        >
+                            <ImageIcon size={20} />
+                        </button>
+
+                        {isAnnouncement && (
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={isAnnouncementPost}
+                                    onChange={(e) => setIsAnnouncementPost(e.target.checked)}
+                                    className="w-4 h-4 rounded border-black dark:border-neutral-700 text-black dark:text-white focus:ring-0 focus:ring-offset-0"
+                                />
+                                <span className="text-xs font-bold font-serif text-neutral-600 dark:text-neutral-400">Duyuru Olarak Paylaş</span>
+                            </label>
+                        )}
+                    </div>
 
                     <button
                         type="submit"
