@@ -106,7 +106,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ id: stri
         .from('profiles')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

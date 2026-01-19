@@ -69,7 +69,7 @@ export default function SettingsPage() {
                 .from('profiles')
                 .select('privacy_settings, notification_settings')
                 .eq('id', user?.id)
-                .single();
+                .maybeSingle();
 
             if (error) throw error;
             if (data?.privacy_settings) {

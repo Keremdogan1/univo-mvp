@@ -175,7 +175,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 .from('profiles')
                 .select('*')
                 .eq('id', resolvedId)
-                .single();
+                .maybeSingle();
 
             if (profileError) throw profileError;
             setProfile(profileData);
