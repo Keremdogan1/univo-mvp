@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { CommunityPost, requestPostPermission, createComment, getPostComments } from '@/app/actions/community-chat';
+import { CommunityPost, requestPostPermission, createComment, getPostComments, getCommunityPosts } from '@/app/actions/community-chat';
 import PostComposer from './PostComposer';
 import AdminRequestPanel from './AdminRequestPanel';
 import { MessageSquare, Heart, Share2, MoreHorizontal, Hand, Send } from 'lucide-react';
@@ -24,9 +24,10 @@ export default function ChatInterface({
 }: ChatInterfaceProps) {
     const [posts, setPosts] = useState(initialPosts);
 
-    // If user posted, we can optimistically add it or rely on server revalidation.
-    // Since we use revalidatePath in action, easier to just refresh or wait. 
-    // But for better UX, let's assume valid refresh happens.
+    const fetchPosts = async () => {
+        const data = await getCommunityPosts(communityId);
+        setPosts(data);
+    };
 
     const handleRequestPermission = async () => {
         toast.promise(requestPostPermission(communityId), {
@@ -50,8 +51,8 @@ export default function ChatInterface({
             {hasPermission ? (
                 <PostComposer
                     communityId={communityId}
-                    // Ideally we refetch posts here or setup realtime subscription involved
-                    isAnnouncement={isAdmin} // Admins post announcements by default? Or toggle? Let's simplfy: Admins post normally for now.
+                    onPostCreated={fetchPosts}
+                    isAnnouncement={isAdmin} 
                 />
             ) : (
             <div className="bg-neutral-50 dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 p-6 text-center mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">

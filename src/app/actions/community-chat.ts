@@ -56,33 +56,35 @@ export async function getCommunityPosts(communityId: string) {
 }
 
 export async function createPost(communityId: string, content: string, mediaUrl?: string, isAnnouncement: boolean = false) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-        throw new Error('Unauthorized')
+        if (!user) {
+            return { success: false, message: 'Oturum açmanız gerekiyor' }
+        }
+
+        const { error } = await supabase
+            .from('community_posts')
+            .insert({
+                community_id: communityId,
+                user_id: user.id,
+                content,
+                media_url: mediaUrl,
+                is_announcement: isAnnouncement
+            })
+
+        if (error) {
+            console.error('Error creating post:', error)
+            return { success: false, message: 'Gönderi oluşturulurken bir hata oluştu' }
+        }
+
+        revalidatePath(`/community/${communityId}/chat`)
+        return { success: true }
+    } catch (e: any) {
+        console.error('Unexpected error in createPost:', e)
+        return { success: false, message: 'Beklenmedik bir hata oluştu' }
     }
-
-    // Check permissions (Admin or Approved Request)
-    // We can rely on RLS, but it's good to fail fast or handle error gracefully
-
-    const { error } = await supabase
-        .from('community_posts')
-        .insert({
-            community_id: communityId,
-            user_id: user.id,
-            content,
-            media_url: mediaUrl,
-            is_announcement: isAnnouncement
-        })
-
-    if (error) {
-        console.error('Error creating post:', error)
-        throw new Error('Could not create post')
-    }
-
-    revalidatePath(`/community/${communityId}/chat`)
-    return { success: true }
 }
 
 export async function getPostComments(postId: string) {
@@ -106,31 +108,32 @@ export async function getPostComments(postId: string) {
 }
 
 export async function createComment(postId: string, content: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-        throw new Error('Unauthorized')
+        if (!user) {
+            return { success: false, message: 'Oturum açmanız gerekiyor' }
+        }
+
+        const { error } = await supabase
+            .from('community_post_comments')
+            .insert({
+                post_id: postId,
+                user_id: user.id,
+                content
+            })
+
+        if (error) {
+            console.error('Error creating comment:', error)
+            return { success: false, message: 'Yorum yapılamadı' }
+        }
+
+        return { success: true }
+    } catch (e: any) {
+        console.error('Unexpected error in createComment:', e)
+        return { success: false, message: 'Beklenmedik bir hata oluştu' }
     }
-
-    const { error } = await supabase
-        .from('community_post_comments')
-        .insert({
-            post_id: postId,
-            user_id: user.id,
-            content
-        })
-
-    if (error) {
-        console.error('Error creating comment:', error)
-        throw new Error('Could not create comment')
-    }
-
-    // We might need to revalidate, or just return success and let client update optimistically
-    // Ideally revalidate the specific post area if possible, but path revalidation works
-    // revalidatePath(`/community/[id]/chat`) - difficult to know ID here easily without passing it.
-    // For now, return success.
-    return { success: true }
 }
 
 export async function requestPostPermission(communityId: string) {

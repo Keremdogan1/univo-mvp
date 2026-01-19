@@ -22,11 +22,16 @@ export default function PostComposer({ communityId, onPostCreated, isAnnouncemen
 
         setIsSubmitting(true);
         try {
-            await createPost(communityId, content, mediaUrl || undefined, isAnnouncement);
-            setContent('');
-            setMediaUrl('');
-            toast.success(isAnnouncement ? 'Duyuru paylaşıldı' : 'Gönderi paylaşıldı');
-            if (onPostCreated) onPostCreated();
+            const result = await createPost(communityId, content, mediaUrl || undefined, isAnnouncement);
+            
+            if (result.success) {
+                setContent('');
+                setMediaUrl('');
+                toast.success(isAnnouncement ? 'Duyuru paylaşıldı' : 'Gönderi paylaşıldı');
+                if (onPostCreated) onPostCreated();
+            } else {
+                toast.error(result.message || 'Paylaşım yapılamadı');
+            }
         } catch (error) {
             console.error(error);
             toast.error('Paylaşım yapılırken bir hata oluştu');
