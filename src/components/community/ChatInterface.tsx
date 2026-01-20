@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CommunityPost, CommunityPostComment, requestPostPermission, createComment, getPostComments, getCommunityPosts, reactToPost, deletePost, reactToComment, updateComment, deleteComment } from '@/app/actions/community-chat';
 import PostComposer from './PostComposer';
 import AdminRequestPanel from './AdminRequestPanel';
-import { MessageSquare, Share2, MoreHorizontal, Hand, Send, Trash2, Flag, ArrowBigUp, Loader2, Edit2, User, MoreVertical, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
+import { MessageSquare, Share2, MoreHorizontal, Hand, Send, Trash2, Flag, ArrowBigUp, ArrowBigDown, Loader2, Edit2, User, MoreVertical, ChevronDown, ChevronUp, ShieldCheck, BadgeCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -254,12 +254,12 @@ function PostItem({
                         <div className="flex justify-between items-start mb-2">
                             <div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    <h4 className="font-bold text-sm text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
+                                    <Link href={`/profile/${post.user_id}`} className="font-bold text-sm text-neutral-900 dark:text-neutral-100 hover:underline">
                                         {post.profiles?.full_name}
-                                    </h4>
+                                    </Link>
                                     {isCommunityAdminPost && (
                                         <div className="group/badge relative flex items-center">
-                                            <ShieldCheck size={16} className="text-[#ff4b2b] dark:text-[#ff6b4b] fill-red-50 dark:fill-red-950/30" />
+                                            <BadgeCheck size={16} className="text-[var(--primary-color)] fill-red-50 dark:fill-red-950/30" />
                                             {/* Tooltip */}
                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[10px] font-bold rounded opacity-0 group-hover/badge:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
                                                 Topluluk Sahibi
@@ -270,26 +270,27 @@ function PostItem({
                                     {post.profiles?.department && (
                                         <span className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium capitalize">
                                             <span className="mx-1 opacity-50">|</span>
-                                            {post.profiles.department} {post.profiles.class_year && `• ${post.profiles.class_year}`}
+                                            {[post.profiles.department, post.profiles.class_year].filter(Boolean).join(' • ')}
                                         </span>
                                     )}
+                                    <span className="text-[11px] text-neutral-400 dark:text-neutral-500 font-serif">
+                                        <span className="mx-1 opacity-50">|</span>
+                                        {formatRelativeTime(post.created_at)}
+                                    </span>
                                     {post.is_announcement && (
-                                        <span className="bg-black text-white dark:bg-white dark:text-black text-[10px] font-black px-2 py-0.5 rounded-none uppercase tracking-tighter">
+                                        <span className="bg-black text-white dark:bg-white dark:text-black text-[10px] font-black px-2 py-0.5 rounded-none uppercase tracking-tighter ml-1">
                                             DUYURU
                                         </span>
                                     )}
                                 </div>
-                                <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
-                                    {formatRelativeTime(post.created_at)}
-                                </span>
                             </div>
 
                             <div className="relative">
                                 <button 
-                                    onClick={() => setShowMenu(!showMenu)}
-                                    className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                                    onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                                    className="p-1 px-1.5 text-neutral-400 hover:text-black dark:hover:text-white transition-colors rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
                                 >
-                                    <MoreVertical size={20} className="text-neutral-400" />
+                                    <MoreVertical size={16} />
                                 </button>
                                 
                                 {showMenu && (
@@ -347,9 +348,9 @@ function PostItem({
                         </div>
 
                         {post.media_url && (
-                            <div className="mb-4 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.05)] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                            <div className="mb-4 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={post.media_url} className="w-full" alt="Post content" />
+                                <img src={post.media_url} className="w-full h-auto max-h-[500px] object-contain cursor-pointer transition-transform hover:scale-[1.01]" alt="Post content" />
                             </div>
                         )}
 
@@ -372,7 +373,7 @@ function PostItem({
                                     onClick={() => handleReaction('dislike')}
                                     className={`p-1.5 rounded-full transition-all flex items-center justify-center w-8 h-8 hover:bg-white dark:hover:bg-black hover:shadow-sm ${userReaction === 'dislike' ? 'text-red-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-red-600'}`}
                                 >
-                                    <ArrowBigUp size={20} className={`rotate-180 ${userReaction === 'dislike' ? 'fill-current' : ''}`} fill={userReaction === 'dislike' ? 'currentColor' : 'none'} />
+                                    <ArrowBigDown size={20} className={userReaction === 'dislike' ? 'fill-current' : ''} />
                                 </button>
                             </div>
                             <button
@@ -382,11 +383,18 @@ function PostItem({
                                 <MessageSquare size={16} />
                                 <span>{post.comment_count && post.comment_count > 0 ? post.comment_count : 'Yorumlar'}</span>
                             </button>
-                            <button className="flex items-center gap-2 group text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors ml-auto">
-                                <div className="p-2 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20">
-                                    <Share2 size={18} />
-                                </div>
-                            </button>
+                             <button
+                                 onClick={(e) => {
+                                     e.stopPropagation();
+                                     navigator.clipboard.writeText(`${window.location.origin}/community/${post.community_id}?post=${post.id}`);
+                                     toast.success('Link kopyalandı!');
+                                 }}
+                                 className="flex items-center gap-2 group text-neutral-400 dark:text-neutral-500 hover:text-green-500 transition-colors ml-auto"
+                             >
+                                 <div className="p-2 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20">
+                                     <Share2 size={18} />
+                                 </div>
+                             </button>
                         </div>
 
                         {/* Comments Section - Inside Content Column for exact alignment */}
@@ -608,7 +616,7 @@ function CommentItem({
                             </span>
                             {isCommunityAdminComment && (
                                 <div className="group/badge relative flex items-center">
-                                    <ShieldCheck size={14} className="text-[#ff4b2b] dark:text-[#ff6b4b] fill-red-50 dark:fill-red-950/30" />
+                                    <BadgeCheck size={14} className="text-[var(--primary-color)] fill-red-50 dark:fill-red-950/30" />
                                     {/* Tooltip */}
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[10px] font-bold rounded opacity-0 group-hover/badge:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
                                         Topluluk Sahibi
@@ -619,18 +627,18 @@ function CommentItem({
                             {comment.profiles?.department && (
                                 <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium capitalize">
                                     <span className="mx-1 opacity-50">|</span>
-                                    {comment.profiles.department} {comment.profiles.class_year && `• ${comment.profiles.class_year}`}
+                                    {[comment.profiles.department, comment.profiles.class_year].filter(Boolean).join(' • ')}
                                 </span>
                             )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold text-neutral-400 uppercase">
+                            <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase">
+                                <span className="mx-1 opacity-50">|</span>
                                 {formatRelativeTime(comment.created_at)}
                             </span>
-                            <div className="relative">
-                                <button onClick={() => setShowMenu(!showMenu)} className="p-0.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <MoreHorizontal size={14} className="text-neutral-400" />
-                                </button>
+                        </div>
+                        <div className="relative">
+                            <button onClick={() => setShowMenu(!showMenu)} className="p-0.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                <MoreHorizontal size={14} className="text-neutral-400" />
+                            </button>
                                 {showMenu && (
                                     <>
                                         <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
@@ -659,7 +667,6 @@ function CommentItem({
                                 )}
                             </div>
                         </div>
-                    </div>
 
                     {isEditing ? (
                         <div className="mt-2">
@@ -690,7 +697,7 @@ function CommentItem({
                                 {reactionCount}
                             </span>
                             <button onClick={() => handleReaction('dislike')} className={`p-1 rounded-full transition-all flex items-center justify-center w-6 h-6 hover:bg-white dark:hover:bg-black hover:shadow-sm ${userReaction === 'dislike' ? 'text-red-600' : 'text-neutral-400 dark:text-neutral-500 hover:text-red-600'}`}>
-                                <ArrowBigUp size={16} className={`rotate-180 ${userReaction === 'dislike' ? 'fill-current' : ''}`} fill={userReaction === 'dislike' ? 'currentColor' : 'none'} />
+                                <ArrowBigDown size={16} className={userReaction === 'dislike' ? 'fill-current' : ''} />
                             </button>
                         </div>
                         <button 
@@ -745,7 +752,7 @@ function CommentItem({
                         offsetX={16 - 28} // Aligns with parent's avatar rail center
                     />
                     
-                    {comment.children.map((child, idx) => (
+                    {comment.children?.map((child, childIdx) => (
                         <div key={child.id} className="relative mb-4">
                             <CommentItem 
                                 key={child.id}
@@ -760,7 +767,7 @@ function CommentItem({
                                 submittingComment={submittingComment}
                                 containerRef={childContainerRef}
                                 offsetX={16 - 28}
-                                onAvatarRef={(el) => { childAvatarRefs.current[idx] = el; }}
+                                onAvatarRef={(el) => { childAvatarRefs.current[childIdx] = el; }}
                             />
                         </div>
                     ))}

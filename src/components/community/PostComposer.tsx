@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createPost } from '@/app/actions/community-chat';
-import { Loader2, Send, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Send, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PostComposerProps {
@@ -60,10 +60,10 @@ export default function PostComposer({ communityId, onPostCreated, isAnnouncemen
                         <button
                             type="button"
                             className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                            title="Resim ekle (Yakında)"
+                            title="Medya Ekle (Video/Resim) (Yakında)"
                             disabled
                         >
-                            <ImageIcon size={20} />
+                            <Camera size={20} />
                         </button>
 
                         {isAnnouncement && (
