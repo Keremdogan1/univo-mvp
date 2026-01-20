@@ -970,15 +970,8 @@ export default function VoiceView() {
 
     const addTagFilter = (tag: string) => {
         const cleanTag = tag.startsWith('#') ? tag.slice(1) : tag;
-        if (!filters.tags.includes(cleanTag)) {
-            const newTags = [...filters.tags, cleanTag];
-            setFilters(prev => ({ ...prev, tags: newTags }));
-            
-            // Update recent tags
-            const newRecent = [cleanTag, ...recentTags.filter(t => t !== cleanTag)].slice(0, 8);
-            setRecentTags(newRecent);
-            localStorage.setItem('univo_recent_tags', JSON.stringify(newRecent));
-        }
+        // Single tag selection - replace existing filter
+        setFilters(prev => ({ ...prev, tags: [cleanTag] }));
         setSearchTerm('');
         setSearchSuggestions([]);
     };
