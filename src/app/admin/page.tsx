@@ -36,6 +36,7 @@ export default function AdminPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [banReason, setBanReason] = useState('');
     const [banCategory, setBanCategory] = useState('');
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
     const fetchData = async () => {
         try {
@@ -134,6 +135,12 @@ export default function AdminPage() {
         const matchesUni = uniFilter === 'all' ? true : u.university === uniFilter;
 
         return matchesSearch && matchesStatus && matchesUni;
+    });
+
+    const sortedUsers = [...filteredUsers].sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
     if (isLoading) {
@@ -246,6 +253,29 @@ export default function AdminPage() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Sort Order */}
+                    <div className="space-y-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500">Sıralama (Kayıt Tarihi)</label>
+                        <div className="flex gap-2">
+                             {[
+                                { id: 'newest', label: 'Yeni Kayıtlar' },
+                                { id: 'oldest', label: 'Eski Kayıtlar' }
+                            ].map((btn) => (
+                                <button
+                                    key={btn.id}
+                                    onClick={() => setSortOrder(btn.id as any)}
+                                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                        sortOrder === btn.id 
+                                        ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                                        : 'bg-white text-neutral-500 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700'
+                                    }`}
+                                >
+                                    {btn.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -267,12 +297,13 @@ export default function AdminPage() {
                                 <th className="px-6 py-3">Öğrenci No</th>
                                 <th className="px-6 py-3">Üniversite</th>
                                 <th className="px-6 py-3">Bölüm</th>
+                                <th className="px-6 py-3">Kayıt Tarihi</th>
                                 <th className="px-6 py-3">Durum</th>
                                 <th className="px-6 py-3 text-right">İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredUsers.map((user) => (
+                            {sortedUsers.map((user) => (
                                 <tr key={user.id} className="border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <Link href={`/admin/users/${user.id}`} className="font-medium text-neutral-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors block w-fit">
@@ -286,7 +317,7 @@ export default function AdminPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {user.university === 'bilkent' ? (
+                                        {user.university === 'bilkent' || (user.email?.includes('bilkent.edu.tr')) ? (
                                             <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-bold border border-blue-100 dark:border-blue-800">
                                                 Bilkent
                                             </span>
@@ -302,6 +333,9 @@ export default function AdminPage() {
                                     </td>
                                     <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">
                                         {user.department || '-'}
+                                    </td>
+                                    <td className="px-6 py-4 text-neutral-500 text-xs">
+                                        {new Date(user.created_at).toLocaleDateString('tr-TR')}
                                     </td>
                                     <td className="px-6 py-4">
                                         {user.is_banned ? (

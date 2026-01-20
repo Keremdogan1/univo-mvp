@@ -68,12 +68,14 @@ export async function POST(request: Request) {
             fullName = toTitleCase(fullName);
         } else if (username === 'bilkent_test') {
             fullName = 'Bilkent Test Kullanıcısı';
+        } else {
+            fullName = 'Bilkent Öğrencisi';
         }
         
         // --- 3. UNIVO AUTHENTICATION ---
-        // Bilkent student emails can be id@ug.bilkent.edu.tr or firstname.lastname@ug...
-        // For consistency with ODTÜ, we use id@bilkent.edu.tr as a stable key (inclusive of grads/personnel)
-        const eduEmail = username.includes('@') ? username : `${username}@bilkent.edu.tr`;
+        // For consistency, we normalize all Bilkent emails to the standard domain
+        const normalizedStarsId = username.split('@')[0];
+        const eduEmail = `${normalizedStarsId}@bilkent.edu.tr`;
         const supabaseAdmin = getSupabaseAdmin();
         
         // Find user
