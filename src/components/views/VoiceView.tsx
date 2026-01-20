@@ -618,18 +618,28 @@ export default function VoiceView() {
         if (profile?.university) setUniversity(profile.university);
     }, [profile]);
 
-    // Initialize Mode from LocalStorage
+    // Enforce Mode Logic: Global for Guests, University for Users (on start)
     useEffect(() => {
-        const savedMode = localStorage.getItem('univo_global_mode');
-        if (savedMode === 'true') {
-            setIsGlobalMode(true);
+        if (!showSkeleton) {
+            if (!user) {
+                setIsGlobalMode(true);
+            } else {
+                // User logged in: Start with University mode as requested
+                // This runs once when user loads. 
+                // We rely on React State to keep it during session if they switch.
+                // To prevent resetting it on minor user updates, we could check isModeInitialized 
+                // but the requirement "always university on start" implies strictly defaulting to false is fine
+                // IF this effect doesn't run too often.
+                // 'user' object reference changes? Likely.
+                // But setting state to same value doesn't cause re-render loop.
+                setIsGlobalMode(false);
+            }
+            setIsModeInitialized(true);
         }
-        setIsModeInitialized(true);
-    }, []);
+    }, [user, showSkeleton]);
 
     const handleModeSwitch = (global: boolean) => {
         setIsGlobalMode(global);
-        localStorage.setItem('univo_global_mode', String(global));
         setVoices([]); // Clear voices immediately to prevent flash
     };
 

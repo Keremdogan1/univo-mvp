@@ -63,15 +63,16 @@ export default function VoiceStatsWidget({
                 {/* Weekly Poll */}
                 <div className="border-4 border-black dark:border-neutral-600 p-4 bg-neutral-50 dark:bg-black/50 transition-colors shrink-0 w-[80vw] md:w-full snap-center rounded-xl md:rounded-none" style={{ scrollSnapStop: 'always' }}>
                     <div className="flex items-center justify-between border-b-2 border-black dark:border-neutral-600 pb-2 mb-3">
-                        <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white">
-                            {isGlobalMode ? 'Global Anket' : 'Haftanın Anketi'}
+                        <h3 className="text-base font-bold font-serif uppercase tracking-tight dark:text-white flex flex-col items-start leading-none gap-1">
+                            <span>{isGlobalMode ? 'Global' : 'Haftanın'}</span>
+                            <span>{isGlobalMode ? 'Anket' : 'Anketi'}</span>
                         </h3>
                         <span className="text-[10px] font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-sm flex items-center gap-1">
                             <span
                                 className="w-2 h-2 rounded-full animate-pulse"
                                 style={{ backgroundColor: 'var(--primary-color, #C8102E)' }}
                             ></span>
-                            {isGlobalMode ? 'Univo Global' : 'Yapay Zeka'}
+                            Yapay Zeka
                         </span>
                     </div>
 

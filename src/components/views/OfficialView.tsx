@@ -68,6 +68,18 @@ export default function OfficialView() {
     const [university, setUniversity] = React.useState(profile?.university || 'metu');
     const isBilkent = university === 'bilkent';
 
+    // Enforce Mode Logic: Global for Guests, University for Users (on start)
+    React.useEffect(() => {
+        if (!showSkeleton) {
+            if (!user) {
+                setIsGlobalMode(true);
+            } else {
+                // User logged in: Start with University mode logic
+                setIsGlobalMode(false);
+            }
+        }
+    }, [user, showSkeleton]);
+
     // Check admin session
     React.useEffect(() => {
         const checkAdmin = async () => {
@@ -696,7 +708,8 @@ export default function OfficialView() {
 
                     {/* Global Mode Switch - Custom Morphing Button (3D Flip) */}
                     <div className="flex items-center gap-3">
-                      {user && isAdminSession ? (
+                      {user && (
+                          isAdminSession ? (
                         <div className="flex items-center gap-2 mb-2 bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-top-2">
                           {/* ODTÜ Button */}
                           <button 
@@ -755,7 +768,8 @@ export default function OfficialView() {
                                 </div>
                             </div>
                         </div>
-                      )}
+                      )
+                    )}
                     </div>
                 </div>
                 <div className="flex justify-between items-center text-sm font-medium border-t-2 border-black dark:border-neutral-600 pt-2 mt-4 max-w-2xl mx-auto text-neutral-600 dark:text-neutral-400 h-8">

@@ -6,9 +6,31 @@ import CommunityView from '@/components/views/CommunityView';
 import VoiceView from '@/components/views/VoiceView';
 import OfficialView from '@/components/views/OfficialView';
 
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const view = searchParams?.get('view') || 'community';
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [isGuest, setIsGuest] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Check auth and guest status
+  useEffect(() => {
+    if (!loading) {
+      const guestMode = localStorage.getItem('univo_guest_mode') === 'true';
+      setIsGuest(guestMode);
+      
+      if (!user && !guestMode) {
+        router.push('/login');
+      } else {
+        setIsChecking(false);
+      }
+    }
+  }, [user, loading, router]);
 
   const renderView = () => {
     switch (view) {
@@ -21,6 +43,17 @@ function HomeContent() {
         return <CommunityView />;
     }
   };
+
+  if (loading || isChecking) {
+       return (
+         <div className="min-h-[100dvh] bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-center">
+             <div className="animate-pulse flex flex-col items-center gap-4">
+                 <div className="h-12 w-12 rounded-full border-4 border-neutral-200 border-t-black dark:border-neutral-800 dark:border-t-white animate-spin"></div>
+                 <p className="text-sm font-medium text-neutral-500">Univo Başlatılıyor...</p>
+             </div>
+         </div>
+       );
+  }
 
   return (
     <div className="min-h-[100dvh] bg-neutral-50 dark:bg-[#0a0a0a] transition-colors duration-300 overflow-x-hidden">

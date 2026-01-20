@@ -394,9 +394,21 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <p className="text-xs text-neutral-400 dark:text-neutral-600 text-center mt-8 pb-4">
-                    &copy; {new Date().getFullYear()} Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
-                </p>
+                <div className="flex flex-col gap-4 mt-8 pb-4 items-center">
+                    <p className="text-xs text-neutral-400 dark:text-neutral-600 text-center">
+                        &copy; {new Date().getFullYear()} Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
+                    </p>
+                    
+                    <button 
+                        onClick={() => {
+                            localStorage.setItem('univo_guest_mode', 'true');
+                            router.push('/');
+                        }}
+                        className="text-xs font-semibold text-neutral-500 hover:text-black dark:text-neutral-500 dark:hover:text-white transition-colors border-b border-transparent hover:border-black dark:hover:border-white pb-0.5"
+                    >
+                        Misafir Olarak Devam Et
+                    </button>
+                </div>
             </div>
         );
     }
@@ -549,9 +561,21 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <p className="text-xs text-neutral-400 dark:text-neutral-600 text-center mt-8 pb-8">
-                &copy; {new Date().getFullYear()} Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
-            </p>
+            <div className="flex flex-col gap-4 mt-8 pb-8 items-center">
+                <p className="text-xs text-neutral-400 dark:text-neutral-600 text-center">
+                    &copy; {new Date().getFullYear()} Univo. ODTÜ'lü öğrenciler tarafından geliştirilmiştir.
+                </p>
+
+                <button 
+                    onClick={() => {
+                        localStorage.setItem('univo_guest_mode', 'true');
+                        router.push('/');
+                    }}
+                    className="text-xs font-semibold text-neutral-500 hover:text-black dark:text-neutral-500 dark:hover:text-white transition-colors border-b border-transparent hover:border-black dark:hover:border-white pb-0.5"
+                >
+                    Misafir Olarak Devam Et
+                </button>
+            </div>
         </div>
     );
 }
