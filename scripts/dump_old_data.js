@@ -36,18 +36,27 @@ async function dumpData() {
 
     fullSql += `-- Table: ${table}\n`;
     for (const row of data) {
-      const columns = Object.keys(row).join(', ');
-      const values = Object.values(row).map(v => {
+      const columnsArr = Object.keys(row);
+      const columnsStr = columnsArr.join(', ');
+      const values = columnsArr.map(col => {
+        const v = row[col];
         if (v === null) return 'NULL';
-        if (Array.isArray(v)) {
+        
+        // Handle TEXT[] columns
+        if (Array.isArray(v) && (col === 'tags' || col === 'links')) {
           return `ARRAY[${v.map(item => `'${String(item).replace(/'/g, "''")}'`).join(', ')}]::TEXT[]`;
         }
-        if (typeof v === 'object') return `'${JSON.stringify(v).replace(/'/g, "''")}'`;
+        
+        // Handle JSONB and other objects
+        if (typeof v === 'object') {
+          return `'${JSON.stringify(v).replace(/'/g, "''")}'`;
+        }
+        
         if (typeof v === 'string') return `'${v.replace(/'/g, "''")}'`;
         return v;
       }).join(', ');
       
-      fullSql += `INSERT INTO public.${table} (${columns}) VALUES (${values}) ON CONFLICT DO NOTHING;\n`;
+      fullSql += `INSERT INTO public.${table} (${columnsStr}) VALUES (${values}) ON CONFLICT DO NOTHING;\n`;
     }
     fullSql += "\n";
   }
